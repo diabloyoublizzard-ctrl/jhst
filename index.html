@@ -1092,7 +1092,10 @@
   <div class="debug-drawer" id="debug-drawer">
     <button class="debug-toggle-btn" id="btn-debug-toggle">🛠️ 封測工具</button>
     <div class="debug-panel">
-      <div style="font-size:0.8rem;color:var(--gold);margin-bottom:8px;font-weight:bold;">⚡ 邊測邊改快捷調試台</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
+        <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.06.2300</span>
+      </div>
 
       <div class="debug-row">
         <select id="dbg-char-select" class="debug-select"></select>
@@ -2001,6 +2004,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
+    const GAME_VERSION = "v2026.11.06.2300";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -14580,6 +14584,8 @@ ${targetW.desc}
 
       // 🛠️ 封測調試抽屜與熱更新按鈕
       const dbgDrawer = document.getElementById("debug-drawer");
+      const vBadge = document.getElementById("dbg-version-badge");
+      if (vBadge) vBadge.textContent = GAME_VERSION;
       document.getElementById("btn-debug-toggle").addEventListener("click", () => dbgDrawer.classList.toggle("open"));
 
       document.getElementById("dbg-btn-meet").addEventListener("click", () => {
