@@ -103,9 +103,9 @@
     }
     .stat-pill strong { color: var(--gold-bright); font-size: 0.96rem; }
 
-    /* 主雙欄佈局 */
+    /* 主雙欄佈局（左欄：武道/羈絆/情報 440px；右欄：紅塵生平卷 1fr） */
     main.game-layout {
-      flex: 1; display: grid; grid-template-columns: 1fr 440px; gap: 16px; padding: 14px 20px; overflow: hidden;
+      flex: 1; display: grid; grid-template-columns: 440px 1fr; gap: 16px; padding: 14px 20px; overflow: hidden;
     }
     @media (max-width: 980px) { main.game-layout { grid-template-columns: 1fr; overflow-y: auto; } }
 
@@ -229,13 +229,13 @@
     }
     .modal-overlay.show { display: flex; }
 
-    /* 穿透式事件抉擇視窗：不遮擋頂部五圍、右側面板與底部暫停按鈕！ */
+    /* 穿透式事件抉擇視窗：置於右側生平卷上方，不遮擋頂部五圍、左側面板與底部暫停按鈕！ */
     #modal-event {
       background: rgba(5, 7, 10, 0.22);
       backdrop-filter: none;
       pointer-events: none;
       justify-content: flex-start;
-      padding-left: max(24px, calc((100vw - 440px - 640px) / 2));
+      padding-left: max(468px, calc(440px + (100vw - 440px - 640px) / 2));
     }
     #modal-event .modal-box {
       pointer-events: auto;
@@ -760,7 +760,7 @@
       <div class="stat-pill">德行 <strong id="stat-de">0</strong></div>
       <div class="stat-pill">名望 <strong id="stat-ming">0</strong></div>
       <div class="stat-pill">財富 <strong id="stat-cai">0</strong></div>
-      <div class="stat-pill">情義 <strong id="stat-qing">0</strong></div>
+      <div class="stat-pill" id="stat-pill-qing" title="【情義妙用】①情義護道：每25點情義提升戰役與同伴助戰戰力加成（最高+16%）；②八方來援：大幅提升壽元將盡與絕境逢生救援率（30%→最高65%）；③同道擁戴：武林大會獲得群雄額外加分（最高+18分）；④故人飛鴿：情義≥80時生死摯友定期傳書贈藥療傷與資助銀兩">情義 <strong id="stat-qing">0</strong></div>
     </div>
   </header>
 
@@ -776,38 +776,11 @@
 
   <!-- 主雙欄佈局 -->
   <main class="game-layout">
-    <!-- 左欄：生平歷程與控制欄 -->
-    <section class="life-stream-panel">
-      <div class="panel-header">
-        <span id="ui-life-stage-title">📜 紅塵生平卷</span>
-        <span id="ui-lifespan-hint" style="font-family:var(--font-sans);font-size:0.8rem;color:var(--text-muted);">壽元：--</span>
-      </div>
-
-      <div id="log-container"></div>
-
-      <div class="control-bar">
-        <div class="btn-group">
-          <button class="ctrl-btn" id="btn-pause" title="快捷鍵：按 P 鍵可隨時暫停或繼續">⏸ 暫停 (P)</button>
-          <button class="ctrl-btn" id="btn-speed-2">🐢 0.5x</button>
-          <button class="ctrl-btn active" id="btn-speed-1">▶ 1x</button>
-          <button class="ctrl-btn" id="btn-speed-5">⚡ 6x</button>
-          <button class="ctrl-btn" id="btn-step">單步推進</button>
-        </div>
-        <div class="btn-group">
-          <button class="ctrl-btn" id="btn-autofate" style="border-color:var(--gold);color:var(--gold-bright);">✨ 交給天命：關</button>
-          <button class="ctrl-btn primary" id="btn-open-epilogue" style="display:none;background:linear-gradient(135deg,#8b261d,#d4af37);color:#fff;font-weight:bold;padding:6px 10px;box-shadow:0 0 12px rgba(212,175,55,0.55);animation:pulseGold 1.8s infinite;">📜 到此一遊</button>
-          <button class="ctrl-btn" id="btn-leave-sect" style="display:none;">🚪 轉換/脫離門派</button>
-          <button class="ctrl-btn" id="btn-fake-death" style="display:none;border-color:var(--gold);color:var(--gold-bright);">⚰️ 假死立塚</button>
-          <button class="ctrl-btn" id="btn-reincarnate-now">🔄 重新輪迴</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 右欄：武學、羈絆、情報、修真、天機 -->
+    <!-- 左欄：武道、羈絆、情報、修真、天機 -->
     <aside class="side-panel">
       <nav class="tabs-nav">
         <button class="tab-btn active" data-tab="tab-skills">武道</button>
-        <button class="tab-btn" data-tab="tab-bonds">同伴羈絆</button>
+        <button class="tab-btn" data-tab="tab-bonds">羈絆</button>
         <button class="tab-btn" data-tab="tab-news">江湖情報</button>
         <button class="tab-btn hidden" id="tab-btn-immortal" data-tab="tab-immortal">洞天修真</button>
         <button class="tab-btn" data-tab="tab-lore">天機成就</button>
@@ -956,6 +929,33 @@
         </div>
       </div>
     </aside>
+
+    <!-- 右欄：生平歷程與控制欄 -->
+    <section class="life-stream-panel">
+      <div class="panel-header">
+        <span id="ui-life-stage-title">📜 紅塵生平卷</span>
+        <span id="ui-lifespan-hint" style="font-family:var(--font-sans);font-size:0.8rem;color:var(--text-muted);">壽元：--</span>
+      </div>
+
+      <div id="log-container"></div>
+
+      <div class="control-bar">
+        <div class="btn-group">
+          <button class="ctrl-btn" id="btn-pause" title="快捷鍵：按 P 鍵可隨時暫停或繼續">⏸ 暫停 (P)</button>
+          <button class="ctrl-btn" id="btn-speed-2">🐢 0.5x</button>
+          <button class="ctrl-btn active" id="btn-speed-1">▶ 1x</button>
+          <button class="ctrl-btn" id="btn-speed-5">⚡ 6x</button>
+          <button class="ctrl-btn" id="btn-step">單步推進</button>
+        </div>
+        <div class="btn-group">
+          <button class="ctrl-btn" id="btn-autofate" style="border-color:var(--gold);color:var(--gold-bright);">✨ 交給天命：關</button>
+          <button class="ctrl-btn primary" id="btn-open-epilogue" style="display:none;background:linear-gradient(135deg,#8b261d,#d4af37);color:#fff;font-weight:bold;padding:6px 10px;box-shadow:0 0 12px rgba(212,175,55,0.55);animation:pulseGold 1.8s infinite;">📜 到此一遊</button>
+          <button class="ctrl-btn" id="btn-leave-sect" style="display:none;">🚪 轉換/脫離門派</button>
+          <button class="ctrl-btn" id="btn-fake-death" style="display:none;border-color:var(--gold);color:var(--gold-bright);">⚰️ 假死立塚</button>
+          <button class="ctrl-btn" id="btn-reincarnate-now">🔄 重新輪迴</button>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- 1. 開局輪迴司 Modal（頂部錨定 align-items:flex-start; padding-top:7vh，按鈕連 1 像素都不晃動！） -->
@@ -1094,7 +1094,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.07.0100</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.07.2015</span>
       </div>
 
       <div class="debug-row">
@@ -1119,6 +1119,7 @@
 
       <div class="debug-row" style="flex-wrap:wrap;">
         <button class="ctrl-btn" id="dbg-btn-battle" style="flex:1;">⚔️ 測試重大戰役</button>
+        <button class="ctrl-btn" id="dbg-btn-family" style="flex:1;border-color:var(--gold);color:var(--gold-bright);">👶 測試生子/家室</button>
       </div>
 
       <div class="debug-row" style="flex-wrap:wrap;">
@@ -1141,7 +1142,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611071820"></script>
+  <script src="data.js?v=202611072015"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1154,7 +1155,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611071820"></script>
+  <script src="patches.js?v=202611072015"></script>
   <script>
 
   (function() {
@@ -2004,7 +2005,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.07.1820";
+    const GAME_VERSION = "v2026.11.07.2015";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -2305,6 +2306,10 @@
         equippedWeapon: null,
         equippedWeaponBonus: 0,
         bonds: [],
+        children: [],
+        disciples: [],
+        lastFamilyEventAge: 0,
+        lastNewsActAge: -1,
         worldHistory: [],
         usedEvents: new Set(),
         usedEpochEvents: new Set(),
@@ -3861,21 +3866,105 @@ ${targetW.desc}
       renderWorldNewsTab();
     }
 
+    function actOnWorldNewsItem(idx) {
+      if (!player || player.isDead) return;
+      const item = player.worldHistory && player.worldHistory[idx];
+      if (!item || item.acted) return;
+      if (player.age < 12) {
+        addLog(`📰【少年閱報】你雖聽聞「${item.text.slice(0, 18)}…」之江湖傳聞，但年紀尚幼（需滿12歲），暫且記在心頭留待日後游歷。`);
+        return;
+      }
+      if (player.lastNewsActAge === player.age) {
+        addLog(`📰【情報行動冷卻】你今年已循線介入過一樁江湖情報，請待來年新情報匯聚後再行探訪。`);
+        return;
+      }
+      player.lastNewsActAge = player.age;
+      item.acted = true;
+
+      const t = item.type || "大事";
+      let logMsg = "";
+      if (t === "武評" || t === "門派" || t === "江湖") {
+        const wuGain = 2 + Math.floor(Math.random() * 2);
+        const chg = modifyStats({ wu: wuGain, ming: 2 });
+        // 若有待參悟秘笈，順勢推進參悟！
+        const pendingSk = (player.skills || []).find(s => s && s.pendingEnlightenment);
+        let skNote = "";
+        if (pendingSk && Math.random() < 0.45) {
+          pendingSk.pendingEnlightenment = false;
+          pendingSk.masteryStage = "已參悟";
+          skNote = `，更在觀摩名家交手中觸類旁通，當場將《${pendingSk.name}》徹底參悟貫通`;
+          renderSkillsTab();
+        }
+        logMsg = `📰【情報探訪 · 觀摩印證】你循著江湖情報「${item.text}」親赴現場觀摩名宿過招，於刀光劍影間印證自身武道${skNote}！(${chg.join("、")})`;
+      } else if (t === "市井" || t === "民生" || t === "風聞") {
+        const caiGain = 4 + Math.floor(Math.random() * 4);
+        const chg = modifyStats({ cai: caiGain, de: 2, qing: 2 });
+        logMsg = `📰【情報探訪 · 順勢行商】你根據市井情報「${item.text}」提前佈局行商並接濟沿途百姓，不僅賺取豐厚資財，亦贏得街坊口碑！(${chg.join("、")})`;
+      } else if (t === "邪道" || t === "塞外" || t === "朝廷" || t === "大事") {
+        const chg = modifyStats({ wu: 2, ming: 4, de: 3, qing: 2 });
+        logMsg = `📰【情報介入 · 仗劍平亂】你循著情報「${item.text}」主動趕赴風暴中心仗劍相助、護佑一方安寧，俠名遠播九州！(${chg.join("、")})`;
+      } else {
+        const chg = modifyStats({ wu: 1, de: 2, ming: 2, qing: 2 });
+        logMsg = `📰【天機推演 · 閱盡滄桑】你細細推演「${item.text}」背後的世局興替，道心與閱歷大有精進！(${chg.join("、")})`;
+      }
+
+      addLog(logMsg, "good-log");
+      unlockBaixiao(`情報介入：${t}風雲`);
+      renderWorldNewsTab();
+      updateAllUI();
+    }
+    window.actOnWorldNewsItem = actOnWorldNewsItem;
+
     function renderWorldNewsTab() {
       const container = document.getElementById("world-news-container");
       const badge = document.getElementById("news-current-ganzhi");
       if (!container || !player) return;
+      const canActThisYear = player.age >= 12 && player.lastNewsActAge !== player.age && !player.isDead;
       badge.textContent = `當前：${getCurrentGanzhi()}年 (${player.age}歲)`;
 
-      container.innerHTML = player.worldHistory.map(item => `
-        <div class="card-item" style="padding:8px 10px;margin-bottom:8px;">
-          <div style="margin-bottom:3px;">
-            <span style="color:var(--gold-bright);font-weight:bold;font-size:0.82rem;margin-right:6px;">[${item.ganzhi}年 · ${item.age}歲]</span>
-            <span class="status-badge" style="color:#ff9b9b;border-color:#8b3232;font-size:0.72rem;">${item.type}</span>
+      const statusBanner = `
+        <div class="card-item" style="padding:8px 11px;margin-bottom:10px;border-color:${canActThisYear ? "var(--gold)" : "var(--border-subtle)"};background:${canActThisYear ? "rgba(212,175,55,0.08)" : "rgba(255,255,255,0.02)"};">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <span style="font-size:0.82rem;color:var(--gold-bright);font-weight:bold;">🧭 天機情報司 · 循線介入風雲</span>
+            <span class="status-badge" style="font-size:0.72rem;color:${canActThisYear ? "#56d364" : "#aaa"};border-color:${canActThisYear ? "#2ea043" : "#555"};">
+              ${player.age < 12 ? "需年滿12歲" : (canActThisYear ? "⚡ 今年可探訪 1 則情報" : "✓ 今年已執行情報行動")}
+            </span>
           </div>
-          <div style="font-size:0.88rem;color:#dedad0;line-height:1.55;">${item.text}</div>
+          <div style="font-size:0.76rem;color:var(--text-muted);margin-top:4px;line-height:1.45;">
+            點擊下方情報的【循線探訪】可親赴事發地：觀摩門派武評可加武力與加速秘笈參悟、介入市井民生可獲銀兩善緣、馳援塞外邪道可揚名立萬！
+          </div>
         </div>
-      `).join("");
+      `;
+
+      const listHtml = player.worldHistory.map((item, idx) => {
+        const t = item.type || "大事";
+        let actionLabel = "⚡ 循線探訪 · 印證世局";
+        if (t === "武評" || t === "門派" || t === "江湖") actionLabel = "⚔️ 循線觀摩 · 印證武道 (武力/參悟)";
+        else if (t === "市井" || t === "民生" || t === "風聞") actionLabel = "💰 順勢佈局 · 行商濟民 (財富/德行)";
+        else if (t === "邪道" || t === "塞外" || t === "朝廷" || t === "大事") actionLabel = "🔥 仗劍介入 · 馳援風雲 (名望/武力/德行)";
+
+        const btnHtml = item.acted
+          ? `<div style="margin-top:6px;font-size:0.75rem;color:#56d364;">✓ 已親自探訪介入此情報</div>`
+          : (canActThisYear && idx < 8
+              ? `<button class="ctrl-btn" onclick="window.actOnWorldNewsItem(${idx})" style="margin-top:6px;width:100%;padding:4px 8px;font-size:0.78rem;border-color:var(--gold);color:var(--gold-bright);background:rgba(212,175,55,0.1);">${actionLabel}</button>`
+              : "");
+
+        return `
+          <div class="card-item" style="padding:8px 10px;margin-bottom:8px;">
+            <div style="margin-bottom:3px;display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <span style="color:var(--gold-bright);font-weight:bold;font-size:0.82rem;margin-right:6px;">[${item.ganzhi}年 · ${item.age}歲]</span>
+                <span class="status-badge" style="color:#ff9b9b;border-color:#8b3232;font-size:0.72rem;">${item.type}</span>
+              </div>
+              ${item.acted ? `<span style="font-size:0.7rem;color:#56d364;">[已介入]</span>` : ""}
+            </div>
+            <div style="font-size:0.88rem;color:#dedad0;line-height:1.55;">${item.text}</div>
+            ${btnHtml}
+          </div>
+        `;
+      }).join("");
+
+      container.innerHTML = statusBanner + listHtml;
     }
 
     /* =========================================================================
@@ -5672,8 +5761,8 @@ ${targetW.desc}
         desc: "你與【謝淵澄】並肩走過最晦暗的復仇歲月，他眼底的寒冰早已因你而融化。然而昔年玄真山門與碧海城舊怨尚留最後一縷因果，他決定獨自北上天池雪山洗去劍上最後一滴仇血。\n\n寒江渡口，白髮隨風輕揚。謝淵澄踏上孤舟前忽然駐足回首，一向沉默寡言的他深深望著你，溫聲道：\n「待謝某將過往恩怨徹底了結、洗淨這柄劍上的血氣，定當回來尋你。」"
       },
       tao_hua: {
-        title: "🌙 落花古道 · 沈緋桃的斬緣之行",
-        desc: "你與【沈緋桃】在腥風血雨中生死相託。為了不再讓『幽冥殿』的追殺令連累於你，桃花決定獨自前往總壇，親手斬斷昔日白無常的最後一道名冊。\n\n殘陽古道上，桃花撫過眉心桃花印，走出數丈後驀然回眸，冷清的眸子裡映著你一人的身影：\n「以前我的劍只為殺人，往後我想為自己、也為你握劍。等我徹底抹去幽冥殿的血債，便回來找你……等我。」"
+        title: "🌙 落花古道 · 洛凝霜的斬緣之行",
+        desc: "你與【洛凝霜】在腥風血雨中生死相託。為了不再讓『幽冥殿』的追殺令連累於你，洛凝霜決定獨自前往總壇，親手斬斷昔日白無常的最後一道名冊。\n\n殘陽古道上，洛凝霜撫過眉心寒梅印，走出數丈後驀然回眸，冷清的眸子裡映著你一人的身影：\n「以前我的劍只為殺人，往後我想為自己、也為你握劍。等我徹底抹去幽冥殿的血債，便回來找你……等我。」"
       },
       hu_xiaodao: {
         title: "🌙 赤霞山道 · 韓破刃的快刀之約",
@@ -5705,7 +5794,7 @@ ${targetW.desc}
       },
       sha_gulan: {
         title: "🌙 大漠駝鈴 · 阿史那嵐的雪蓮之約",
-        desc: "你與【阿史那嵐】生死與共，金沙王庭忽傳冬牧轉場與王庭議事之訊，身為部落公主的她必須趕回天山主持族務。\n\n大漠落日下，阿史那嵐翻身躍上白駝，清脆駝鈴聲中她驀然回首，眼眸亮若天山星辰：\n「等我安頓好金沙族人，就在天山雪蓮盛開的時候回來找你！我有金沙部最神聖的誓言要親口對你說！」"
+        desc: "你與【阿史那嵐】生死與共，金沙王庭忽傳冬牧轉場與王庭議事之訊，身為部落公主的她必須趕回天山主持族務。\n\n大漠落日下，阿史那嵐翻身躍上白駝，清脆駝鈴聲中她驀然回首，眼眸亮若天山星辰：\n「等我安頓好金沙族人，就在天山雪蓮盛開的時候回來找你！」"
       },
       shi_xiaolu: {
         title: "🌙 泰安古道 · 墨千機的木劍之約",
@@ -5773,7 +5862,71 @@ ${targetW.desc}
       );
     }
 
-    // 第二階段：6~24 個月計時器到期重逢，正式觸發定情承諾
+    // 同性知己專屬「義結金蘭 · 生死之交」重逢承諾劇本（避免對同性角色出現兒女私情/柔情曖昧用詞）
+    const SWORN_ASCENSION_SCRIPTS = {
+      qiao_feng: {
+        title: "🔥 朔風關外草場 · 塞上千碗結義酒",
+        desc: "塞北萬里長空秋高氣爽，朔風關外草場延伸至天際。蕭烈山一身豪邁勁裝立於山坡之上，大風吹動他魁梧的衣袍。他轉過身望向你，平日威震天下的虎目中流露出肝膽相照的豪情與坦蕩：\n「蕭某半生漂泊，歷經身世巨變與天下人的誤解背棄，唯有你始終不離不棄與蕭某並肩作戰！人生得一知己足矣，今日長生天在上，你可願與蕭某撮土為香、結為異姓生死弟兄？往後無論刀山火海，我們有難同當、有酒同飲！」"
+      },
+      li_xiaoyao: {
+        title: "🔥 雲津古道酒肆 · 仗劍紅塵共結義",
+        desc: "夜風微涼，陸雲逍提著兩壺陳年桂花釀躍上酒肆屋脊，將其中一壺拋給你。他拍了拍身畔的長劍，爽朗的眉宇間滿是赤誠豪氣：\n「這江湖大得很，獨自仗劍難免冷清！這一路走來，唯有你最合我脾胃。今日明月當空，咱們不如乾脆拜把子結為異姓手足，往後天塌下來有咱們兩人一起頂著，如何？」"
+      },
+      hu_xiaodao: {
+        title: "🔥 赤霞鎮老酒館 · 快刀烈酒拜把子",
+        desc: "赤霞鎮老酒館打烊後，韓破刃搬來兩大罈最烈的燒刀子，拔出腰間快刀重重插在桌案中央，摘下歪戴的氈帽咧嘴大笑：\n「俺韓破刃這輩子沒服過幾個人，但你這朋友，俺交定了！什麼虛頭巴腦的客套話俺不會講，今日這碗血酒喝下去，從今往後你就是俺親手足，誰敢動你一根寒毛，先問過俺手裡的快刀！」"
+      },
+      meng_xiang: {
+        title: "🔥 孤峰殘雪崖 · 斷刀立誓同生死",
+        desc: "漫天風雪之中，孟孤鴻佇立於孤峰崖畔，手中厚背刀映著森然寒光。他轉身看向你，平日冷峻寡言的臉龐浮現出堅定無比的信任：\n「我孟孤鴻向來獨來獨往，以為刀客一生只需一柄刀便夠了。直到遇見你，我才明白背後有手足相託是何等快意。今日以刀立誓，你可願與我結為生死同盟？」"
+      },
+      xiao_hanzhou: {
+        title: "🔥 玄真松風亭 · 蒼松為證結金蘭",
+        desc: "玄真山紫霄觀外古松蒼勁，沈寒舟親手為你斟上一盞清茶，一襲青衫在山風中顯得格外磊落坦蕩：\n「貧道行道江湖多年，見慣世人趨炎附勢，唯道友與寒舟肝膽相照、道心相契。今日蒼松皓月為證，寒舟願與道友義結金蘭，此生共扶正道、生死相扶！」"
+      },
+      tuoba_jun: {
+        title: "🔥 霜狼王庭金帳 · 長生天前結安答",
+        desc: "塞外草原篝火熊熊，赫連錚雙手捧起一隻盛滿馬奶酒的純金狼頭酒碗，拔出金刀在掌心輕劃一道，神色莊重而熾熱：\n「在我們草原上，最尊貴的情義便是向長生天結為生死安答！你救過我的命，也贏得了整座霜狼王庭的敬重。喝下這碗結義酒，從今往後，草原的鐵騎永遠為我的好安答衝鋒！」"
+      },
+      shi_xiaolu: {
+        title: "🔥 泰安老木坊 · 魯班尺前拜手足",
+        desc: "泰安鎮老木匠鋪裡燈火溫馨，墨千機搓著滿是老繭的雙手，從懷裡鄭重取出兩枚親手雕琢的機關平安木牌遞給你：\n「俺嘴笨，不會說江湖大俠那些漂亮話。但這幾年若沒有你照拂，俺早不知死了幾回！這枚平安牌刻著咱倆的名號，今日俺想與你結拜為生死手足，往後有事你吱一聲，俺背著工具箱走遍天下也跟定你！」"
+      },
+      li_yichen: {
+        title: "🔥 終南山竹林 · 醉春風裡結知音",
+        desc: "竹葉沙沙作響，顧忘塵拔開『醉春風』的泥封，清冽酒香瞬間瀰漫竹林。他舉壺向你致意，平日微醺的眼眸清亮如星：\n「昔年故人凋零，顧某本以為此生再無可共醉之人。幸得蒼天垂憐讓我遇見你這位絕世知音！來，今日我們效仿古人竹林結義，從此做一對快意江湖的異姓手足！」"
+      },
+      tao_yuanyi: {
+        title: "🔥 碧海潮音崖 · 瀝血長槍盟金蘭",
+        desc: "驚濤拍岸，楚驚鴻將長槍立地，摘下臉上寒鐵鬼面，露出洗盡戾氣後的堅毅面龐，抱拳沉聲道：\n「昔日滿門血仇令楚某形同孤鬼，是你將楚某拉回人間。大恩不言謝，今日碧海潮音為證，楚某願與你結為異姓手足，此生此世，楚某這桿槍永遠替你擋住身後冷箭！」"
+      },
+      lin_yueru: {
+        title: "🔥 煙水城演武堂 · 雙姝仗劍結金蘭",
+        desc: "煙水城蘇家堡演武堂上紅燭高照，蘇月華挽了個漂亮的鞭花，英姿颯爽地走到你面前，伸出白皙手掌爽朗笑道：\n「誰說只有男子漢才能拜把子？本小姐瞧遍江南豪傑，就屬你最痛快、最講義氣！今日咱們便結為異姓金蘭姊妹，一起吃遍天下美食、打遍天下惡霸，誰也別想欺負咱們！」"
+      },
+      zhao_linger: {
+        title: "🔥 雲夢島蓮池 · 白蓮見證金蘭盟",
+        desc: "雲夢島蓮池清香陣陣，蘇清靈雙手捧著兩盞蓮心清茶，澄澈溫柔的眼眸中滿是真摯情誼：\n「清靈自幼居於孤島，踏入紅塵後幸得你一路護持相伴。今日滿池白蓮盛開，清靈願與你結為金蘭手足，無論前路多少風雨，我們都守望相助、永不背棄。」"
+      },
+      xj_anu: {
+        title: "🔥 蒼洱海棠林 · 銀鈴五彩結手足",
+        desc: "蒼洱城外紅海棠隨風飛舞，藍采薇笑嘻嘻地把一串親手編織的五彩靈蝶銀鈴繫在你的手腕上，清脆銀鈴叮噹作響：\n「好啦！戴上本姑娘的五彩銀鈴，從今天起咱們就是過命的結拜手足啦！以後不管去哪裡偷摘酸梅果、去哪裡闖禍，我都罩著你！」"
+      },
+      ling_yan: {
+        title: "🔥 雲澤聽雨舫 · 高山流水結知音",
+        desc: "雲澤湖煙波浩渺，葉緋煙於畫舫中焚香撫琴，一曲《高山流水》彈罷，她起身斂衽向你鄭重一禮：\n「紅塵萬丈，知音難覓。緋煙能得你這位肝膽相照的至交，實乃三生有幸。今日焚香為盟，願與你結為異姓金蘭，此生琴劍相扶、共傲江湖！」"
+      },
+      sha_gulan: {
+        title: "🔥 天山雪蓮峰 · 彎刀映雪結金蘭",
+        desc: "天山腳下篝火映紅白雪，阿史那嵐拔出精緻的彎刀與你的兵刃輕輕一碰，眼眸亮若天山寒星：\n「金沙部最敬重有情有義的勇士！這一路生死相伴，你早已是我阿史那嵐最信賴的親人。今日向天山神靈起誓，我們結為生死與共的金蘭手足！」"
+      },
+      tao_hua: {
+        title: "🔥 江南寒梅林 · 寒梅映雪盟生死",
+        desc: "十里寒梅林暗香浮動，洛凝霜收劍入鞘，冷清的眉眼間浮現出難得的溫暖笑意：\n「昔日我身處黑暗，從不知世間尚有不求回報的情義。是你讓我明白知己手足的可貴。今日寒梅為證，洛凝霜願與你義結金蘭，生死同舟，絕不負你！」"
+      }
+    };
+
+    // 第二階段：6~24 個月計時器到期重逢，正式觸發定情承諾或同性金蘭結義
     function promptBondAscension(charData, bond) {
       bond.pendingConfessionMonths = 0;
       const isOppositeGender = player.gender !== (bond.gender || "男");
@@ -5781,8 +5934,13 @@ ${targetW.desc}
       const canBeLover = isOppositeGender || isSpecialException;
 
       const conf = charData.confessionEvent;
-      const modalTitle = conf?.title || `羈絆昇華 · ${charData.name}的主動傾訴`;
-      const modalDesc = conf?.desc || `你與【${charData.name}】歷經風雨，友好與默契皆已臻至化境。星夜之下，${charData.name}主動約你相見，吐露深藏心底的情義與誓言。`;
+      const swornScript = SWORN_ASCENSION_SCRIPTS[charData.id];
+      const modalTitle = canBeLover
+        ? (conf?.title || `羈絆昇華 · ${charData.name}的主動傾訴`)
+        : (swornScript?.title || `🔥 肝膽相照 · 與${charData.name}的生死結義之約`);
+      const modalDesc = canBeLover
+        ? (conf?.desc || `你與【${charData.name}】歷經風雨，友好與默契皆已臻至化境。星夜之下，${charData.name}主動約你相見，吐露深藏心底的情義與誓言。`)
+        : (swornScript?.desc || `你與【${charData.name}】歷經無數生死風浪，彼此肝膽相照、默契無間。\n\n秋風長亭下，【${charData.name}】攜來兩罈烈酒與你相對而飲，朗聲笑道：\n「人生在世，得一知己足以慰風塵！你我並肩闖蕩多年，情分早已勝過親生手足。今日天地為證，你可願與我撮土為香、義結金蘭，從此福禍相依、生死與共？」`);
 
       const choices = [];
       if (canBeLover && (charData.ascension?.lover || charData.ascension?.partner || conf)) {
@@ -5805,7 +5963,7 @@ ${targetW.desc}
       if (charData.ascension?.sworn || conf) {
         const swornReply = charData.ascension?.sworn || `你與${charData.name}對天歃血為盟，結為異姓生死手足！`;
         choices.push({
-          text: `🔥 【歃血為盟 · 義結金蘭】與【${charData.name}】結為異姓生死手足`,
+          text: `🔥 【歃血為盟 · 義結金蘭】與【${charData.name}】撮土為香，結為異姓生死手足 (情義+10、名望+5)`,
           onSelect: () => {
             bond.relationTag = "義結金蘭";
             bond.intimacyIndex = INTIMACY_LEVELS.length - 1;
@@ -7487,7 +7645,8 @@ ${targetW.desc}
         `【抉擇與後果】：你飛身趕至戰圈外圍，生死只在一瞬之間！`;
 
       const reqWu = 65;
-      const effWu = Math.round((player.stats.wu || 0) * 1.2); // 與同伴並肩作戰武力×1.2
+      const qingAidMult = 1.20 + Math.min(0.15, Math.floor((player.stats.qing || 0) / 20) * 0.02);
+      const effWu = Math.round((player.stats.wu || 0) * qingAidMult); // 與同伴並肩作戰武力×(1.20~1.35，隨情義提升)
 
       const choices = [
         {
@@ -9307,12 +9466,17 @@ ${targetW.desc}
         statusNotes.push(`重傷×${heavy}大幅折損`);
       }
 
+      const qingVal = player ? (player.stats.qing || 0) : 0;
+      const qingMoralePct = Math.min(0.16, Math.floor(qingVal / 25) * 0.02); // 每25點情義提升+2%戰力共鳴（最高+16%）
+      const aidBoostMult = 1.20 + Math.min(0.15, Math.floor(qingVal / 20) * 0.02); // 同伴助戰加成隨情義由 1.20x 提升至最高 1.35x
+
       const r = Math.pow(Math.random(), skewPower);
-      const mult = minMult + r * (maxMult - minMult);
+      const mult = (minMult + r * (maxMult - minMult)) * (1 + qingMoralePct);
       const floatedBase = Math.max(5, Math.round(base * mult));
-      const finalWu = aidedBond ? Math.round(floatedBase * 1.2) : floatedBase;
+      const finalWu = aidedBond ? Math.round(floatedBase * aidBoostMult) : floatedBase;
       const pct = Math.round(mult * 100);
-      const stateTag = statusNotes.length > 0 ? `，受${statusNotes.join("、")}影響發揮 ${pct}%` : `，臨陣發揮 ${pct}%`;
+      if (qingMoralePct > 0) statusNotes.push(`情義護道+${Math.round(qingMoralePct * 100)}%`);
+      const stateTag = statusNotes.length > 0 ? `，${statusNotes.join("、")}（發揮 ${pct}%）` : `，臨陣發揮 ${pct}%`;
 
       return {
         rawWu: base,
@@ -10205,13 +10369,17 @@ ${targetW.desc}
       if ((player.stats.de || 0) >= 80) deBonus = 6;
       else if ((player.stats.de || 0) >= 60) deBonus = 3;
 
-      const totalScore = baseWu + bonusScore + artifactScore + deBonus;
+      // 情義同道擁戴加權 (每 18 點情義 +1 分，最高 +18 分)
+      const qingBonus = Math.min(18, Math.floor((player.stats.qing || 0) / 18));
+
+      const totalScore = baseWu + bonusScore + artifactScore + deBonus + qingBonus;
 
       return {
         baseWu,
         bonusScore,
         artifactScore,
         deBonus,
+        qingBonus,
         totalScore,
         zhenpaiCount,
         shangchengCount,
@@ -10230,7 +10398,7 @@ ${targetW.desc}
         lin_yueru: "蘇月華抱著長鞭雙手叉腰，嘴角卻止不住上揚：『哼，算你沒給本小姐丟臉！從今天起，看江湖上誰還敢對你指指點點！……不過，就算當了盟主，也別想命令本小姐！』",
         zhao_linger: "蘇清靈雙手合十，溫柔地注視著你：『恭喜你……看到你守護了天下蒼生，清靈心中滿是歡喜。願人間從此四海承平，大家都能平安長樂。』",
         hu_xiaodao: "韓破刃拔出長刀仰天長笑：『兄弟！哈哈哈！痛快！太痛快了！老子當年在雲夢山就看出你絕非池中之物！今天你當盟主，老子要喝他個三百碗！』",
-        tao_hua: "沈緋桃素手按劍，冷艷的面容露出一抹極罕見的柔和微笑：『恭喜少主。你的劍已經天下第一了。只要你想做的事，緋桃誓死相隨。』",
+        tao_hua: "洛凝霜素手按劍，冷艷的面容露出一抹極罕見的柔和微笑：『恭喜少主。你的劍已經天下第一了。只要你想做的事，凝霜誓死相隨。』",
         tao_yuanyi: "謝淵澄撫著滿頭白髮，深深一揖：『多虧有你……在暗無天日的日子裡拉了我一把。今日能見證你君臨天下，謝某這條命，值了。』",
         li_yichen: "顧忘塵拍開泥封仰頭痛飲一大口烈酒：『哈哈哈哈！千杯醉不倒，一劍定乾坤！天下第一的酒，今天非喝不可！敬武林盟主一杯！』",
         bai_nina: "珈蘭娜雙手捧著聖火金鈴祝禱：『長生天的雄鷹終於飛上了最高的雪峰！聖火長明，願你的榮光永遠庇佑這片大地！』",
@@ -10481,6 +10649,7 @@ ${targetW.desc}
         `• 三花聚頂境界（招式/心法/輕功俱達鎮派）：${res.isZhenpaiSanHua ? "🔥 達成 (+12分)" : "未達成 (+0分)"}\n` +
         `• 神兵神器加持：${res.artifactNames.length > 0 ? res.artifactNames.join("、") + " (+" + res.artifactScore + "分)" : "無"}\n` +
         `• 德行名望群雄敬仰：+${res.deBonus}分\n` +
+        `• 情義深厚同道擁戴：+${res.qingBonus || 0}分（情義 ${player.stats.qing || 0}）\n` +
         `⚔️ 綜合奪魁總評分：【${res.totalScore} 分】（登頂武林盟主門檻：${winThreshold}分）`;
 
       // 第 1 幕：泰山南天門 · 強敵攔路立威
@@ -11635,10 +11804,11 @@ ${targetW.desc}
             triggerAge120AscensionCeremony();
             return;
           }
-          // 壽元結束的那一年：30% 機率觸發「同伴來救」或「昔年因果救過的人來救」劇情（成功則壽元+3~5年，失敗則到此一遊）
+          // 壽元結束的那一年：基礎 30% 機率（隨【情義】每點 +0.2%，最高可達 65%！）觸發「同伴來救」或「昔年因果救過的人來救」劇情（成功則壽元+3~5年，失敗則到此一遊）
           if (player.lastLifespanRescueAge !== player.age) {
             player.lastLifespanRescueAge = player.age;
-            if (Math.random() < 0.30) {
+            const qingRescueChance = Math.min(0.65, 0.30 + ((player.stats.qing || 0) * 0.002));
+            if (Math.random() < qingRescueChance) {
               triggerLifespanEndRescueModal();
               return;
             }
@@ -11777,8 +11947,8 @@ ${targetW.desc}
               old: "於塞外辽闊草原上與牧民痛飲三百碗馬奶酒，伴著長生天的蒼鷹長鳴，豪邁大笑著安然長眠"
             },
             tao_hua: {
-              young: "於夜雨古廟中為護住一名素不相識的孤兒，獨抗幽冥殿十名黑衣死士，劍斷人亡，眉心桃花印殷紅如血",
-              old: "於江南桃林小築中靜靜看落花滿院，一生冷冽的眉眼在想起你時化作溫柔，安詳闔上雙眸"
+              young: "於夜雨古廟中為護住一名素不相識的孤兒，獨抗幽冥殿十名黑衣死士，劍斷人亡，眉心寒梅印殷紅如血",
+              old: "於江南寒梅小築中靜靜看落花滿院，一生冷冽的眉眼在想起你時化作溫柔，安詳闔上雙眸"
             },
             bai_nina: {
               young: "於冥山西麓為鎮壓失控的聖火地脈，高舉金鈴吟唱古老祝禱直至元神燃盡，化作一縷純白聖焰",
@@ -11840,7 +12010,66 @@ ${targetW.desc}
         }
 
         // 隨行靈獸與名駒每年年齡增長與壽終判定（凡塵階段達品種壽元上限時安詳長眠，絕不出現年齡超過上限如 87/50 歲之異常）
-        if (Array.isArray(player.mounts) && player.mounts.length > 0) {
+        // 紅塵家室 · 子女與親傳弟子專區
+      const childrenList = Array.isArray(player.children) ? player.children : [];
+      const disciplesList = Array.isArray(player.disciples) ? player.disciples : [];
+      if (childrenList.length > 0 || disciplesList.length > 0) {
+        const famCards = [
+          ...childrenList.map((c, idx) => {
+            const curAge = Math.max(1, player.age - (c.bornAtPlayerAge || player.age) + 1);
+            const acted = c.lastInteractAge === player.age;
+            return `
+              <div class="card-item" style="border-color:#e3b341;background:rgba(212,175,55,0.08);margin-bottom:8px;padding:9px 12px;">
+                <div class="card-header" style="margin-bottom:4px;">
+                  <div>
+                    <strong style="color:var(--gold-bright);font-size:0.95rem;">👶 ${c.name}</strong>
+                    <span class="status-badge" style="margin-left:5px;font-size:0.72rem;color:#ffdfb6;border-color:#d4af37;">${c.orderLabel} · ${curAge}歲</span>
+                  </div>
+                  <span class="status-badge" style="color:#56d364;border-color:#2ea043;font-size:0.72rem;">血脈傳承</span>
+                </div>
+                <div style="font-size:0.8rem;color:#dedad0;line-height:1.5;">
+                  <div>💖 生母/生父：<span style="color:var(--gold);">${c.parentName}</span> ｜ 根骨：${c.aptitude || "將門虎子"}</div>
+                  <div>⚔️ 家傳絕學：《${c.inheritedSkill || "家傳武學"}》</div>
+                </div>
+                <button class="ctrl-btn" onclick="window.interactWithFamilyMember('child', ${idx})" ${acted ? "disabled" : ""} style="margin-top:6px;width:100%;padding:4px 8px;font-size:0.78rem;border-color:${acted ? "#555" : "var(--gold)"};color:${acted ? "#888" : "var(--gold-bright)"};">
+                  ${acted ? "✓ 今年已指點陪伴過" : "🏡 考校家傳武學 · 共享天倫 (情義+4、武力+2)"}
+                </button>
+              </div>
+            `;
+          }),
+          ...disciplesList.map((d, idx) => {
+            const curAge = Math.max(14, (d.age || 15) + Math.max(0, player.age - (d.recruitedAtPlayerAge || player.age)));
+            const acted = d.lastInteractAge === player.age;
+            return `
+              <div class="card-item" style="border-color:var(--jade);background:rgba(59,156,133,0.08);margin-bottom:8px;padding:9px 12px;">
+                <div class="card-header" style="margin-bottom:4px;">
+                  <div>
+                    <strong style="color:var(--jade-bright);font-size:0.95rem;">🍵 ${d.name}</strong>
+                    <span class="status-badge" style="margin-left:5px;font-size:0.72rem;color:#a5f3fc;border-color:var(--jade);">${d.title} · ${curAge}歲</span>
+                  </div>
+                  <span class="status-badge" style="color:var(--jade-bright);border-color:var(--jade);font-size:0.72rem;">衣缽傳人</span>
+                </div>
+                <div style="font-size:0.8rem;color:#dedad0;line-height:1.5;">
+                  <div>🌱 出身：${d.originTitle || "寒門少俠"}（${d.trait || "天資聰穎"}）</div>
+                  <div>📘 親傳絕學：《${d.inheritedSkill || "本門絕學"}》</div>
+                </div>
+                <button class="ctrl-btn" onclick="window.interactWithFamilyMember('disciple', ${idx})" ${acted ? "disabled" : ""} style="margin-top:6px;width:100%;padding:4px 8px;font-size:0.78rem;border-color:${acted ? "#555" : "var(--jade)"};color:${acted ? "#888" : "var(--jade-bright)"};">
+                  ${acted ? "✓ 今年已考校傳功過" : "⚔️ 考校親傳武學 · 師徒拆招 (情義+4、武力+2)"}
+                </button>
+              </div>
+            `;
+          })
+        ].join("");
+
+        box.innerHTML = `
+          <div style="margin-bottom:12px;padding-bottom:8px;border-bottom:1px dashed var(--border-subtle);">
+            <div style="font-size:0.84rem;color:var(--gold-bright);margin-bottom:8px;font-weight:bold;">🏡 紅塵家室 · 骨肉與親傳門徒（${childrenList.length + disciplesList.length}）</div>
+            ${famCards}
+          </div>
+        ` + box.innerHTML;
+      }
+
+      if (Array.isArray(player.mounts) && player.mounts.length > 0) {
           player.mounts.forEach(m => {
             if (!m || m.isDead) return;
             assignMountLifespan(m);
@@ -12089,9 +12318,45 @@ ${targetW.desc}
         return;
       }
 
-      // 58 歲後若已選擇【廣收門徒 · 薪火相傳】（一代名師）或【開宗立派】，有機率觸發師徒互動劇情
-      if (player.age >= 58 && (player.lateLifeChosen === "收徒" || player.lateLifeChosen === "開宗立派") && Math.random() < (0.035 * oldAgeCalmMult) && triggerDiscipleInteractionEvent()) {
-        return;
+      // 【紅塵伴侶誕育子女】：20～54 歲期間若擁有在世【紅塵伴侶／神仙眷侶】且子女少於 2 人，隔幾年有機率迎來愛情結晶！
+      if (player.age >= 20 && player.age <= 54 && getLivingSpouse() && (player.children || []).length < 2 && (player.age - (player.lastFamilyEventAge || 0) >= 3) && Math.random() < 0.035) {
+        if (triggerChildBirthEvent(false)) return;
+      }
+
+      // 【中年收錄親傳弟子】：32 歲以上、武力≥85 且名望≥65 時，有機率收下親傳弟子，與子女一同成長闖江湖！
+      if (player.age >= 32 && (player.stats.wu || 0) >= 85 && (player.stats.ming || 0) >= 65 && (player.disciples || []).length < 1 && (player.age - (player.lastFamilyEventAge || 0) >= 3) && Math.random() < 0.018) {
+        if (triggerEarlyDiscipleRecruit()) return;
+      }
+
+      // 【紅塵家室 · 子女與親傳弟子攜手闖江湖／天倫互動】：當有子女或親傳弟子時，定期觸發豐富的家門與雙少俠闖江湖劇情！
+      if (player.age >= 24 && ((player.children && player.children.length > 0) || (player.disciples && player.disciples.length > 0)) && (player.age - (player.lastFamilyEventAge || 0) >= 3) && Math.random() < (0.042 * oldAgeCalmMult)) {
+        if (triggerFamilyAndDiscipleEvent(false)) return;
+      }
+
+      // 【情義實質作用 · 故人飛鴿傳書饋贈】：當情義 ≥ 80 且有在世至交好友時，有機率收到故人寄來的靈藥（治癒輕傷）或銀兩！
+      if (player.age >= 18 && (player.stats.qing || 0) >= 80 && Math.random() < 0.018) {
+        const livingFriends = (player.bonds || []).filter(b => b && !b.isDead && (b.intimacyIndex || 0) >= 3);
+        if (livingFriends.length > 0) {
+          const sender = livingFriends[Math.floor(Math.random() * livingFriends.length)];
+          if ((player.lightInjuries || 0) > 0) {
+            player.lightInjuries = Math.max(0, (player.lightInjuries || 0) - 1);
+            syncPlayerInjuries();
+            const chg = modifyStats({ qing: 2, wu: 1 });
+            addLog(`🕊️【情義迴響 · 故人飛鴿贈藥】你的生死至交【${sender.name}】聽聞你身上帶傷，特地飛鴿傳書送來一瓶秘製靈藥，助你化解一處經脈輕傷！(${chg.join("、")}、輕傷-1)`, "good-log");
+          } else {
+            const chg = modifyStats({ cai: 5, qing: 2 });
+            addLog(`🕊️【情義迴響 · 故人千里寄禮】你的知己【${sender.name}】派人送來一匣江南珍玩與美酒相贈，足見平生情義深重！(${chg.join("、")})`, "good-log");
+          }
+          updateAllUI();
+        }
+      }
+
+      // 58 歲後若已選擇【廣收門徒 · 薪火相傳】（一代名師）或【開宗立派】，確保自動登記親傳弟子並有機率觸發師徒互動劇情
+      if (player.age >= 58 && (player.lateLifeChosen === "收徒" || player.lateLifeChosen === "開宗立派")) {
+        if (!player.disciples || player.disciples.length === 0) ensureDiscipleRegistered();
+        if (Math.random() < (0.035 * oldAgeCalmMult) && triggerDiscipleInteractionEvent()) {
+          return;
+        }
       }
 
       // 68 歲後若已登基【武林盟主】，觸發盟主專屬高潮傳奇劇本
@@ -12958,9 +13223,15 @@ ${targetW.desc}
         bioParts.push(`平生有靈獸「${livingMounts[0].name}」相伴，踏遍名山大川。`);
       }
       if (spouseBond) {
-        bioParts.push(`紅塵之中與【${spouseBond.name}】結為連理，生死相許。`);
+        const childNamesStr = (player.children && player.children.length > 0)
+          ? `，育有${player.children.map(c => `${c.orderLabel}【${c.name}】`).join("、")}`
+          : "";
+        bioParts.push(`紅塵之中與【${spouseBond.name}】結為連理，生死相許${childNamesStr}。`);
       } else if (swornBonds.length > 0) {
         bioParts.push(`與【${swornBonds.map(b => b.name).join("、")}】義結金蘭，肝膽相照。`);
+      }
+      if (player.disciples && player.disciples.length > 0) {
+        bioParts.push(`晚年門下親傳弟子【${player.disciples.map(d => d.name).join("、")}】盡得真傳，薪火相傳。`);
       }
       const cleanReason = String(reasonText || "壽終正寢")
         .replace(/^[，。、\s]+/, "")
@@ -13117,6 +13388,12 @@ ${targetW.desc}
         });
         if (afterwordLines.length === 0) {
           afterwordLines.push("孤塚立於荒野，未有故人前來祭拜，唯有山風吹落枯葉，替你拂去碑上微塵。");
+        }
+        if ((player.children && player.children.length > 0) || (player.disciples && player.disciples.length > 0)) {
+          const cList = (player.children || []).map(c => `${c.orderLabel}【${c.name}】`);
+          const dList = (player.disciples || []).map(d => `${d.title}【${d.name}】`);
+          const heirsStr = [...cList, ...dList].join("與");
+          afterwordLines.push(`🌱 薪火傳承：${heirsStr}跪於你的碑前立誓繼承遺志，此後攜手闖蕩九州江湖，令你一脈的俠名傳頌百年不衰。`);
         }
         if (equippedWeaponName) {
           const markerNoun = /刀|刃/.test(equippedWeaponName) ? "刀標" : (/槍|矛|戟/.test(equippedWeaponName) ? "槍標" : (/棍|杖|棒/.test(equippedWeaponName) ? "兵標" : "劍標"));
@@ -13416,14 +13693,16 @@ ${targetW.desc}
         }
       };
 
+      const qingSuccessBonus = Math.min(20, Math.floor((player.stats.qing || 0) / 10));
+      const finalRescueRate = Math.min(88, 68 + qingSuccessBonus);
       const choices = [
         {
-          text: `💊 【凝神配合 · 吞服靈丹衝擊生門】強提最後一絲心神配合${rescuerTitle}引藥入脈（若成功則壽元 +3～5 年；若失敗則安詳辭世）`,
-          onSelect: () => executeRescueAttempt("吞服靈丹衝擊生門", 68)
+          text: `💊 【凝神配合 · 吞服靈丹衝擊生門】強提最後一絲心神配合${rescuerTitle}引藥入脈（成功率 ${finalRescueRate}% [含情義加成]，成功則壽元 +3～5 年）`,
+          onSelect: () => executeRescueAttempt("吞服靈丹衝擊生門", finalRescueRate)
         },
         {
-          text: `☯️ 【真元交融 · 順應天命溫養心脈】握住對方的手，以平緩吐納接引續命真元（若成功則壽元 +3～5 年；若失敗則含笑而逝）`,
-          onSelect: () => executeRescueAttempt("真元交融溫養心脈", 68)
+          text: `☯️ 【真元交融 · 順應天命溫養心脈】握住對方的手，以平緩吐納接引續命真元（成功率 ${finalRescueRate}% [含情義加成]，成功則壽元 +3～5 年）`,
+          onSelect: () => executeRescueAttempt("真元交融溫養心脈", finalRescueRate)
         }
       ];
 
@@ -13565,7 +13844,7 @@ ${targetW.desc}
         promptDiv.innerHTML = `
           <div>
             <strong style="color:var(--gold-bright);font-size:1rem;">📜 【塵緣落幕 · 到此一遊】</strong>
-            <div style="font-size:0.88rem;color:#e6e2d8;margin-top:2px;">此生故事已畫下句點（${reasonText}）。看完上方最後劇本後，請點擊右側按鈕展開身後名畫卷。</div>
+            <div style="font-size:0.88rem;color:#e6e2d8;margin-top:2px;">${reasonText}此生故事已畫下句點，看完上方最後劇本後，請點擊右側按鈕展開身後名畫卷。</div>
           </div>
           <button class="ctrl-btn primary" style="white-space:nowrap;padding:8px 16px;font-size:0.9rem;box-shadow:0 0 12px rgba(212,175,55,0.5);">📜 到此一遊 · 身後名畫卷</button>
         `;
@@ -13985,11 +14264,407 @@ ${targetW.desc}
       }
     }
 
+    /* =========================================================================
+     * 十五之二、 紅塵家室 · 子女誕育、親傳弟子與少俠攜手闖江湖系統
+     * ========================================================================= */
+    const CHILD_GIVEN_NAMES_MALE = ["念安", "承志", "星河", "知行", "驚雲", "清風", "長歌", "破曉", "明遠", "少游"];
+    const CHILD_GIVEN_NAMES_FEMALE = ["念慈", "清歌", "若雪", "映月", "星瀾", "知微", "語嫣", "聽雨", "慕雲", "晴川"];
+    const DISCIPLE_NAMES_POOL = [
+      { name: "林驚羽", gender: "男", title: "寒門劍童", trait: "劍骨清奇、重情重義" },
+      { name: "蘇小婉", gender: "女", title: "藥谷孤女", trait: "心思剔透、兼修岐黃" },
+      { name: "秦烈風", gender: "男", title: "塞北牧馬少年", trait: "天生神力、刀法狂野" },
+      { name: "柳如煙", gender: "女", title: "江南遺孤", trait: "身法輕靈、過目不忘" },
+      { name: "葉知秋", gender: "男", title: "落魄書生之子", trait: "沉穩內斂、悟性絕佳" }
+    ];
+
+    function getPlayerSurname() {
+      if (!player || !player.name) return "沈";
+      const compoundSurnames = ["司馬", "歐陽", "上官", "慕容", "獨孤", "皇甫", "南宮", "諸葛", "東方", "令狐", "赫連", "百里"];
+      for (const cs of compoundSurnames) {
+        if (player.name.startsWith(cs)) return cs;
+      }
+      return player.name.charAt(0);
+    }
+
+    function getLivingSpouse() {
+      if (!player || !Array.isArray(player.bonds)) return null;
+      return player.bonds.find(b => b && !b.isDead && (b.relationTag === "紅塵伴侶" || b.relationTag === "神仙眷侶"));
+    }
+
+    function ensureDiscipleRegistered(customReason = "") {
+      if (!player) return null;
+      if (!Array.isArray(player.disciples)) player.disciples = [];
+      if (player.disciples.length >= 2) return player.disciples[0];
+      const usedNames = new Set(player.disciples.map(d => d.name));
+      const avail = DISCIPLE_NAMES_POOL.filter(d => !usedNames.has(d.name));
+      const picked = avail.length > 0 ? avail[Math.floor(Math.random() * avail.length)] : DISCIPLE_NAMES_POOL[0];
+      const bestSk = getBestLearnedSkillName("招式", "本門絕學");
+      const newDisc = {
+        name: picked.name,
+        gender: picked.gender,
+        title: player.disciples.length === 0 ? "開山大弟子" : "關門小弟子",
+        originTitle: picked.title,
+        trait: picked.trait,
+        age: 14 + Math.floor(Math.random() * 4),
+        recruitedAtPlayerAge: player.age,
+        inheritedSkill: bestSk,
+        lastInteractAge: -1
+      };
+      player.disciples.push(newDisc);
+      renderBondsTab();
+      return newDisc;
+    }
+
+    // 觸發喜獲麟兒／掌上明珠劇情（有紅塵伴侶時隔幾年機率觸發，最多誕育 2 名子女）
+    function triggerChildBirthEvent(forceDebug = false) {
+      if (!player) return false;
+      if (!Array.isArray(player.children)) player.children = [];
+      if (player.children.length >= 2 && !forceDebug) return false;
+
+      let spouse = getLivingSpouse();
+      if (!spouse && forceDebug) {
+        const oppBond = (player.bonds || []).find(b => b && !b.isDead && b.gender !== player.gender);
+        if (oppBond) {
+          oppBond.relationTag = "紅塵伴侶";
+          oppBond.intimacyIndex = INTIMACY_LEVELS.length - 1;
+          spouse = oppBond;
+        } else {
+          const fallbackChar = (DB.CHARACTERS || []).find(c => c && c.gender !== player.gender) || { id: "zhao_linger", name: "蘇清靈", gender: "女", title: "靈神聖裔" };
+          spouse = {
+            id: fallbackChar.id,
+            name: fallbackChar.name,
+            gender: fallbackChar.gender || (player.gender === "男" ? "女" : "男"),
+            title: fallbackChar.title || "紅塵知己",
+            age: player.age,
+            maxLifespan: 95,
+            intimacyIndex: INTIMACY_LEVELS.length - 1,
+            tacit: 3,
+            relationTag: "紅塵伴侶"
+          };
+          player.bonds.push(spouse);
+        }
+      }
+      if (!spouse) return false;
+
+      setPauseState(true);
+      player.lastFamilyEventAge = player.age;
+
+      const isBoy = Math.random() < 0.5;
+      const childGender = isBoy ? "男" : "女";
+      const surname = getPlayerSurname();
+      const usedGiven = new Set((player.children || []).map(c => c.givenName));
+      const pool = isBoy ? CHILD_GIVEN_NAMES_MALE : CHILD_GIVEN_NAMES_FEMALE;
+      const availGiven = pool.filter(n => !usedGiven.has(n));
+      const givenName = availGiven.length > 0 ? availGiven[Math.floor(Math.random() * availGiven.length)] : pool[0];
+      const fullName = surname + givenName;
+      const orderLabel = player.children.length === 0 ? (isBoy ? "長子" : "長女") : (isBoy ? "次子" : "次女");
+      const bestAtk = getBestLearnedSkillName("招式", "家傳武學");
+
+      const desc = `春風送暖，喜鵲登枝！你與紅塵伴侶【${spouse.name}】相濡以沫、恩愛日深。\n\n` +
+        `這一日產房外霞光微映，伴隨著一聲清脆響亮的啼哭，你們迎來了血脈相連的${orderLabel}——你與【${spouse.name}】相視一笑，為孩子取名為【${fullName}】！\n\n` +
+        `看著襁褓中眉眼間既有你的神采、又帶著【${spouse.name}】靈秀之氣的孩子，你決定如何為【${fullName}】奠定人生根基？`;
+
+      const registerChild = (aptitudeTitle, styleNote, statsDelta) => {
+        const childObj = {
+          name: fullName,
+          givenName,
+          gender: childGender,
+          orderLabel,
+          parentName: spouse.name,
+          age: 1,
+          bornAtPlayerAge: player.age,
+          aptitude: aptitudeTitle,
+          inheritedSkill: bestAtk,
+          lastInteractAge: -1
+        };
+        player.children.push(childObj);
+        const chg = modifyStats(statsDelta);
+        addLog(`👶【弄璋弄瓦 · 喜誕${orderLabel}】你與摯愛【${spouse.name}】迎來愛情結晶【${fullName}】（${aptitudeTitle}）！${styleNote} (${chg.join("、")})`, "milestone");
+        unlockAchievement("family_blessing", "紅塵天倫 · 薪火相傳");
+        renderBondsTab();
+        updateAllUI();
+        setPauseState(false);
+      };
+
+      openEventModal(
+        `👶 紅塵添丁 · 與${spouse.name}喜獲${orderLabel}【${fullName}】`,
+        "紅塵家室 · 血脈傳承",
+        desc,
+        [
+          {
+            text: `⚔️ 【護體洗髓 · 承襲家傳武道】與【${spouse.name}】聯手以純和真氣為【${fullName}】洗毛伐髓，立志培養其為少年名俠 (情義+8、武力+3、名望+4)`,
+            onSelect: () => registerChild("將門虎子 · 武骨天成", `你與【${spouse.name}】以本命真元為孩子溫養經脈，期許他日仗劍天下。`, { qing: 8, wu: 3, ming: 4 })
+          },
+          {
+            text: `📖 【詩書禮樂 · 仁心濟世為本】在書房掛起平安長命鎖，期許【${fullName}】先學做人、明辨是非善惡 (德行+8、情義+8、名望+3)`,
+            onSelect: () => registerChild("溫潤如玉 · 仁俠之風", `你與【${spouse.name}】親自為孩子戴上長命玉鎖，教導其仁義立身。`, { de: 8, qing: 8, ming: 3 })
+          },
+          {
+            text: `🍶 【大擺滿月酒 · 廣邀天下至交同慶】開懷暢飲三天三夜，讓各位結義手足與江湖好友認下這門乾親 (情義+12、名望+6、財富-3)`,
+            onSelect: () => registerChild("萬千寵愛 · 江湖小福星", `滿堂豪傑爭相送上賀禮與護身兵刃，【${fullName}】自幼便受盡江湖叔伯姑姨疼愛。`, { qing: 12, ming: 6, cai: -3 })
+          }
+        ]
+      );
+      return true;
+    }
+
+    // 中年收徒事件（32歲以上若武力與名望足夠，可提前收下開山親傳弟子，與子女一同長大闖江湖！）
+    function triggerEarlyDiscipleRecruit() {
+      if (!player || player.age < 32) return false;
+      if (!Array.isArray(player.disciples)) player.disciples = [];
+      if (player.disciples.length >= 2) return false;
+
+      setPauseState(true);
+      player.lastFamilyEventAge = player.age;
+      const usedNames = new Set(player.disciples.map(d => d.name));
+      const avail = DISCIPLE_NAMES_POOL.filter(d => !usedNames.has(d.name));
+      const cand = avail.length > 0 ? avail[Math.floor(Math.random() * avail.length)] : DISCIPLE_NAMES_POOL[0];
+      const bestSk = getBestLearnedSkillName("招式", "獨門絕學");
+
+      const desc = `你在江湖上威名日盛，這一日行經風雪山神廟，見一名年約十四五歲的${cand.title}【${cand.name}】正咬牙在雪地裡以木枝演練殘缺招式，雖滿手凍瘡卻眼神堅毅（${cand.trait}）。\n\n` +
+        `得知你便是名震天下的大俠後，【${cand.name}】噗通一聲跪在雪地裡連磕三個響頭：\n` +
+        `「晚輩【${cand.name}】孤苦無依，唯願拜入前輩門下為親傳弟子，侍奉師父左右、傳承俠道！」`;
+
+      openEventModal(
+        `🍵 薪火相傳 · 收錄親傳弟子【${cand.name}】`,
+        "師門傳承 · 佳徒拜師",
+        desc,
+        [
+          {
+            text: `🔥 【欣然收為親傳弟子】飲下拜師茶，將《${bestSk}》傾囊相授！(德行+6、情義+8、名望+5)`,
+            onSelect: () => {
+              player.disciples.push({
+                name: cand.name,
+                gender: cand.gender,
+                title: player.disciples.length === 0 ? "開山大弟子" : "親傳弟子",
+                originTitle: cand.title,
+                trait: cand.trait,
+                age: 15,
+                recruitedAtPlayerAge: player.age,
+                inheritedSkill: bestSk,
+                lastInteractAge: -1
+              });
+              const chg = modifyStats({ de: 6, qing: 8, ming: 5 });
+              addLog(`🍵【開山收徒 · 薪火相傳】你收下天資聰穎的【${cand.name}】為親傳弟子，傳授《${bestSk}》，師門自此有了傳承後人！(${chg.join("、")})`, "milestone");
+              renderBondsTab();
+              updateAllUI();
+              setPauseState(false);
+            }
+          },
+          {
+            text: `📘 【指點迷津 · 贈金送別】不收徒弟之名，但點破其武學迷障並贈予盤纏 (德行+4、情義+3)`,
+            onSelect: () => {
+              const chg = modifyStats({ de: 4, qing: 3 });
+              addLog(`🤝【指點後進】你婉拒了【${cand.name}】的拜師之請，但耐心指點其武道關竅並贈予銀兩。(${chg.join("、")})`, "good-log");
+              updateAllUI();
+              setPauseState(false);
+            }
+          }
+        ]
+      );
+      return true;
+    }
+
+    // 家庭天倫、子女成長、以及「子女 × 親傳弟子」攜手闖江湖豐富劇本池！
+    function triggerFamilyAndDiscipleEvent(forceDebug = false) {
+      if (!player) return false;
+      if (!Array.isArray(player.children)) player.children = [];
+      if (!Array.isArray(player.disciples)) player.disciples = [];
+
+      if (forceDebug) {
+        if (player.children.length === 0) {
+          return triggerChildBirthEvent(true);
+        }
+        if (player.disciples.length === 0 && Math.random() < 0.5) {
+          return triggerEarlyDiscipleRecruit();
+        }
+      }
+
+      if (player.children.length === 0 && player.disciples.length === 0) return false;
+
+      const spouse = getLivingSpouse();
+      const spouseName = spouse ? spouse.name : (player.children[0]?.parentName || "伴侶");
+      const child = player.children[Math.floor(Math.random() * player.children.length)];
+      const disc = player.disciples[Math.floor(Math.random() * player.disciples.length)];
+      const bestAtk = getBestLearnedSkillName("招式", "家傳絕學");
+      const bestQg = getBestLearnedSkillName("輕功", "獨門身法");
+
+      const scenarios = [];
+
+      if (child && disc) {
+        scenarios.push(
+          {
+            id: "fam_co_backyard_spar",
+            title: `⚔️ 後山梅林 · 【${child.name}】與師兄姊【${disc.name}】的拆招較量`,
+            tag: "家室與師門 · 同門切磋",
+            desc: `清晨後山演武場上劍氣縱橫！你的${child.orderLabel}【${child.name}】正與親傳弟子【${disc.name}】以木劍激烈拆招。\n\n` +
+              `【${disc.name}】將你傳授的《${disc.inheritedSkill || bestAtk}》使出七分火候，招式沉穩處處護著師弟妹；而【${child.name}】卻古靈精怪地揉合了你與【${spouseName}】的步法，冷不防一記險招點向【${disc.name}】手腕！\n` +
+              `兩人收劍後發現你與【${spouseName}】正在廊下含笑觀戰，連忙紅著臉上前行禮！`,
+            choices: [
+              {
+                text: `🔥 【親自下場 · 考校雙少俠合擊之術】讓【${child.name}】與【${disc.name}】聯手攻你三招，傳授雙劍合璧之妙 (武力+4、情義+8、名望+5)`,
+                onSelect: () => {
+                  const chg = modifyStats({ wu: 4, qing: 8, ming: 5 });
+                  addLog(`⚔️【少俠雙璧 · 傳授合擊】你親自下場指點愛子/女【${child.name}】與親傳弟子【${disc.name}】演練雙人合擊之陣，兩人默契大增！(${chg.join("、")})`, "milestone");
+                  setPauseState(false);
+                }
+              },
+              {
+                text: `🍵 【與${spouseName}備下酒菜 · 勉勵同門情義】叮囑兩人行走江湖須如親手足般彼此扶持 (情義+10、德行+6)`,
+                onSelect: () => {
+                  const chg = modifyStats({ qing: 10, de: 6 });
+                  addLog(`🏡【師門家宴 · 手足情深】你與【${spouseName}】設下家宴犒賞【${child.name}】與【${disc.name}】，師兄妹二人立誓終生守望相助！(${chg.join("、")})`, "good-log");
+                  setPauseState(false);
+                }
+              }
+            ]
+          },
+          {
+            id: "fam_co_jianghu_debut",
+            title: `🐎 雙少俠初涉江湖 · 【${child.name}】與【${disc.name}】聯手夜探黑風嶺`,
+            tag: "少俠闖江湖 · 師門揚威",
+            desc: `近日附近州縣頻傳『黑風嶺雙煞』劫掠商旅，你本欲親自出馬，不料今晨留下一封字條——你的${child.orderLabel}【${child.name}】竟與親傳弟子【${disc.name}】悄悄牽走駿馬，結伴下山除暴安良去了！\n\n` +
+              `當你與【${spouseName}】趕至黑風嶺山寨時，只見寨門火把通明：【${disc.name}】正面持劍攔住大當家，而【${child.name}】施展《${bestQg}》自屋脊奇襲二當家，兩人配合天衣無縫！`,
+            choices: [
+              {
+                text: `🦅 【隱於暗處壓陣 · 放手讓小輩立威】不出手干預，僅以暗勁震落偷襲冷箭，看他們親手平定山寨！(名望+12、情義+8、武力+3)`,
+                onSelect: () => {
+                  const chg = modifyStats({ ming: 12, qing: 8, wu: 3 });
+                  addLog(`🦅【雛鳳清聲 · 雙少俠揚名】你的${child.orderLabel}【${child.name}】與大弟子【${disc.name}】聯手搗毀黑風嶺，江湖茶肆紛紛傳頌『虎父無犬子、名師出高徒』！(${chg.join("、")})`, "milestone");
+                  setPauseState(false);
+                }
+              },
+              {
+                text: `⚡ 【現身喝彩 · 一家師徒並肩清剿餘孽】朗聲大笑飛身入陣，帶著孩子與徒弟痛快大戰一場！(武力+5、情義+10、德行+6)`,
+                onSelect: () => {
+                  const chg = modifyStats({ wu: 5, qing: 10, de: 6 });
+                  addLog(`🔥【上陣父子兵 · 師徒同心】你與【${spouseName}】攜愛子/女【${child.name}】及弟子【${disc.name}】並肩作戰，一舉蕩平黑風嶺群寇！(${chg.join("、")})`, "milestone");
+                  setPauseState(false);
+                }
+              }
+            ]
+          },
+          {
+            id: "fam_co_young_heroes_tourney",
+            title: `🏆 江南少年英雄大會 · 【${child.name}】與【${disc.name}】雙雙奪魁`,
+            tag: "少俠闖江湖 · 天下揚名",
+            desc: `五年一度的『九州少年英雄大會』於洞庭湖畔舉行，各大名門正派紛紛派出門下最傑出的年輕弟子爭鋒。\n\n` +
+              `你的${child.orderLabel}【${child.name}】與親傳弟子【${disc.name}】代表你們一脈聯袂出戰，一路過關斬將殺入最終決賽，竟在擂台上會師！台下群雄無不驚嘆你們一門雙傑的絕世風采！`,
+            choices: [
+              {
+                text: `👑 【命二人放手一搏 · 以武會友點到為止】讓天下人見識《${bestAtk}》的真正氣象！(名望+15、武力+4、情義+8)`,
+                onSelect: () => {
+                  const chg = modifyStats({ ming: 15, wu: 4, qing: 8 });
+                  addLog(`🏆【一門雙傑 · 少年奪魁】【${child.name}】與【${disc.name}】於少年英雄大會巔峰演武三十合不分軒輊，雙雙並列少年榜首，令你威名更盛！(${chg.join("、")})`, "milestone");
+                  setPauseState(false);
+                }
+              },
+              {
+                text: `🍶 【相視一笑雙雙拱手讓冠 · 盡顯宗師門風】兩人同時收劍行禮、攜手下台痛飲慶功 (德行+12、情義+10、名望+10)`,
+                onSelect: () => {
+                  const chg = modifyStats({ de: 12, qing: 10, ming: 10 });
+                  addLog(`🌟【謙謙君子 · 盛名滿九州】【${child.name}】與【${disc.name}】於擂台上相視一笑、不爭虛名，滿場名宿起立撫掌讚嘆！(${chg.join("、")})`, "milestone");
+                  setPauseState(false);
+                }
+              }
+            ]
+          }
+        );
+      }
+
+      if (child) {
+        scenarios.push(
+          {
+            id: "fam_child_lantern_festival",
+            title: `🏮 上元花燈夜 · 與【${spouseName}】攜【${child.name}】同遊夜市`,
+            tag: "紅塵家室 · 天倫之樂",
+            desc: `正月十五上元佳節，長街十里花燈如晝。你難得放下江湖紛爭，與摯愛【${spouseName}】牽著【${child.name}】漫步於熱鬧夜市之中。\n\n` +
+              `【${child.name}】一手舉著冰糖葫蘆、一手提著走馬兔子燈，在人群中歡快奔跑；【${spouseName}】挽著你的手臂，眼波流轉間盡是洗盡鉛華的溫柔：「昔年刀光劍影，何曾想過今日能有這般人間煙火？」`,
+            choices: [
+              {
+                text: `🎯 【在射柳攤位露一手絕活 · 替孩子贏下頭彩寶刀木偶】博得滿堂喝彩與妻兒歡笑 (情義+10、武力+2、名望+3)`,
+                onSelect: () => {
+                  const chg = modifyStats({ qing: 10, wu: 2, ming: 3 });
+                  addLog(`🏮【上元天倫 · 萬家燈火】你在花燈夜市百步穿楊替【${child.name}】贏得頭彩，與【${spouseName}】相攜看漫天煙火，快意無比！(${chg.join("、")})`, "good-log");
+                  setPauseState(false);
+                }
+              },
+              {
+                text: `🏮 【一家人於拱橋畔放飛孔明燈】祈願歲月長安、家門永固 (情義+10、德行+5、壽元+1)`,
+                onSelect: () => {
+                  player.maxLifespan = (player.maxLifespan || 80) + 1;
+                  const chg = modifyStats({ qing: 10, de: 5 });
+                  addLog(`🏮【天倫祈福 · 燈映長安】你與【${spouseName}】、【${child.name}】一同放飛祈福天燈，心境祥和圓融，壽元上限 +1 載！(${chg.join("、")}、壽元+1)`, "good-log");
+                  setPauseState(false);
+                }
+              }
+            ]
+          },
+          {
+            id: "fam_child_defend_parents",
+            title: `🗡️ 茶樓護親 · 少年【${child.name}】拔劍斥退狂妄惡客`,
+            tag: "紅塵家室 · 將門虎子",
+            desc: `今日你與【${spouseName}】在江南茶樓雅座小憩，鄰桌幾名不知天高地厚的外地幫派惡漢酒後大放厥詞，竟出言編派你們夫妻昔年的江湖事蹟。\n\n` +
+              `你尚未開口，年方十餘歲的【${child.name}】已按捺不住，一拍桌案挺身而出，手中長劍連出三記《${bestAtk}》精妙變招，當場削斷惡漢腰帶與兵刃，朗聲喝道：\n` +
+              `「家父與家母之名，豈容爾等鼠輩妄議！還不快滾！」`,
+            choices: [
+              {
+                text: `👍 【撫掌微笑 · 讚許其劍法火候與俠氣】指點其剛才第三劍的收勢關竅 (武力+3、名望+8、情義+6)`,
+                onSelect: () => {
+                  const chg = modifyStats({ wu: 3, ming: 8, qing: 6 });
+                  addLog(`🗡️【虎父無犬子 · 茶樓立威】你的${child.orderLabel}【${child.name}】於茶樓三劍震退狂徒，盡顯將門虎子風範！(${chg.join("、")})`, "milestone");
+                  setPauseState(false);
+                }
+              },
+              {
+                text: `☯️ 【溫言教導 · 傳授『泰山崩於前而色不變』的養氣工夫】讓孩子明白大俠胸襟 (德行+8、情義+8)`,
+                onSelect: () => {
+                  const chg = modifyStats({ de: 8, qing: 8 });
+                  addLog(`🍵【言傳身教 · 養氣修心】你與【${spouseName}】溫言點撥【${child.name}】制怒養氣之道，孩子恍然受教，氣度更趨沉穩！(${chg.join("、")})`, "good-log");
+                  setPauseState(false);
+                }
+              }
+            ]
+          }
+        );
+      }
+
+      const picked = scenarios[Math.floor(Math.random() * scenarios.length)];
+      if (!picked) return false;
+      player.lastFamilyEventAge = player.age;
+      setPauseState(true);
+      openEventModal(picked.title, picked.tag, picked.desc, picked.choices);
+      return true;
+    }
+
+    function interactWithFamilyMember(kind, idx) {
+      if (!player || player.isDead) return;
+      const list = kind === "child" ? (player.children || []) : (player.disciples || []);
+      const target = list[idx];
+      if (!target) return;
+      if (target.lastInteractAge === player.age) {
+        addLog(`🏡【家門日常】你今年已親自考校並陪伴過【${target.name}】了。`);
+        return;
+      }
+      target.lastInteractAge = player.age;
+      const bestSk = getBestLearnedSkillName("招式", "家傳絕學");
+      const chg = modifyStats({ qing: 4, wu: 2, ming: 2 });
+      if (kind === "child") {
+        addLog(`🏡【考校骨肉 · 家傳授藝】你在庭院中親自指點${target.orderLabel}【${target.name}】演練《${bestSk}》，一家人其樂融融！(${chg.join("、")})`, "good-log");
+      } else {
+        addLog(`🍵【師門傳功 · 提攜佳徒】你在演武堂親自為${target.title}【${target.name}】拆解《${bestSk}》精微奧義，師徒情義更深！(${chg.join("、")})`, "good-log");
+      }
+      renderBondsTab();
+      updateAllUI();
+    }
+    window.interactWithFamilyMember = interactWithFamilyMember;
+
     function renderBondsTab() {
       if (!player) return;
       document.getElementById("bonds-count-badge").textContent = `${player.bonds.length} 人`;
       const box = document.getElementById("bonds-list");
-      if (player.bonds.length === 0 && (!player.mounts || player.mounts.length === 0)) {
+      const hasFamily = (player.children && player.children.length > 0) || (player.disciples && player.disciples.length > 0);
+      if (player.bonds.length === 0 && (!player.mounts || player.mounts.length === 0) && !hasFamily) {
         box.innerHTML = `<div style="color:var(--text-muted);font-size:0.86rem;text-align:center;padding:24px 0;">紅塵獨行，尚未結識江湖同伴</div>`;
         return;
       }
@@ -15222,7 +15897,11 @@ ${targetW.desc}
         if (!player) startNewLife();
         gainImmortalScripture(null, "封測調試台賜予");
       });
-      document.getElementById("dbg-btn-battle").addEventListener("click", () => {
+      document.getElementById("dbg-btn-family")?.addEventListener("click", () => {
+      if (!player) startNewLife();
+      triggerFamilyAndDiscipleEvent(true);
+    });
+    document.getElementById("dbg-btn-battle").addEventListener("click", () => {
         if (!player) startNewLife();
         triggerMajorBattle();
       });
