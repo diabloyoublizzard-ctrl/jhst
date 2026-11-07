@@ -294,16 +294,16 @@
     .ep-corner.bl { bottom: 10px; left: 10px; border-bottom: 2px solid #9e8c70; border-left: 2px solid #9e8c70; }
     .ep-corner.br { bottom: 10px; right: 10px; border-bottom: 2px solid #9e8c70; border-right: 2px solid #9e8c70; }
     .ep-vertical-seal {
-      position: absolute; left: 16px; top: 96px;
+      position: static;
       writing-mode: vertical-rl; text-orientation: upright;
-      border: 2.5px double #b03024; color: #b03024;
-      padding: 8px 4px; font-weight: 900; font-size: 0.92rem; letter-spacing: 3px;
-      background: rgba(176, 48, 36, 0.06); transform: rotate(-4deg);
-      box-shadow: inset 0 0 0 1px rgba(176, 48, 36, 0.25);
-      user-select: none;
+      border: 2px double #b03024; color: #b03024;
+      padding: 5px 3px; font-weight: 900; font-size: 0.88rem; letter-spacing: 2px;
+      background: rgba(176, 48, 36, 0.06); transform: rotate(-3deg);
+      box-shadow: inset 0 0 0 1px rgba(176, 48, 36, 0.22);
+      user-select: none; line-height: 1.1; white-space: nowrap; height: fit-content;
     }
     .ep-frame-inner { position: relative; padding: 6px 4px 4px 4px; }
-    .ep-body-wrap { padding-left: 28px; position: relative; }
+    .ep-body-wrap { padding-left: 0; position: relative; }
     .ep-unique-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
       gap: 8px; margin-top: 6px;
@@ -334,8 +334,9 @@
       background: rgba(184, 145, 70, 0.08); border-left: 2.5px solid #9e7328; line-height: 1.65;
     }
     .ep-rarity-line { font-size: 0.78rem; color: #8c7b65; letter-spacing: 1.5px; margin-bottom: 6px; }
-    .ep-hero-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .ep-hero-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
     .ep-hero-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .ep-hero-right { display: flex; align-items: center; gap: 14px; margin-left: auto; }
     .ep-hero-name { font-size: 2rem; font-weight: 900; color: #1f1a16; letter-spacing: 2px; line-height: 1.1; }
     .ep-role-badge {
       background: #9e2a22; color: #f9f4eb; font-size: 0.8rem; font-weight: bold;
@@ -1007,9 +1008,6 @@
         <div class="ep-corner bl"></div>
         <div class="ep-corner br"></div>
 
-        <!-- 左側斜向朱文方印 -->
-        <div class="ep-vertical-seal" id="ep-vertical-seal">江湖歸人</div>
-
         <div class="ep-body-wrap">
           <div class="ep-rarity-line" id="ep-rarity-line">命格碑帖 · 蓋棺定論</div>
 
@@ -1018,7 +1016,11 @@
               <span class="ep-hero-name" id="ep-hero-name">--</span>
               <span class="ep-role-badge" id="ep-role-badge">江湖散修</span>
             </div>
-            <div class="ep-age-big" id="ep-cause-badge">0 歲</div>
+            <div class="ep-hero-right">
+              <!-- 壽元左側朱文方印 -->
+              <div class="ep-vertical-seal" id="ep-vertical-seal">江湖歸人</div>
+              <div class="ep-age-big" id="ep-cause-badge">0 歲</div>
+            </div>
           </div>
 
           <div class="ep-open-quote" id="ep-open-quote"></div>
@@ -1094,7 +1096,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.07.2015</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.07.2130</span>
       </div>
 
       <div class="debug-row">
@@ -17753,7 +17755,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.07.2015";
+    const GAME_VERSION = "v2026.11.07.2130";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -18032,6 +18034,8 @@ addGameData({
         heroId: candidateDraft.heroId,
         sect: candidateDraft.sect,
         sectTrait: "",
+        initialSect: candidateDraft.sect || "",
+        initialSectTrait: "",
         age: 0,
         month: 1,
         ganzhiIndex: Math.floor(Math.random() * 60),
@@ -22473,6 +22477,10 @@ ${targetW.desc}
           onSelect: () => {
             player.sect = s.name;
             player.sectTrait = s.trait;
+            if (!player.initialSect || player.initialSect === "無門無派" || player.initialSect === "江湖散修") {
+              player.initialSect = s.name;
+              player.initialSectTrait = s.trait || "";
+            }
             player.title = `${s.name}弟子`;
             if (!player.badges.includes(s.trait)) player.badges.push(s.trait);
             const chg = modifyStats(s.bonus || { wu: 3 });
@@ -23217,6 +23225,10 @@ ${targetW.desc}
           onSelect: () => {
             player.sect = s.name;
             player.sectTrait = s.trait;
+            if (!player.initialSect || player.initialSect === "無門無派" || player.initialSect === "江湖散修") {
+              player.initialSect = s.name;
+              player.initialSectTrait = s.trait || "";
+            }
             player.title = `${s.name}弟子`;
             if (!player.badges.includes(s.trait)) player.badges.push(s.trait);
             const chg = modifyStats(s.bonus || { wu: 4 });
@@ -28955,8 +28967,16 @@ ${targetW.desc}
 
       let bioParts = [];
       bioParts.push(`${birthGanzhi}年生於九州紅塵，生具「${talentNames}」之資。`);
-      if (hasRealSect) {
-        bioParts.push(`少時拜入【${player.sect}】門牆${player.sectTrait ? "，領悟「" + player.sectTrait + "」真諦" : ""}。`);
+      if (player.lateLifeChosen === "開宗立派" || player.sectTrait === "開山始祖" || (player.sect && player.title === "開山祖師")) {
+        const originSect = (player.initialSect && player.initialSect !== "無門無派" && player.initialSect !== "江湖散修" && player.initialSect !== player.sect) ? player.initialSect : "";
+        const originTrait = player.initialSectTrait || "";
+        if (originSect) {
+          bioParts.push(`少時拜入【${originSect}】門牆${originTrait ? "，領悟「" + originTrait + "」真諦" : ""}；暮年融會貫通開宗立派，創立【${player.sect}】道統，為天下尊崇之開山祖師。`);
+        } else {
+          bioParts.push(`少時不羈於名門藩籬，以一介散修仗劍獨行；暮年以曠世武道開宗立派，創立【${player.sect}】道統，為天下尊崇之開山祖師。`);
+        }
+      } else if (hasRealSect) {
+        bioParts.push(`少時拜入【${player.sect}】門牆${player.sectTrait && player.sectTrait !== "開山始祖" ? "，領悟「" + player.sectTrait + "」真諦" : ""}。`);
       } else if (player.adultProfession) {
         bioParts.push(`束髮之年於市井立業為【${player.adultProfession}】，於百態紅塵中磨礪筋骨。`);
       } else {
@@ -29220,25 +29240,7 @@ ${targetW.desc}
         ctx.stroke();
       });
 
-      // 2. 左側斜向朱文方印
-      ctx.save();
-      ctx.translate(68, 175);
-      ctx.rotate(-0.07);
-      ctx.strokeStyle = "#b03024";
-      ctx.lineWidth = 3;
-      ctx.strokeRect(-22, -65, 44, 150);
-      ctx.lineWidth = 1;
-      ctx.strokeRect(-18, -61, 36, 142);
-      ctx.fillStyle = "#b03024";
-      ctx.font = "bold 22px 'Songti SC', 'Noto Serif TC', serif";
-      ctx.textAlign = "center";
-      const sealChars = (d.primarySeal.name || "江湖歸人").slice(0, 4).split("");
-      sealChars.forEach((ch, idx) => {
-        ctx.fillText(ch, 0, -30 + idx * 32);
-      });
-      ctx.restore();
-
-      const leftX = 118;
+      const leftX = 64;
       const contentW = W - leftX - 64;
       let y = 80;
 
@@ -29295,7 +29297,28 @@ ${targetW.desc}
       ctx.fillStyle = "#5c4e3c";
       ctx.textAlign = "right";
       ctx.fillText(d.ageText, W - 64, y - 4);
+      const ageW = ctx.measureText(d.ageText).width;
       ctx.textAlign = "left";
+
+      // 壽元左側朱文印鑑
+      ctx.save();
+      const sealX = W - 64 - ageW - 32;
+      const sealY = y - 8;
+      ctx.translate(sealX, sealY);
+      ctx.rotate(-0.05);
+      ctx.strokeStyle = "#b03024";
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(-18, -48, 36, 106);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-15, -45, 30, 100);
+      ctx.fillStyle = "#b03024";
+      ctx.font = "bold 17px 'Songti SC', 'Noto Serif TC', serif";
+      ctx.textAlign = "center";
+      const sealChars = (d.primarySeal.name || "江湖歸人").slice(0, 4).split("");
+      sealChars.forEach((ch, idx) => {
+        ctx.fillText(ch, 0, -25 + idx * 24);
+      });
+      ctx.restore();
       y += 32;
 
       // 引言與太史公小傳
