@@ -1096,7 +1096,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.07.2130</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.07.2345</span>
       </div>
 
       <div class="debug-row">
@@ -1144,7 +1144,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611072130"></script>
+  <script src="data.js?v=202611072345"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1157,7 +1157,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611072130"></script>
+  <script src="patches.js?v=202611072345"></script>
   <script>
 
   (function() {
@@ -2007,7 +2007,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.07.2130";
+    const GAME_VERSION = "v2026.11.07.2345";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -2550,19 +2550,19 @@
     }
 
     function addLightInjury(count = 1) {
-      if (!player) return;
+      if (!player || player.isDead) return false;
       if (count > 0) recordInjuryOrigin("light", count);
       player.lightInjuries = Math.max(0, (player.lightInjuries || 0) + count);
       syncPlayerInjuries();
-      checkInjuryMortality(false);
+      return checkInjuryMortality(false);
     }
 
     function addHeavyInjury(count = 1) {
-      if (!player) return;
+      if (!player || player.isDead) return false;
       if (count > 0) recordInjuryOrigin("heavy", count);
       player.heavyInjuries = Math.max(0, (player.heavyInjuries || 0) + count);
       syncPlayerInjuries();
-      checkInjuryMortality(false);
+      return checkInjuryMortality(false);
     }
 
     function getSkillTierPriority(tier) {
@@ -9653,7 +9653,7 @@ ${targetW.desc}
 
     // 5 幕重大戰役推進（支援戮神殿 31 節點樹狀分支、同伴助陣武力×1.2、三段式救人傷亡判定與戰役武力隨機 +3~+5）
     function playBattleStage(battle, stageNum, branchKey = null) {
-      if (!player) return;
+      if (!player || player.isDead) return;
       const isWushendian = (battle.id === "wushendian_final" || battle.id === "battle_wushendian" || (battle.title || "").includes("戮神殿終戰"));
       const isHengshan = (battle.id === "hengshan_crisis" || battle.id === "battle_hengshan" || (battle.title || "").includes("雲夢澤之劫"));
       const isCangzhou = (battle.id === "cangzhou_tieshidu" || (battle.title || "").includes("滄州鐵獅渡"));
@@ -9705,6 +9705,7 @@ ${targetW.desc}
         cost: c.cost,
         allowFatalChallenge: c.allowFatalChallenge,
         onSelect: () => {
+          if (!player || player.isDead) return;
           // 判斷是否為同伴助陣選項或身邊有深厚羈絆同伴協同作戰
           let aidedBond = null;
           const canAid = (b) => b && !b.isDead && (!player.fakedDeath || b.isImmortal) && (!player.inImmortalPhase || b.isImmortal);
@@ -9753,14 +9754,12 @@ ${targetW.desc}
               const chg = modifyStats(rawSt);
               addLog(`⚔️【${battle.title} · 第 ${stageNum} 幕 · 奇策功成】${c.diceSuccessResult || c.result || ""} ${chg.length ? "(" + chg.join("、") + ")" : ""}`, "milestone");
             } else {
-              if (c.diceFailLightInjury) addLightInjury(c.diceFailLightInjury);
-              if (c.diceFailHeavyInjury) addHeavyInjury(c.diceFailHeavyInjury);
               const rawSt = rollBattleStats(c.diceFailStats || { wu: 2 });
               const chg = modifyStats(rawSt);
               addLog(`⚠️【${battle.title} · 第 ${stageNum} 幕 · 行險受挫】${c.diceFailResult || "你在險境中稍有閃失，受了些許波及！"}${c.diceFailLightInjury ? ` (輕傷+${c.diceFailLightInjury})` : ""}${c.diceFailHeavyInjury ? ` (重傷+${c.diceFailHeavyInjury})` : ""}${chg.length ? " (" + chg.join("、") + ")" : ""}`, "danger-log");
-              if ((c.diceFailLightInjury || c.diceFailHeavyInjury) && checkInjuryMortality(false)) {
-                return;
-              }
+              if (c.diceFailLightInjury) addLightInjury(c.diceFailLightInjury);
+              if (c.diceFailHeavyInjury) addHeavyInjury(c.diceFailHeavyInjury);
+              if (player.isDead) return;
             }
             customOutcomeHandled = true;
           } else if (isFatalCheck) {
@@ -9780,12 +9779,10 @@ ${targetW.desc}
               if (consumeTaixuArmor()) {
                 addLog(`🛡️【神器護主】${aidNote} 太虛神甲替你擋下致命狂暴一擊碎裂成齏粉！你借力後撤撿回一條性命！`, "good-log");
               } else if (Math.random() < 0.50) {
-                addHeavyInjury(2);
                 const chg = modifyStats(rollBattleStats({ wu: 1 }));
                 addLog(`🩸【武力未逮 · 強闖重創】${aidNote} 你在武力與破局條件皆不足之下強行正面硬撼，當場被狂暴殺招震碎護體真氣、口噴鮮血倒飛數丈，身受兩處沉重內傷！（重傷+2${chg.length ? "、" + chg.join("、") : ""}）`, "danger-log");
-                if (checkInjuryMortality(false)) {
-                  return;
-                }
+                addHeavyInjury(2);
+                if (player.isDead) return;
               } else {
                 if (aidedBond) {
                   aidedBond.isDead = true;
@@ -9812,9 +9809,10 @@ ${targetW.desc}
               const roll = Math.random();
               if (roll < 1 / 3) {
                 if (battle.id === "huashan_dahui" && stageNum === 4) player.huashanBlockedSword = false;
-                addHeavyInjury(1);
                 const chg = modifyStats(rollBattleStats({ wu: 3, ming: 2 }));
                 addLog(`🩸【武力相當 · 慘烈重創】${aidNote} 你拼盡全力與強敵硬撼，雖僥倖保住性命，卻被狂暴氣勁震退未能救下目標，自身亦經脈俱裂受了重傷！(${chg.length ? chg.join("、") + "、" : ""}重傷+1)`, "danger-log");
+                addHeavyInjury(1);
+                if (player.isDead) return;
                 customOutcomeHandled = true;
               } else if (roll < 2 / 3) {
                 if (battle.id === "huashan_dahui" && stageNum === 4) player.huashanBlockedSword = false;
@@ -9867,6 +9865,8 @@ ${targetW.desc}
             addLog(`⚔️【${battle.title} · 第 ${stageNum} 幕】${c.result || ""} ${chg.length ? "(" + chg.join("、") + ")" : ""}`, "milestone");
           }
 
+          if (player.isDead) return;
+
           // 榮獲江湖封號與天機成就
           if (c.title) {
             player.titles = player.titles || [];
@@ -9881,6 +9881,8 @@ ${targetW.desc}
           }
 
           updateAllUI();
+
+          if (player.isDead) return;
 
           if (isCangzhou && c.nextBranch) {
             if (c.nextBranch === "4A") player.cangzhouOutcome = "saved_xiaoman";
@@ -15114,9 +15116,8 @@ ${targetW.desc}
 
     // 動態前置條件過濾、標籤去重與渲染
     function openEventModal(title, tag, desc, rawChoices) {
-      if (player) {
-        player.lastEventContext = { title: String(title || ""), tag: String(tag || ""), age: player.age };
-      }
+      if (!player || player.isDead) return;
+      player.lastEventContext = { title: String(title || ""), tag: String(tag || ""), age: player.age };
       document.getElementById("ev-modal-title").textContent = title;
       document.getElementById("ev-modal-tag").textContent = tag;
       const descEl = document.getElementById("ev-modal-desc");
