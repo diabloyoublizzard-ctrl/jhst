@@ -1141,7 +1141,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611071615"></script>
+  <script src="data.js?v=202611071820"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1154,7 +1154,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611071615"></script>
+  <script src="patches.js?v=202611071820"></script>
   <script>
 
   (function() {
@@ -2004,7 +2004,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.07.1615";
+    const GAME_VERSION = "v2026.11.07.1820";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -7677,7 +7677,7 @@ ${targetW.desc}
       "1": {
         subtitle: "冥山山麓 · 三路分兵破魔障",
         narrative: "狂暴暴風雪席捲冥山山麓，戮神殿萬千魔化血衛結成『百鬼夜行大陣』封鎖登山要道！正道聯軍於山麓帥帳緊急議事，決定分兵三路：前鋒強攻山門天梯、奇兵繞行雪谷營救被俘弟子、後軍留守山麓大營主持八門金鎖防線與救治傷患！",
-        situationGuide: "【戰況導引】：你的選擇將決定後續 2/5～5/5 幕所在的戰場路線！側翼雪谷救援需具備輕功與招式；留守山麓大營主持防務與救治則需高深德行與名望（德行≥120、名望≥85）；若兩者皆未達標卻執意參戰，將只能踏上中間的【前鋒破陣線】（中位數門檻：需武力≥138）正面硬撼！",
+        situationGuide: "【戰況導引】：你的選擇將決定後續 2/5～5/5 幕所在的戰場路線！側翼雪谷救援需具備輕功與招式；留守山麓大營主持防務與救治則需高深德行與名望（德行≥220、名望≥190）；若兩者皆未達標卻執意參戰，將只能踏上中間的【前鋒破陣線】（中位數門檻：需武力≥172）正面硬撼！",
         choices: [
           {
             text: "【雪谷救援線 · 潛行劫營】主動請纓率領輕功好手繞往冥山側翼雪谷，營救被魔殿囚禁的各派年輕弟子！（需習得輕功與外門招式，進入側翼雪谷線）", dynamicSkillSlot: "輕功",
@@ -7687,16 +7687,16 @@ ${targetW.desc}
             result: "你藉著暴風雪掩護施展絕頂身法，悄無聲息地潛入冥山側翼幽谷，朝囚禁各派弟子的寒牢摸去！"
           },
           {
-            text: "【前鋒破陣線 · 強斬陣心】挺身擔任正道先鋒，凝聚全身真氣正面強行撕裂山門魔傀大陣！（需武力≥138，進入前鋒登山線）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 138 }, allowFatalChallenge: true, isFatal: true,
+            text: "【前鋒破陣線 · 強斬陣心】挺身擔任正道先鋒，凝聚全身真氣正面強行撕裂山門魔傀大陣！（需武力≥172，進入前鋒登山線）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 172 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "2A",
             stats: { wu: 4, ming: 5 },
             result: "漫天雪幕被你強勢劈開！狂暴氣勁斬碎陣眼石柱，你率領前鋒精銳踏上冥淵天梯！",
             failDeath: { reason: "於冥淵山門強衝魔傀大陣，力竭陣亡。", seal: { name: "埋骨冥淵", quote: "雪擁冥淵山門破，壯士一去不復還。" } }
           },
           {
-            text: "【山下後援線 · 號令固守大營】憑藉崇高德望坐鎮冥山山麓大營主持防務、救治傷患並調度火器！（需德行≥120、名望≥85，進入山下後援線）",
-            reqStat: { de: 120, ming: 85 }, lockIfUnmet: true,
+            text: "【山下後援線 · 號令固守大營】憑藉崇高德望坐鎮冥山山麓大營主持防務、救治傷患並調度火器！（需德行≥220、名望≥190，進入山下後援線）",
+            reqStat: { de: 220, ming: 190 }, lockIfUnmet: true,
             nextBranch: "2C",
             stats: { de: 5, qing: 5, ming: 3 },
             result: "群雄信服你的威望，你坐鎮山麓大營加固鹿角拒馬、熬煮驅寒湯藥，將聯軍大後方打理得井井有條！"
@@ -7707,18 +7707,18 @@ ${targetW.desc}
       "2A": {
         subtitle: "前鋒線 · 冥淵天梯戰四天王",
         narrative: "你率前鋒部隊殺上直插雲霄的冥淵天梯，腳下是萬丈冰淵！戮神殿四大天王踏雪攔路，狂暴掌風震落無數冰錐，前鋒同道傷亡慘重！",
-        situationGuide: "【前鋒戰況】：正面硬撼四大天王直衝玉虛坪需武力檢定144；退守玄冰石林斷後需深厚內功與德行（德行≥125）；引動雪崩奇襲偏殿則需輕功與招式配合。",
+        situationGuide: "【前鋒戰況】：正面硬撼四大天王直衝玉虛坪需武力檢定178；退守玄冰石林斷後需深厚內功與德行（德行≥228）；引動雪崩奇襲偏殿則需輕功與招式配合。",
         choices: [
           {
-            text: "【斷後阻敵 · 退守玄冰石林】運轉深厚內功並號令同道交替掩護，將追兵引入玄冰石林周旋（需習得內功且德行≥125）", dynamicSkillSlot: "內功",
-            reqNeigong: true, reqStat: { de: 125 }, lockIfUnmet: true,
+            text: "【斷後阻敵 · 退守玄冰石林】運轉深厚內功並號令同道交替掩護，將追兵引入玄冰石林周旋（需習得內功且德行≥228）", dynamicSkillSlot: "內功",
+            reqNeigong: true, reqStat: { de: 228 }, lockIfUnmet: true,
             nextBranch: "3A2",
             stats: { qing: 5, de: 5 },
             result: "你憑藉醇厚內息與複雜的玄冰石林地形死死纏住魔殿主力，替前鋒同道爭取了登頂良機！"
           },
           {
-            text: "【強斬天王 · 直衝玉虛坪】於萬仞冰崖上正面硬撼四大天王，殺開通往主殿之路！（需武力≥144）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 144 }, allowFatalChallenge: true, isFatal: true,
+            text: "【強斬天王 · 直衝玉虛坪】於萬仞冰崖上正面硬撼四大天王，殺開通往主殿之路！（需武力≥178）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 178 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "3A1",
             stats: { wu: 4, ming: 5 },
             result: "你在絕壁間連破四大天王合擊，一路殺上戮神殿外圍的玉虛石坪！"
@@ -7735,25 +7735,25 @@ ${targetW.desc}
       "2B": {
         subtitle: "救援線 · 幽谷寒牢破鎖救人",
         narrative: "你潛入冥山側翼的幽谷寒牢，只見數十名各派菁英弟子被玄鐵鎖鏈困於冰水牢籠中，四周更有魔殿血蠱師正在催動蝕心毒瘴！",
-        situationGuide: "【側翼戰況】：救出受困弟子後，可選擇強勢率眾奪取烽火台（需武力≥136）、以深厚內功解毒追入毒窟、或憑名望結陣扼守雪谷咽喉。",
+        situationGuide: "【側翼戰況】：救出受困弟子後，可選擇強勢率眾奪取烽火台（需武力≥168）、以深厚內功解毒追入毒窟、或憑名望結陣扼守雪谷咽喉。",
         choices: [
           {
-            text: "【解毒破瘴 · 深入地肺毒窟】先以深厚內功與藥物替眾人逼出屍毒，隨即追入地底毒窟鏟除蠱母（需習得內功且德行≥115）", dynamicSkillSlot: "內功",
-            reqNeigong: true, reqStat: { de: 115 }, lockIfUnmet: true,
+            text: "【解毒破瘴 · 深入地肺毒窟】先以深厚內功與藥物替眾人逼出屍毒，隨即追入地底毒窟鏟除蠱母（需習得內功且德行≥215）", dynamicSkillSlot: "內功",
+            reqNeigong: true, reqStat: { de: 215 }, lockIfUnmet: true,
             nextBranch: "3B2",
             stats: { de: 5, wu: 3, ming: 4 },
             result: "你安頓好獲救弟子後，提刃追入陰森詭譎的冥山地肺毒窟！"
           },
           {
-            text: "【破鎖救人 · 強攻冥山烽火台】震斷玄鐵牢籠救出眾弟子，身先士卒殺向半山腰的魔殿烽火台！（需武力≥136）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 136 }, allowFatalChallenge: true, isFatal: true,
+            text: "【破鎖救人 · 強攻冥山烽火台】震斷玄鐵牢籠救出眾弟子，身先士卒殺向半山腰的魔殿烽火台！（需武力≥168）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 168 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "3B1",
             stats: { wu: 4, qing: 5, ming: 5 },
             result: "獲救的各派弟子士氣大振，緊隨你殺向半山腰的冥山烽火台！"
           },
           {
-            text: "【號令結陣 · 扼守雪谷一線天】憑藉江湖威望統率獲救弟子，於雪谷咽喉一線天構築防線阻截魔殿外圍援軍（需名望≥80、德行≥110）",
-            reqStat: { ming: 80, de: 110 }, lockIfUnmet: true,
+            text: "【號令結陣 · 扼守雪谷一線天】憑藉江湖威望統率獲救弟子，於雪谷咽喉一線天構築防線阻截魔殿外圍援軍（需名望≥185、德行≥212）",
+            reqStat: { ming: 185, de: 212 }, lockIfUnmet: true,
             nextBranch: "3B3",
             stats: { qing: 5, de: 5 },
             result: "眾弟子聽從你的號令，在雪谷一線天兩側高崖布下滾石檑木，牢牢鎖死了魔殿增援之路！"
@@ -7789,7 +7789,7 @@ ${targetW.desc}
       "3A1": {
         subtitle: "前鋒主線 · 玉虛石坪救掌門",
         narrative: "你殺上戮神殿外圍的玉虛石坪，只見梵天、玄真、霸刀掌門皆已負傷浴血，被十二名修羅血衛死死圍困，魔刀即將斬落！",
-        situationGuide: "【戰況導引】：正面強救掌門需達中位數武力門檻（武力檢定148）；圍魏救趙需具備輕功與招式；護脈退入長廊則需深厚內功與高德行（德行≥130）。",
+        situationGuide: "【戰況導引】：正面強救掌門需達中位數武力門檻（武力檢定184）；圍魏救趙需具備輕功與招式；護脈退入長廊則需深厚內功與高德行（德行≥236）。",
         choices: [
           {
             text: "【圍魏救趙 · 掠影攻血旗】施展上乘輕功掠過戰圈，全力轟擊石坪中央的修羅血旗迫敵回防（需習得輕功與外門招式）", dynamicSkillSlot: "輕功",
@@ -7799,15 +7799,15 @@ ${targetW.desc}
             result: "修羅血旗被你一擊轟碎，十二血衛氣機反噬陣型大亂，三大掌門得以喘息突圍！"
           },
           {
-            text: "【雷霆強援 · 硬撼十二血衛】運起巔峰功力正面殺入血衛陣中，強行救下三大掌門！（需武力≥148）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 148 }, allowFatalChallenge: true, isFatal: true,
+            text: "【雷霆強援 · 硬撼十二血衛】運起巔峰功力正面殺入血衛陣中，強行救下三大掌門！（需武力≥184）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 184 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4A1",
             stats: { wu: 5, ming: 5, de: 5 },
             result: "你霸烈無匹的勁氣橫掃石坪，震斷數柄魔刀，成功將三大掌門救出重圍！"
           },
           {
-            text: "【純陽護脈 · 掩護掌門退入偏廊】運轉深厚內功震退正面之敵，攙扶重傷掌門退入石坪長廊調息（需習得內功且德行≥130）", dynamicSkillSlot: "內功",
-            reqNeigong: true, reqStat: { de: 130 }, lockIfUnmet: true,
+            text: "【純陽護脈 · 掩護掌門退入偏廊】運轉深厚內功震退正面之敵，攙扶重傷掌門退入石坪長廊調息（需習得內功且德行≥236）", dynamicSkillSlot: "內功",
+            reqNeigong: true, reqStat: { de: 236 }, lockIfUnmet: true,
             nextBranch: "4A3",
             stats: { de: 5, qing: 5 },
             result: "你及時替三位掌門封住流血大穴退入長廊，掌門感念大恩，將畢生破魔要訣傾囊相告！"
@@ -7817,25 +7817,25 @@ ${targetW.desc}
       "3A2": {
         subtitle: "前鋒斷後線 · 玄冰石林迷蹤戰",
         narrative: "你在玄冰石林中獨自牽制戮神殿大批精銳，四周冰柱如鏡，魔殿左右護法率眾合圍而來，殺機四伏！",
-        situationGuide: "【戰況導引】：正面強襲魔殿護法需武力檢定144；震塌冰林需內功深厚；游身引敵則需習得輕功身法。",
+        situationGuide: "【戰況導引】：正面強襲魔殿護法需武力檢定178；震塌冰林需內功深厚；游身引敵則需習得輕功身法。",
         choices: [
           {
-            text: "【震塌冰林 · 封鎖魔軍去路】運轉深厚內功灌入石林地脈裂隙，震塌數十根萬斤冰柱困住魔軍（需習得內功且德行≥125）", dynamicSkillSlot: "內功",
-            reqNeigong: true, reqStat: { de: 125 }, lockIfUnmet: true,
+            text: "【震塌冰林 · 封鎖魔軍去路】運轉深厚內功灌入石林地脈裂隙，震塌數十根萬斤冰柱困住魔軍（需習得內功且德行≥228）", dynamicSkillSlot: "內功",
+            reqNeigong: true, reqStat: { de: 228 }, lockIfUnmet: true,
             nextBranch: "4A2",
             stats: { wu: 4, de: 4 },
             result: "萬斤冰柱轟然倒塌化作天然冰牢，將魔殿兩百精銳死死困在石林深處！"
           },
           {
-            text: "【冰鏡折影 · 強襲魔殿護法】於冰柱間驟然暴起，正面硬撼魔殿左護法！（需武力≥144）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 144 }, allowFatalChallenge: true, isFatal: true,
+            text: "【冰鏡折影 · 強襲魔殿護法】於冰柱間驟然暴起，正面硬撼魔殿左護法！（需武力≥178）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 178 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4A2",
             stats: { wu: 5, ming: 5 },
             result: "魔殿左護法被你一招重創倒地，追兵駭然止步！"
           },
           {
-            text: "【游身纏鬥 · 引敵入絕谷】施展輕功步法於石林間且戰且退，將魔殿護法引向寒冰絕谷（需習得輕功且名望≥85）", dynamicSkillSlot: "輕功",
-            reqQinggong: true, reqStat: { ming: 85 }, lockIfUnmet: true,
+            text: "【游身纏鬥 · 引敵入絕谷】施展輕功步法於石林間且戰且退，將魔殿護法引向寒冰絕谷（需習得輕功且名望≥195）", dynamicSkillSlot: "輕功",
+            reqQinggong: true, reqStat: { ming: 195 }, lockIfUnmet: true,
             nextBranch: "4A3",
             stats: { qing: 5, de: 5, wu: 3 },
             result: "你成功將魔殿生力軍引離主戰場十里之外，大大減輕了正道主力攻殿的壓力！"
@@ -7845,7 +7845,7 @@ ${targetW.desc}
       "3A3": {
         subtitle: "前鋒奇襲線 · 九幽偏殿毀陣樞",
         narrative: "你順著秘道突入戮神殿側翼的九幽偏殿，只見殿內血池翻湧，九根黑曜陣柱正源源不斷向山頂主殿輸送魔煞之氣！",
-        situationGuide: "【戰況導引】：正面轟碎九幽陣柱需武力檢定144；逆轉陣紋需深厚內功；傾倒火油則需高德行與名望號令隨行好手協作。",
+        situationGuide: "【戰況導引】：正面轟碎九幽陣柱需武力檢定178；逆轉陣紋需深厚內功；傾倒火油則需高德行與名望號令隨行好手協作。",
         choices: [
           {
             text: "【逆轉陣紋 · 引地火反噬主殿】運轉深厚內功挪移陣盤，將地底火脈逆衝向武神主殿（需習得內功）", dynamicSkillSlot: "內功",
@@ -7855,15 +7855,15 @@ ${targetW.desc}
             result: "地肺火脈順著陣紋逆衝而上，主殿地磚轟然炸裂，魔衛陣腳大亂！"
           },
           {
-            text: "【全力出手 · 轟碎黑曜陣柱】運足真氣正面連破九根黑曜陣柱，斬斷戮神殿魔氣來源！（需武力≥144）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 144 }, allowFatalChallenge: true, isFatal: true,
+            text: "【全力出手 · 轟碎黑曜陣柱】運足真氣正面連破九根黑曜陣柱，斬斷戮神殿魔氣來源！（需武力≥178）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 178 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4A3",
             stats: { wu: 5, ming: 5 },
             result: "九根黑曜陣柱應聲爆裂，山頂主殿傳來司馬玄冥驚怒交加的咆哮，魔陣威能頓減三成！"
           },
           {
-            text: "【號令焚池 · 傾倒雄黃火油】號令同道將偏殿儲備的燈油盡數傾入血池點燃，化去漫殿魔煞（需德行≥125、名望≥85）",
-            reqStat: { de: 125, ming: 85 }, lockIfUnmet: true,
+            text: "【號令焚池 · 傾倒雄黃火油】號令同道將偏殿儲備的燈油盡數傾入血池點燃，化去漫殿魔煞（需德行≥228、名望≥195）",
+            reqStat: { de: 228, ming: 195 }, lockIfUnmet: true,
             nextBranch: "4A3",
             stats: { de: 5 },
             result: "烈焰吞沒血池，困擾正道群雄的蝕骨魔音隨之煙消雲散！"
@@ -7873,25 +7873,25 @@ ${targetW.desc}
       "3B1": {
         subtitle: "救援主線 · 奪占冥山烽火台",
         narrative: "你率領從寒牢救出的數十名各派菁英殺至半山腰的冥山烽火台。只要點燃正道信號狼煙，便能指引山下援軍夾擊魔殿背腹！",
-        situationGuide: "【戰況導引】：守台魔將憑險死守，可強攻奪台（武力檢定138）、或憑名望指揮群豪合擊、或以高德行勸降受脅迫的外圍守軍。",
+        situationGuide: "【戰況導引】：守台魔將憑險死守，可強攻奪台（武力檢定172）、或憑名望指揮群豪合擊、或以高德行勸降受脅迫的外圍守軍。",
         choices: [
           {
-            text: "【群豪合擊 · 結陣輪番推進】憑藉威望指揮獲救的各派弟子結成三才合擊陣，步步為營攻下烽火台（需名望≥85）",
-            reqStat: { ming: 85 }, lockIfUnmet: true,
+            text: "【群豪合擊 · 結陣輪番推進】憑藉威望指揮獲救的各派弟子結成三才合擊陣，步步為營攻下烽火台（需名望≥195）",
+            reqStat: { ming: 195 }, lockIfUnmet: true,
             nextBranch: "4B1",
             stats: { qing: 5, ming: 5, wu: 3 },
             result: "眾志成城之下魔兵節節敗退，你們成功奪下烽火台並舉火為號！"
           },
           {
-            text: "【陣前斬將 · 奪台燃起狼煙】身先士卒躍上高台正面擊潰守台魔將，親手點燃正道沖天狼煙！（需武力≥138）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 138 }, allowFatalChallenge: true, isFatal: true,
+            text: "【陣前斬將 · 奪台燃起狼煙】身先士卒躍上高台正面擊潰守台魔將，親手點燃正道沖天狼煙！（需武力≥172）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 172 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4B1",
             stats: { wu: 5, ming: 5, qing: 4 },
             result: "守台魔將應聲落敗，赤紅狼煙直衝雲霄，全山正道群雄見之精神大振！"
           },
           {
-            text: "【攻心為上 · 瓦解外圍脅從】以仁德高聲宣布被魔殿種下蠱毒者可得解藥，令外圍守軍倒戈相向（需德行≥125）",
-            reqStat: { de: 125 }, lockIfUnmet: true,
+            text: "【攻心為上 · 瓦解外圍脅從】以仁德高聲宣布被魔殿種下蠱毒者可得解藥，令外圍守軍倒戈相向（需德行≥228）",
+            reqStat: { de: 228 }, lockIfUnmet: true,
             nextBranch: "4B2",
             stats: { de: 5, ming: 5 },
             result: "上百名被迫效命的外圍守軍紛紛棄械倒戈，烽火台兵不血刃落入正道手中！"
@@ -7911,15 +7911,15 @@ ${targetW.desc}
             result: "刺骨冰水傾瀉而下，將血玉蠱母與三名蠱師徹底冰封於地底！"
           },
           {
-            text: "【罡氣破邪 · 強斬血玉蠱母】屏住呼吸衝入毒霧核心，以至剛勁力正面斬殺千年蠱母！（需武力≥140）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 140 }, allowFatalChallenge: true, isFatal: true,
+            text: "【罡氣破邪 · 強斬血玉蠱母】屏住呼吸衝入毒霧核心，以至剛勁力正面斬殺千年蠱母！（需武力≥174）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 174 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4B2",
             stats: { wu: 5, ming: 5 },
             result: "千年血玉蠱母發出一聲淒厲嘶鳴化為膿血，山上數千魔傀同時僵直倒地！"
           },
           {
-            text: "【以毒攻毒 · 投入百草化屍散】憑岐黃醫毒之術將藥粉投入通風口，逼出蠱師各個擊破（需為郎中或德行≥130）",
-            reqStat: { de: 130 }, lockIfUnmet: true,
+            text: "【以毒攻毒 · 投入百草化屍散】憑岐黃醫毒之術將藥粉投入通風口，逼出蠱師各個擊破（需為郎中或德行≥236）",
+            reqStat: { de: 236 }, lockIfUnmet: true,
             nextBranch: "4B3",
             stats: { de: 5 },
             result: "三名黑袍蠱師被藥煙嗆出洞窟，被你守株待兔逐一制伏，屍傀大陣隨之瓦解！"
@@ -7932,15 +7932,15 @@ ${targetW.desc}
         situationGuide: "【戰況導引】：居高臨下扼守險關，可推落滾石封谷、率敢死隊截殺敵酋、或布設藤索絆馬陣。",
         choices: [
           {
-            text: "【萬石齊發 · 轟塌峽谷天險】憑崇高威望指揮眾弟子同時斬斷藤索，以萬噸落石徹底封死一線天（需名望≥85）",
-            reqStat: { ming: 85 }, lockIfUnmet: true,
+            text: "【萬石齊發 · 轟塌峽谷天險】憑崇高威望指揮眾弟子同時斬斷藤索，以萬噸落石徹底封死一線天（需名望≥195）",
+            reqStat: { ming: 195 }, lockIfUnmet: true,
             nextBranch: "4B3",
             stats: { ming: 5, de: 5, wu: 3 },
             result: "地動山搖間巨石封谷，兩千魔門援軍被徹底阻絕於冥山山外，無一人能登頂助戰！"
           },
           {
-            text: "【飛身掠陣 · 萬軍中取敵將首級】自高崖凌空撲下，於亂軍之中正面直取魔騎統領！（需武力≥140）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 140 }, allowFatalChallenge: true, isFatal: true,
+            text: "【飛身掠陣 · 萬軍中取敵將首級】自高崖凌空撲下，於亂軍之中正面直取魔騎統領！（需武力≥174）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 174 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4B3",
             stats: { wu: 5, ming: 5 },
             result: "你如蒼鷹搏兔於萬軍中擊落魔騎統領，群魔群龍無首，自相踐踏潰退三十里！"
@@ -7985,8 +7985,8 @@ ${targetW.desc}
         situationGuide: "【山下戰況】：身處山麓後方的你發現了決定全軍生死的火藥暗道，必須立即處置！",
         choices: [
           {
-            text: "【深入暗道 · 斬殺火藥庫魔將】提刃率精銳突入山麓地底暗道，在引線點燃前解決看守魔將！（需武力≥105）",
-            reqStat: { wu: 105 }, allowFatalChallenge: true, isFatal: true,
+            text: "【深入暗道 · 斬殺火藥庫魔將】提刃率精銳突入山麓地底暗道，在引線點燃前解決看守魔將！（需武力≥142）",
+            reqStat: { wu: 142 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4C2",
             stats: { wu: 4, ming: 5 },
             result: "你在引線燃盡前一寸斬斷火繩並擊斃看守魔將，挽救了全軍數千人的性命！"
@@ -8011,8 +8011,8 @@ ${targetW.desc}
         situationGuide: "【半山後援戰況】：憑藉神臂連弩與棧道地利，將空中來犯之敵盡數攔截於山下！",
         choices: [
           {
-            text: "【親自操弩 · 一箭射落血蝠統領】凝神鎖定空中滑翔的血蝠統領，扣動神臂連弩機括一箭穿雲！（需武力≥95）",
-            reqStat: { wu: 95 },
+            text: "【親自操弩 · 一箭射落血蝠統領】凝神鎖定空中滑翔的血蝠統領，扣動神臂連弩機括一箭穿雲！（需武力≥135）",
+            reqStat: { wu: 135 },
             nextBranch: "4C3",
             stats: { wu: 4, ming: 5, qing: 4 },
             result: "精鋼巨箭破空呼嘯，當場將血蝠統領自半空射落深淵，餘眾驚駭逃散！"
@@ -8035,18 +8035,18 @@ ${targetW.desc}
       "4A1": {
         subtitle: "前鋒巔峰線 · 踏入武神主殿迎戰魔主",
         narrative: "你與獲救的三大掌門並肩踏入宏偉的武神主殿！九龍玄冰座上，司馬玄冥黑髮狂舞，周身環繞著令人窒息的九重玄陰魔氣：『能殺到本座面前，爾等足以自傲了！』",
-        situationGuide: "【決戰前奏】：身處主殿最前線，正面硬接第九重魔功威壓需武力≥156；與三大掌門結陣共抗需習得內功且德行≥135、名望≥95；游走掠陣突襲氣門則需習得輕功與外門招式！",
+        situationGuide: "【決戰前奏】：身處主殿最前線，正面硬接第九重魔功威壓需武力≥192；與三大掌門結陣共抗需習得內功且德行≥245、名望≥210；游走掠陣突襲氣門則需習得輕功與外門招式！",
         choices: [
           {
-            text: "【四象聯擊 · 與三大掌門結陣共抗】運轉深厚內功與梵天、玄真、天刀三位掌門分站四方，合四人之力平攤魔主威壓（需習得內功且德行≥135、名望≥95）", dynamicSkillSlot: "內功",
-            reqNeigong: true, reqStat: { de: 135, ming: 95 }, lockIfUnmet: true,
+            text: "【四象聯擊 · 與三大掌門結陣共抗】運轉深厚內功與梵天、玄真、天刀三位掌門分站四方，合四人之力平攤魔主威壓（需習得內功且德行≥245、名望≥210）", dynamicSkillSlot: "內功",
+            reqNeigong: true, reqStat: { de: 245, ming: 210 }, lockIfUnmet: true,
             nextBranch: "5A1",
             stats: { wu: 4, qing: 5, ming: 5 },
             result: "四股浩然真氣彼此勾連化作太極罡罩，穩穩擋下了司馬玄冥摧心裂肺的魔功衝擊！"
           },
           {
-            text: "【挺身主攻 · 硬接九重玄陰魔氣】踏前一步擋在眾掌門身前，以畢生功力正面硬撼司馬玄冥第一波狂暴魔威！（需武力≥156）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 156 }, allowFatalChallenge: true, isFatal: true,
+            text: "【挺身主攻 · 硬接九重玄陰魔氣】踏前一步擋在眾掌門身前，以畢生功力正面硬撼司馬玄冥第一波狂暴魔威！（需武力≥192）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 192 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "5A1",
             stats: { wu: 5, ming: 5, de: 5 },
             result: "你雙足踏碎殿磚，硬生生扛住九重魔氣威壓並反震出凌厲一擊，逼得司馬玄冥首露驚容！"
@@ -8063,18 +8063,18 @@ ${targetW.desc}
       "4A2": {
         subtitle: "前鋒側攻線 · 攻破戮神殿護殿劍陣",
         narrative: "你從外圍石林殺至武神主殿丹墀前，只見三十六名黑衣劍侍結成『天魔解體劍陣』守死殿門，殿內已傳來司馬玄冥與正道高手的驚天交手轟鳴！",
-        situationGuide: "【戰況導引】：正面破開殿門劍陣需達中位數武力門檻（武力≥148）；撞鐘音波破陣需深厚內功；由殿頂破瓦而入則需上乘輕功！",
+        situationGuide: "【戰況導引】：正面破開殿門劍陣需達中位數武力門檻（武力≥184）；撞鐘音波破陣需深厚內功；由殿頂破瓦而入則需上乘輕功！",
         choices: [
           {
-            text: "【引動殿外巨鐘 · 以鐘聲震散劍侍心神】運轉深厚內功撞響丹墀前的萬斤青銅古鐘，以渾厚音波破去天魔劍陣（需習得內功且德行≥130）", dynamicSkillSlot: "內功",
-            reqNeigong: true, reqStat: { de: 130 }, lockIfUnmet: true,
+            text: "【引動殿外巨鐘 · 以鐘聲震散劍侍心神】運轉深厚內功撞響丹墀前的萬斤青銅古鐘，以渾厚音波破去天魔劍陣（需習得內功且德行≥236）", dynamicSkillSlot: "內功",
+            reqNeigong: true, reqStat: { de: 236 }, lockIfUnmet: true,
             nextBranch: "5A2",
             stats: { ming: 5, de: 5, wu: 3 },
             result: "鐺——！古鐘震耳欲聾，三十六名劍侍氣血翻湧陣型崩潰，你率眾順勢攻入主殿！"
           },
           {
-            text: "【霸道破陣 · 一招擊穿三十六劍侍】運足十成功力正面直取劍陣核心陣眼！（需武力≥148）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 148 }, allowFatalChallenge: true, isFatal: true,
+            text: "【霸道破陣 · 一招擊穿三十六劍侍】運足十成功力正面直取劍陣核心陣眼！（需武力≥184）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 184 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "5A2",
             stats: { wu: 5, ming: 5 },
             result: "三十六柄魔劍齊齊震飛，你一腳踹開沉重的戮神殿青銅大門殺入殿內！"
@@ -8091,7 +8091,7 @@ ${targetW.desc}
       "4A3": {
         subtitle: "前鋒內應線 · 偏殿秘道直通龍座後方",
         narrative: "你在九幽偏殿毀去陣樞並休整傷員後，發現偏殿屏風後竟有一條通往武神主殿九龍玄冰座正後方的暗格甬道！",
-        situationGuide: "【戰況導引】：正面潛行刺王需達中位數武力門檻（武力≥148）；震斷承重玄柱需深厚內功；開啟機關號令群雄包抄則需高德行與名望！",
+        situationGuide: "【戰況導引】：正面潛行刺王需達中位數武力門檻（武力≥184）；震斷承重玄柱需深厚內功；開啟機關號令群雄包抄則需高德行與名望！",
         choices: [
           {
             text: "【催動內勁震斷承重玄柱 · 令主殿穹頂坍塌】以深厚內功連續震裂主殿後方的四根承重玄冰柱（需習得內功）", dynamicSkillSlot: "內功",
@@ -8101,15 +8101,15 @@ ${targetW.desc}
             result: "四根玄冰巨柱應聲崩裂，主殿穹頂萬鈞冰雪傾瀉而下，將司馬玄冥的魔域空間徹底壓塌！"
           },
           {
-            text: "【潛行刺王 · 於龍座後暴起奇襲】屏息潛行至九龍玄冰座後，待司馬玄冥全力應付正面時暴起刺其背心！（需武力≥148）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 148 }, allowFatalChallenge: true, isFatal: true,
+            text: "【潛行刺王 · 於龍座後暴起奇襲】屏息潛行至九龍玄冰座後，待司馬玄冥全力應付正面時暴起刺其背心！（需武力≥184）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 184 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "5A3",
             stats: { wu: 5, ming: 5 },
             result: "你自龍座後方毫無徵兆地暴起發難，凌厲勁氣穿透玄冰王座，令司馬玄冥護體魔罡劇烈動盪！"
           },
           {
-            text: "【開啟偏殿機關 · 號令正道群雄湧入包抄】打開偏殿所有暗門通道，憑威望引導殿外數百正道好手從四面八方湧入主殿（需德行≥130、名望≥90）",
-            reqStat: { de: 130, ming: 90 }, lockIfUnmet: true,
+            text: "【開啟偏殿機關 · 號令正道群雄湧入包抄】打開偏殿所有暗門通道，憑威望引導殿外數百正道好手從四面八方湧入主殿（需德行≥236、名望≥200）",
+            reqStat: { de: 236, ming: 200 }, lockIfUnmet: true,
             nextBranch: "5A3",
             stats: { qing: 5, de: 5, ming: 5 },
             result: "正道群雄順著你打開的通道蜂擁而入，將武神主殿團團圍住，司馬玄冥徹底陷入重圍！"
@@ -8122,8 +8122,8 @@ ${targetW.desc}
         situationGuide: "【側翼戰況】：奪下或毀去萬魂幡，即可徹底粉碎魔殿暗算主戰場的陰謀！",
         choices: [
           {
-            text: "【單騎奪幡 · 斬落督戰長老】一馬當先衝入法壇，強行斬落督戰長老手中的萬魂幡！（需武力≥136）",
-            reqStat: { wu: 136 }, allowFatalChallenge: true, isFatal: true,
+            text: "【單騎奪幡 · 斬落督戰長老】一馬當先衝入法壇，強行斬落督戰長老手中的萬魂幡！（需武力≥168）",
+            reqStat: { wu: 168 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "5B1",
             stats: { wu: 5, ming: 5 },
             result: "你一招震飛督戰長老，將萬魂幡撕成兩半投入火盆，主殿內的正道掌門壓力頓消！"
@@ -8148,8 +8148,8 @@ ${targetW.desc}
         situationGuide: "【地脈戰況】：身處冥山地脈核心，可引靈泉水氣破魔、或順升降機括直達主殿外廣場。",
         choices: [
           {
-            text: "【以內力催動靈泉 · 化萬丈白虹貫入山頂】運起全身真氣擊向地脈泉眼，引滾燙靈泉化作浩然水柱直衝山頂！（需武力≥128）",
-            reqStat: { wu: 128 },
+            text: "【以內力催動靈泉 · 化萬丈白虹貫入山頂】運起全身真氣擊向地脈泉眼，引滾燙靈泉化作浩然水柱直衝山頂！（需武力≥158）",
+            reqStat: { wu: 158 },
             nextBranch: "5B2",
             stats: { wu: 5, de: 5, ming: 5 },
             result: "百丈靈泉水柱破開山巔積雪直衝雲霄，漫山遍野的魔氣被洗滌得一乾二淨！"
@@ -8174,8 +8174,8 @@ ${targetW.desc}
         situationGuide: "【雪谷戰況】：你繼續在雪谷與半山腰機動作戰，絕不讓殘敵威脅後營！",
         choices: [
           {
-            text: "【雪谷追擊 · 活捉魔門副帥】縱身踏雪疾追十里，於山道拐角攔下並生擒魔門副帥！（需武力≥128）",
-            reqStat: { wu: 128 },
+            text: "【雪谷追擊 · 活捉魔門副帥】縱身踏雪疾追十里，於山道拐角攔下並生擒魔門副帥！（需武力≥158）",
+            reqStat: { wu: 158 },
             nextBranch: "5B3",
             stats: { wu: 5, ming: 5 },
             result: "你生擒魔門副帥並高懸其旌旗，殘餘魔兵徹底喪膽，紛紛跪地投降！"
@@ -8273,11 +8273,11 @@ ${targetW.desc}
       "5A1": {
         subtitle: "前鋒終章 · 絕巔誅魔 · 武林神話",
         narrative: "武神主殿穹頂盡碎，漫天暴雪狂舞！司馬玄冥已至強弩之末，卻仍瘋狂燃燒全身精血，化作百丈黑龍虛影朝正道群雄撲來：『既不能獨尊天下，那便全給本座陪葬吧！』",
-        situationGuide: "【終局決斷】：你身處主殿最前線，這是決定天下蒼生氣運的最後一擊（武力檢定170）！",
+        situationGuide: "【終局決斷】：你身處主殿最前線，這是決定天下蒼生氣運的最後一擊（武力檢定205）！",
         choices: [
           {
-            text: "【極道爭鋒 · 孤身斬破百丈魔龍】將畢生修為催動至極限，化作一道貫穿天地的驚世長虹正面擊碎司馬玄冥魔身！（需武力≥170，榮獲封號【武林神話】）",
-            reqStat: { wu: 170 }, allowFatalChallenge: true, isFatal: true,
+            text: "【極道爭鋒 · 孤身斬破百丈魔龍】將畢生修為催動至極限，化作一道貫穿天地的驚世長虹正面擊碎司馬玄冥魔身！（需武力≥205，榮獲封號【武林神話】）",
+            reqStat: { wu: 205 }, allowFatalChallenge: true, isFatal: true,
             title: "武林神話",
             achievement: { id: "end_wushen_myth", text: "【武林神話】於絕北冥淵正面擊潰司馬玄冥，威震天下！" },
             stats: { wu: 5, ming: 5, de: 5 },
@@ -8304,8 +8304,8 @@ ${targetW.desc}
         situationGuide: "【終局決斷】：把握這千載難逢的戰機，一舉奠定冥山終戰勝局！",
         choices: [
           {
-            text: "【雷霆一擊 · 直貫魔主破綻】抓住司馬玄冥分神剎那，全力一招轟向其氣海死穴！（需武力≥155，榮獲封號【破魔尊者】）",
-            reqStat: { wu: 155 }, allowFatalChallenge: true, isFatal: true,
+            text: "【雷霆一擊 · 直貫魔主破綻】抓住司馬玄冥分神剎那，全力一招轟向其氣海死穴！（需武力≥190，榮獲封號【破魔尊者】）",
+            reqStat: { wu: 190 }, allowFatalChallenge: true, isFatal: true,
             title: "破魔尊者",
             stats: { wu: 5, ming: 5 },
             result: "你這石破天驚的側翼一擊直接震碎司馬玄冥護體氣海，三大掌門順勢合擊，徹底終結了戮神殿之禍！"
@@ -8330,8 +8330,8 @@ ${targetW.desc}
         situationGuide: "【終局決斷】：截住魔功反噬的司馬玄冥，或優先救出崩塌主殿中的正道同道！",
         choices: [
           {
-            text: "【絕崖截殺 · 痛打落水魔主】於殿後雪崖攔住遭反噬重創的司馬玄冥，將其徹底擊落深淵！（需武力≥145，榮獲封號【絕巔傳奇】）",
-            reqStat: { wu: 145 }, allowFatalChallenge: true, isFatal: true,
+            text: "【絕崖截殺 · 痛打落水魔主】於殿後雪崖攔住遭反噬重創的司馬玄冥，將其徹底擊落深淵！（需武力≥182，榮獲封號【絕巔傳奇】）",
+            reqStat: { wu: 182 }, allowFatalChallenge: true, isFatal: true,
             title: "絕巔傳奇",
             stats: { wu: 5, ming: 5 },
             result: "重傷反噬的司馬玄冥再難抵擋你的鋒芒，慘叫一聲墜入萬丈雪淵，一代魔梟自此除名！"
@@ -8512,11 +8512,11 @@ ${targetW.desc}
       "1": {
         subtitle: "第 1/5 幕 · 朔風臨江 · 三路分兵",
         narrative: "暮冬朔風捲起千堆寒浪！北冥『血衣都督 · 完顏烈』麾下先鋒鐵浮屠已踏上滄州鐵獅浮橋，江心數十艘火油船同時點燃引線，而南岸蘆葦蕩的流民藥棚亦遭北冥死士投擲毒火雷！\n\n橋頭盲琴師裴十九手按焦尾琴弦，沉聲喝道：『鐵橋若失，滄州十萬百姓皆成魚肉！少俠，你要守哪一路？』",
-        situationGuide: "【第一幕抉擇】：正面死守鐵獅橋頭需高強武力（武力≥88）；潛入寒江鑿穿火船需輕功或水戰膽魄；退守蘆葦蕩護住小醫女溫小滿與四十名染疫孤兒則需仁德之心（德行≥65）。",
+        situationGuide: "【第一幕抉擇】：正面死守鐵獅橋頭需高強武力（武力≥112）；潛入寒江鑿穿火船需輕功或水戰膽魄；退守蘆葦蕩護住小醫女溫小滿與四十名染疫孤兒則需仁德之心（德行≥138）。",
         choices: [
           {
-            text: "【鐵橋血戰線 · 橫刃獨擋鐵浮屠】與獨腿老校尉陳滄海並肩立於橋頭，以霸道兵刃硬撼北冥重甲先鋒！（需武力≥88）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 88 }, allowFatalChallenge: true, isFatal: true,
+            text: "【鐵橋血戰線 · 橫刃獨擋鐵浮屠】與獨腿老校尉陳滄海並肩立於橋頭，以霸道兵刃硬撼北冥重甲先鋒！（需武力≥112）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 112 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "2A",
             stats: { wu: 5, ming: 5, qing: 3 },
             result: "鐺——！火星四濺！你與陳滄海一左一右死守橋頭，連斬七名北冥鐵浮屠，陳滄海吐出一口血沫哈哈大笑：『痛快！好久沒見過這般硬骨頭的江湖漢子了！』",
@@ -8623,8 +8623,8 @@ ${targetW.desc}
             result: "你一劍劈開砸落的火樑！溫小滿雙手被火炭燙得血肉模糊，懷裡卻死死護著三個娃娃和最後一包甘草。見你衝進火海將她們背出，這個一直強忍不哭的小姑娘終於趴在你背上嚎啕大哭：『我就知道……大俠一定不會丟下我們的！』【成功改寫命運：溫小滿與四十名病童生還！】"
           },
           {
-            text: "【鐵血決斷 · 截殺北冥副帥奪回《山河龍脈圖》】為保九州萬里城防不失，忍痛橫江追擊，強斬北冥副帥奪回國寶！（需武力≥92）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 92 }, allowFatalChallenge: true, isFatal: true,
+            text: "【鐵血決斷 · 截殺北冥副帥奪回《山河龍脈圖》】為保九州萬里城防不失，忍痛橫江追擊，強斬北冥副帥奪回國寶！（需武力≥118）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 118 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4B",
             stats: { wu: 5, ming: 5 },
             result: "刀光如電！你在東岸淺灘三招斬落北冥副帥首級，奪回染血的《山河龍脈圖》！然而當你提著圖卷急奔回蘆葦蕩時，藥棚已化為灰燼。廢墟中，溫小滿至死仍張開雙臂護在孩童身前，焦黑的掌心裡緊攥著半包未煎完的甘草。【命運分流：奪回龍脈圖立下奇功，但小醫女溫小滿不幸殉難】",
@@ -8644,8 +8644,8 @@ ${targetW.desc}
         situationGuide: "【宿命忠魂 × 仁心護道】：老校尉陳滄海的壯烈犧牲無法挽回，但因你救下了溫小滿，她正忍著雙手燙傷替守軍熬製解毒湯藥！",
         choices: [
           {
-            text: "【拔槍繼志 · 飲下溫小滿的解毒湯正面決戰完顏烈】接過溫小滿雙手捧來的熱藥一飲而盡，拔起老校尉身前的斷槍直取完顏烈！（需武力≥95）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 95 }, allowFatalChallenge: true, isFatal: true,
+            text: "【拔槍繼志 · 飲下溫小滿的解毒湯正面決戰完顏烈】接過溫小滿雙手捧來的熱藥一飲而盡，拔起老校尉身前的斷槍直取完顏烈！（需武力≥124）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 124 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "5A",
             stats: { wu: 5, de: 5, ming: 5 },
             result: "溫小滿的湯藥瞬間化開你體內寒毒！你怒吼一聲擲出老校尉的斷槍，貫穿完顏烈肩甲，將這位北冥都督硬生生轟落寒江！",
@@ -8665,8 +8665,8 @@ ${targetW.desc}
         situationGuide: "【宿命忠魂 × 悲憤破敵】：裴十九、溫小滿與陳滄海相繼殉難，滿腔悲憤化作雷霆殺意！",
         choices: [
           {
-            text: "【悲憤化雷 · 攜滿腔血淚正面強斬完顏烈】懷揣染血的《山河龍脈圖》，將悲憤化入刀劍，與完顏烈決一死戰！（需武力≥95）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 95 }, allowFatalChallenge: true, isFatal: true,
+            text: "【悲憤化雷 · 攜滿腔血淚正面強斬完顏烈】懷揣染血的《山河龍脈圖》，將悲憤化入刀劍，與完顏烈決一死戰！（需武力≥124）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 124 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "5B",
             stats: { wu: 5, ming: 5 },
             result: "你雙目赤紅，招招皆是同歸於盡的慘烈殺法！完顏烈被你一劍劈碎護心寶鏡，吐血墜江倉皇北逃！",
@@ -8686,8 +8686,8 @@ ${targetW.desc}
         situationGuide: "【宿命忠魂 × 斷琴破陣】：阿笙彈奏的《破陣悲音》令北冥戰馬驚立嘶鳴，正是破敵良機！",
         choices: [
           {
-            text: "【琴劍合鳴 · 借阿笙悲壯琴音正面強斬完顏烈】在斷琴錚鳴聲中人劍合一，直刺完顏烈咽喉！（需武力≥92）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 92 }, allowFatalChallenge: true, isFatal: true,
+            text: "【琴劍合鳴 · 借阿笙悲壯琴音正面強斬完顏烈】在斷琴錚鳴聲中人劍合一，直刺完顏烈咽喉！（需武力≥118）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 118 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "5C",
             stats: { wu: 5, qing: 5, ming: 4 },
             result: "斷琴一聲裂帛長鳴，完顏烈心神劇震！你趁勢一劍貫穿其左肩，將其重創逼退！",
@@ -8749,11 +8749,11 @@ ${targetW.desc}
       "1": {
         subtitle: "黑石隘口 · 三路分兵破屍潮",
         narrative: "連綿血雨籠罩雲夢七十二峰！九幽門以『腐心血煞毒』將數百名外門弟子與山民煉為刀槍不入的幽冥屍傀，將登山必經的黑石隘口堵得水洩不通！祝融峰頂急鐘九響，掌門與諸位長老已被九幽門少主圍困於祖師殿內！",
-        situationGuide: "【戰況導引（門檻提升）】：你的抉擇將開啟截然不同的 3×3×3 專屬後續戰線！正面破陣需高強武力（武力≥58）；側翼百丈飛瀑奇襲需具備輕功與招式（或踏入飛瀑強衝淤穴奇襲）；山腰丹廬救護則需崇高德行與名望（德行≥52、名望≥45）。",
+        situationGuide: "【戰況導引（門檻提升）】：你的抉擇將開啟截然不同的 3×3×3 專屬後續戰線！正面破陣需高強武力（武力≥70）；側翼百丈飛瀑奇襲需具備輕功與招式（或踏入飛瀑強衝淤穴奇襲）；山腰丹廬救護則需崇高德行與名望（德行≥82、名望≥46）。",
         choices: [
           {
-            text: "【正面破陣線 · 強斬鐵甲屍傀】運足十成真氣護住心脈，正面硬撼刀槍不入的鐵甲屍傀大陣！（需武力≥58，進入正面強攻線）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 58 }, allowFatalChallenge: true, isFatal: true,
+            text: "【正面破陣線 · 強斬鐵甲屍傀】運足十成真氣護住心脈，正面硬撼刀槍不入的鐵甲屍傀大陣！（需武力≥70，進入正面強攻線）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 70 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "2A",
             stats: { wu: 4, ming: 5, de: 3 },
             result: "你刀劍如雷霆劈落，硬生生斬斷三具鐵甲屍傀的玄鐵鎖鏈，於屍山血海中殺開一條登山血路！",
@@ -8770,8 +8770,8 @@ ${targetW.desc}
             nextBranch: "2B"
           },
           {
-            text: "【山腰丹廬線 · 焚艾立陣護蒼生】憑藉仁德聲望聚攏潰散弟子與藥師，於紫蓋峰丹廬點燃百年雄黃艾陣阻隔屍毒（需德行≥52、名望≥45，進入丹廬救護線）",
-            reqStat: { de: 52, ming: 45 }, lockIfUnmet: true,
+            text: "【山腰丹廬線 · 焚艾立陣護蒼生】憑藉仁德聲望聚攏潰散弟子與藥師，於紫蓋峰丹廬點燃百年雄黃艾陣阻隔屍毒（需德行≥82、名望≥46，進入丹廬救護線）",
+            reqStat: { de: 82, ming: 46 }, lockIfUnmet: true,
             nextBranch: "2C",
             stats: { de: 5, ming: 5, qing: 4 },
             result: "滾滾雄黃烈煙順著山風席捲山道，幽冥屍傀嗅之狂亂退縮，你在山腰丹廬穩穩築起了一道救死扶傷的生命防線！"
@@ -8782,11 +8782,11 @@ ${targetW.desc}
       "2A": {
         subtitle: "正面強攻線 · 試劍石前赤練巨蟒陣",
         narrative: "你率前鋒死士殺至雲夢半腰試劍石，九幽門黑袍毒尊正驅使兩條水桶粗的『赤練血鱗蟒』配合三十具銅甲屍傀封鎖石階，石壁盡染暗紅毒血！",
-        situationGuide: "【正面戰況】：可選擇正面斬殺雙蟒（需武力≥62）、行險借試劍石雷火裂隙破陣、或運轉內功結陣護住重傷長老退入碑林。",
+        situationGuide: "【正面戰況】：可選擇正面斬殺雙蟒（需武力≥74）、行險借試劍石雷火裂隙破陣、或運轉內功結陣護住重傷長老退入碑林。",
         choices: [
           {
-            text: "【斷水截芒 · 強斬赤練雙蟒】身形暴起凌空下擊，以霸道兵刃直刺雙蟒七寸死穴！（需武力≥62）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 62 }, allowFatalChallenge: true, isFatal: true,
+            text: "【斷水截芒 · 強斬赤練雙蟒】身形暴起凌空下擊，以霸道兵刃直刺雙蟒七寸死穴！（需武力≥74）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 74 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "3A1",
             stats: { wu: 4, ming: 5 },
             result: "青鋒如電！你連劈兩道丈許氣芒斬斷赤練雙蟒七寸，巨蟒轟然倒地，黑袍毒尊駭然暴退！"
@@ -8802,8 +8802,8 @@ ${targetW.desc}
             nextBranch: "3A2"
           },
           {
-            text: "【純陽護脈 · 轉戰南天門碑林】以深厚內功替受困的雲夢傳功長老逼出蛇毒，交替掩護轉入南天門古碑林設伏（需習得內功且德行≥54）", dynamicSkillSlot: "內功",
-            reqNeigong: true, reqStat: { de: 54 }, lockIfUnmet: true,
+            text: "【純陽護脈 · 轉戰南天門碑林】以深厚內功替受困的雲夢傳功長老逼出蛇毒，交替掩護轉入南天門古碑林設伏（需習得內功且德行≥85）", dynamicSkillSlot: "內功",
+            reqNeigong: true, reqStat: { de: 85 }, lockIfUnmet: true,
             nextBranch: "3A3",
             stats: { de: 5, qing: 5 },
             result: "傳功長老吐出一口黑血後神智恢復，指點你利用南天門古碑林的奇門方位反制屍傀！"
@@ -8813,18 +8813,18 @@ ${targetW.desc}
       "2B": {
         subtitle: "側翼飛瀑線 · 百丈澗谷鐵索迷瘴",
         narrative: "你自百丈飛瀑攀上側翼幽谷，前方唯有一座橫跨萬丈深淵的『鐵索雲橋』通往九幽門的後山控屍血壇，橋上已被四名九幽血影衛布下蝕骨毒網！",
-        situationGuide: "【側翼戰況】：可選擇強行震斷毒網殺過鐵索橋（需武力≥60）、施展絕頂輕功踏索飛渡、或引飛瀑寒氣凝冰破網。",
+        situationGuide: "【側翼戰況】：可選擇強行震斷毒網殺過鐵索橋（需武力≥72）、施展絕頂輕功踏索飛渡、或引飛瀑寒氣凝冰破網。",
         choices: [
           {
-            text: "【霸刃破網 · 強奪鐵索雲橋】於搖晃不止的鐵索橋上正面硬撼四名血影衛！（需武力≥60）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 60 }, allowFatalChallenge: true, isFatal: true,
+            text: "【霸刃破網 · 強奪鐵索雲橋】於搖晃不止的鐵索橋上正面硬撼四名血影衛！（需武力≥72）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 72 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "3B1",
             stats: { wu: 4, ming: 5 },
             result: "你在萬丈深淵之上刀劍縱橫，將四名血影衛連同蝕骨毒網一併震落深谷！"
           },
           {
-            text: "【梯雲踏索 · 奇襲藏經閣後崖】施展上乘輕功踩著懸崖青藤與鐵索殘樁凌空飛渡，直撲藏經閣後崖（需習得輕功且情義≥48）", dynamicSkillSlot: "輕功",
-            reqQinggong: true, reqStat: { qing: 48 }, lockIfUnmet: true,
+            text: "【梯雲踏索 · 奇襲藏經閣後崖】施展上乘輕功踩著懸崖青藤與鐵索殘樁凌空飛渡，直撲藏經閣後崖（需習得輕功且情義≥68）", dynamicSkillSlot: "輕功",
+            reqQinggong: true, reqStat: { qing: 68 }, lockIfUnmet: true,
             nextBranch: "3B2",
             stats: { qing: 5, ming: 5, wu: 3 },
             result: "你身形如蒼鷹掠過深澗，悄無聲息地落在藏經閣後崖，打探到九幽門的母蠱所在！"
@@ -8844,11 +8844,11 @@ ${targetW.desc}
       "2C": {
         subtitle: "山腰丹廬線 · 紫蓋峰百草丹房保衛戰",
         narrative: "你在山腰紫蓋峰丹廬收容了上百名中毒弟子與百姓，九幽門副壇主見正面久攻不下，竟率領『屍火敢死隊』攜帶猛火油與腐屍毒罐夜襲丹廬！",
-        situationGuide: "【丹廬戰況】：可選擇親率精銳出廬迎戰副壇主（需武力≥58）、親嘗百草滾湯提煉萬靈解毒散、或憑高深德望號令傷癒同道結成火牆防線。",
+        situationGuide: "【丹廬戰況】：可選擇親率精銳出廬迎戰副壇主（需武力≥70）、親嘗百草滾湯提煉萬靈解毒散、或憑高深德望號令傷癒同道結成火牆防線。",
         choices: [
           {
-            text: "【拔劍出廬 · 斬殺九幽副壇主】單人獨劍衝入屍火陣中，直取九幽門副壇主首級！（需武力≥58）", dynamicSkillSlot: "招式",
-            reqStat: { wu: 58 }, allowFatalChallenge: true, isFatal: true,
+            text: "【拔劍出廬 · 斬殺九幽副壇主】單人獨劍衝入屍火陣中，直取九幽門副壇主首級！（需武力≥70）", dynamicSkillSlot: "招式",
+            reqStat: { wu: 70 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "3C1",
             stats: { wu: 4, ming: 5 },
             result: "你於火光中三招斬落副壇主首級，屍火敢死隊群龍無首，頃刻潰散！"
@@ -8864,8 +8864,8 @@ ${targetW.desc}
             nextBranch: "3C2"
           },
           {
-            text: "【仁德號令 · 結百草火牆反伏擊】憑藉崇高德行與名望調度丹廬藥師與傷癒弟子，以雄黃火油溝反燒敵軍（需德行≥58、名望≥50）",
-            reqStat: { de: 58, ming: 50 }, lockIfUnmet: true,
+            text: "【仁德號令 · 結百草火牆反伏擊】憑藉崇高德行與名望調度丹廬藥師與傷癒弟子，以雄黃火油溝反燒敵軍（需德行≥90、名望≥52）",
+            reqStat: { de: 90, ming: 52 }, lockIfUnmet: true,
             nextBranch: "3C3",
             stats: { de: 5, ming: 5, qing: 5 },
             result: "眾志成城之下，百丈雄黃火牆拔地而起，將來犯的屍火敢死隊徹底阻絕於丹廬之外！"
@@ -8879,8 +8879,8 @@ ${targetW.desc}
         situationGuide: "【第 3 幕 · 3A1 分支】：三種破局策略將分別導向 4A1_1、4A1_2、4A1_3 三條後續劇情！",
         choices: [
           {
-            text: "【霸道碎鐘 · 一劍劈裂攝魂血鐘】頂著刺耳魔音逆流衝頂，一招劈向萬斤攝魂血鐘！（需武力≥66）",
-            reqStat: { wu: 66 }, allowFatalChallenge: true, isFatal: true,
+            text: "【霸道碎鐘 · 一劍劈裂攝魂血鐘】頂著刺耳魔音逆流衝頂，一招劈向萬斤攝魂血鐘！（需武力≥78）",
+            reqStat: { wu: 78 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4A1_1",
             stats: { wu: 4, ming: 5 },
             result: "鐺——！萬斤血鐘被你從中劈為兩半，狂暴屍傀瞬間僵立原地！"
@@ -8896,8 +8896,8 @@ ${targetW.desc}
             nextBranch: "4A1_2"
           },
           {
-            text: "【摯友合擊 · 雙鋒絞殺護法】與身邊至交好友左右包抄，一人擋傀一人斬殺敲鐘護法（需有深厚羈絆同伴或情義≥55）",
-            reqStat: { qing: 55 }, lockIfUnmet: true,
+            text: "【摯友合擊 · 雙鋒絞殺護法】與身邊至交好友左右包抄，一人擋傀一人斬殺敲鐘護法（需有深厚羈絆同伴或情義≥75）",
+            reqStat: { qing: 75 }, lockIfUnmet: true,
             nextBranch: "4A1_3",
             stats: { qing: 5, wu: 4, ming: 4 },
             result: "你們配合天衣無縫，頃刻間取下敲鐘護法首級，天梯屍潮隨之崩潰！"
@@ -8910,8 +8910,8 @@ ${targetW.desc}
         situationGuide: "【第 3 幕 · 3A2 分支】：三種追擊策略將分別導向 4A2_1、4A2_2、4A2_3 三條後續劇情！",
         choices: [
           {
-            text: "【罡氣排毒 · 強穿毒障斬毒尊】屏息凝神撐開護體罡氣，直接衝入萬毒腐骨障中格殺毒尊！（需武力≥65）",
-            reqStat: { wu: 65 }, allowFatalChallenge: true, isFatal: true,
+            text: "【罡氣排毒 · 強穿毒障斬毒尊】屏息凝神撐開護體罡氣，直接衝入萬毒腐骨障中格殺毒尊！（需武力≥77）",
+            reqStat: { wu: 77 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4A2_1",
             stats: { wu: 4, ming: 5 },
             result: "你憑藉雄渾罡氣排開五彩毒障，於火谷深處一招斃殺黑袍毒尊！"
@@ -8927,8 +8927,8 @@ ${targetW.desc}
             nextBranch: "4A2_2"
           },
           {
-            text: "【內息導引 · 封閉谷口反困魔頭】以醇厚內功搬動巨石封死火谷下風口，令毒霧倒灌毒尊自身（需習得內功且德行≥56）",
-            reqNeigong: true, reqStat: { de: 56 }, lockIfUnmet: true,
+            text: "【內息導引 · 封閉谷口反困魔頭】以醇厚內功搬動巨石封死火谷下風口，令毒霧倒灌毒尊自身（需習得內功且德行≥88）",
+            reqNeigong: true, reqStat: { de: 88 }, lockIfUnmet: true,
             nextBranch: "4A2_3",
             stats: { de: 5, ming: 5, wu: 3 },
             result: "毒風倒卷入谷，黑袍毒尊自食惡果中了腐骨劇毒，被你輕易擒殺！"
@@ -8941,8 +8941,8 @@ ${targetW.desc}
         situationGuide: "【第 3 幕 · 3A3 分支】：三種破敵策略將分別導向 4A3_1、4A3_2、4A3_3 三條後續劇情！",
         choices: [
           {
-            text: "【掌劈石碑 · 飛石破滅血煞四鬼】運足功力連續拍飛千斤古碑，以排山倒海之勢砸碎四鬼合擊！（需武力≥64）",
-            reqStat: { wu: 64 }, allowFatalChallenge: true, isFatal: true,
+            text: "【掌劈石碑 · 飛石破滅血煞四鬼】運足功力連續拍飛千斤古碑，以排山倒海之勢砸碎四鬼合擊！（需武力≥76）",
+            reqStat: { wu: 76 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4A3_1",
             stats: { wu: 4, ming: 5 },
             result: "數塊千斤石碑呼嘯飛出，血煞四鬼陣型大亂，被你逐一格殺！"
@@ -8958,8 +8958,8 @@ ${targetW.desc}
             nextBranch: "4A3_2"
           },
           {
-            text: "【聽從長老指點 · 轉動陣樞困殺群傀】依傳功長老口訣踏遍奇門八宮，啟動碑林迷陣困死屍傀（需德行≥58、名望≥48）",
-            reqStat: { de: 58, ming: 48 }, lockIfUnmet: true,
+            text: "【聽從長老指點 · 轉動陣樞困殺群傀】依傳功長老口訣踏遍奇門八宮，啟動碑林迷陣困死屍傀（需德行≥88、名望≥50）",
+            reqStat: { de: 88, ming: 50 }, lockIfUnmet: true,
             nextBranch: "4A3_3",
             stats: { de: 5, qing: 5, ming: 5 },
             result: "石碑移位化作天然迷宮，百具屍傀在陣中自相衝撞，不費吹灰之力便即瓦解！"
@@ -8972,8 +8972,8 @@ ${targetW.desc}
         situationGuide: "【第 3 幕 · 3B1 分支】：三種破壇策略將分別導向 4B1_1、4B1_2、4B1_3 三條後續劇情！",
         choices: [
           {
-            text: "【雷霆斬首 · 強劈金背屍王蠱】不顧七名蠱師毒針攢射，縱身躍上法壇一劍斬碎屍王蠱！（需武力≥65）",
-            reqStat: { wu: 65 }, allowFatalChallenge: true, isFatal: true,
+            text: "【雷霆斬首 · 強劈金背屍王蠱】不顧七名蠱師毒針攢射，縱身躍上法壇一劍斬碎屍王蠱！（需武力≥77）",
+            reqStat: { wu: 77 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4B1_1",
             stats: { wu: 5, ming: 5 },
             result: "劍氣縱橫間金背屍王蠱斷為兩截，全山幽冥屍傀同時發出一聲哀鳴，戰力暴跌五成！"
@@ -8989,8 +8989,8 @@ ${targetW.desc}
             nextBranch: "4B1_2"
           },
           {
-            text: "【輕功掠影 · 先救血壇下被俘的雲夢山菁英】施展鬼魅身法切斷祭壇四周鐵籠，放出一眾雲夢山內門弟子反攻（需習得輕功且情義≥52）",
-            reqQinggong: true, reqStat: { qing: 52 }, lockIfUnmet: true,
+            text: "【輕功掠影 · 先救血壇下被俘的雲夢山菁英】施展鬼魅身法切斷祭壇四周鐵籠，放出一眾雲夢山內門弟子反攻（需習得輕功且情義≥72）",
+            reqQinggong: true, reqStat: { qing: 72 }, lockIfUnmet: true,
             nextBranch: "4B1_3",
             stats: { qing: 5, ming: 5, wu: 3 },
             result: "數十名雲夢山內門菁英脫困後憤怒拔劍，與你合力將七名蠱師連同血壇徹底鏟平！"
@@ -9003,8 +9003,8 @@ ${targetW.desc}
         situationGuide: "【第 3 幕 · 3B2 分支】：三種護閣策略將分別導向 4B2_1、4B2_2、4B2_3 三條後續劇情！",
         choices: [
           {
-            text: "【飛身破窗 · 獨戰血衣長老護典籍】自閣頂破窗而入，以絕強武力正面擊潰血衣長老！（需武力≥64）",
-            reqStat: { wu: 64 }, allowFatalChallenge: true, isFatal: true,
+            text: "【飛身破窗 · 獨戰血衣長老護典籍】自閣頂破窗而入，以絕強武力正面擊潰血衣長老！（需武力≥76）",
+            reqStat: { wu: 76 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4B2_1",
             stats: { wu: 5, ming: 5, de: 4 },
             result: "你在書架間連出十餘記殺招，將血衣長老震出窗外，完好保住了雲夢山百年典籍！"
@@ -9020,8 +9020,8 @@ ${targetW.desc}
             nextBranch: "4B2_2"
           },
           {
-            text: "【先救閣中受困幼徒 · 結劍陣固守閣門】優先救出躲在暗格中的十餘名雲夢山幼徒，憑藉威望指揮眾人據險固守（需德行≥55、名望≥48）",
-            reqStat: { de: 55, ming: 48 }, lockIfUnmet: true,
+            text: "【先救閣中受困幼徒 · 結劍陣固守閣門】優先救出躲在暗格中的十餘名雲夢山幼徒，憑藉威望指揮眾人據險固守（需德行≥86、名望≥50）",
+            reqStat: { de: 86, ming: 50 }, lockIfUnmet: true,
             nextBranch: "4B2_3",
             stats: { de: 5, qing: 5, ming: 4 },
             result: "幼徒們感念你的救命大恩，啟動藏經閣護閣機關射出萬道竹箭，逼退了血衣長老！"
@@ -9034,8 +9034,8 @@ ${targetW.desc}
         situationGuide: "【第 3 幕 · 3B3 分支】：三種護泉策略將分別導向 4B3_1、4B3_2、4B3_3 三條後續劇情！",
         choices: [
           {
-            text: "【雷霆出擊 · 於毒桶傾倒前盡數斬殺毒水營】疾衝上前，以凌厲招式在呼吸之間解決全部投毒魔徒！（需武力≥63）",
-            reqStat: { wu: 63 }, allowFatalChallenge: true, isFatal: true,
+            text: "【雷霆出擊 · 於毒桶傾倒前盡數斬殺毒水營】疾衝上前，以凌厲招式在呼吸之間解決全部投毒魔徒！（需武力≥75）",
+            reqStat: { wu: 75 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4B3_1",
             stats: { wu: 4, de: 5, ming: 5 },
             result: "刀光閃過，十名投毒魔徒全數斃命，十桶腐心劇毒穩穩落在岸邊，滴水未入靈泉！"
@@ -9051,8 +9051,8 @@ ${targetW.desc}
             nextBranch: "4B3_2"
           },
           {
-            text: "【內力封泉 · 投入解毒靈草淨化水源】以深厚內功截斷泉眼流向，並將沿途採集的百草投入水中化解毒性（需習得內功且德行≥56）",
-            reqNeigong: true, reqStat: { de: 56 }, lockIfUnmet: true,
+            text: "【內力封泉 · 投入解毒靈草淨化水源】以深厚內功截斷泉眼流向，並將沿途採集的百草投入水中化解毒性（需習得內功且德行≥88）",
+            reqNeigong: true, reqStat: { de: 88 }, lockIfUnmet: true,
             nextBranch: "4B3_3",
             stats: { de: 5, ming: 5, wu: 3 },
             result: "清泉非但未被污染，反而融入百草藥力，順流而下助山頂守軍抵禦屍氣！"
@@ -9065,8 +9065,8 @@ ${targetW.desc}
         situationGuide: "【第 3 幕 · 3C1 分支】：三種馳援策略將分別導向 4C1_1、4C1_2、4C1_3 三條後續劇情！",
         choices: [
           {
-            text: "【單騎破圍 · 強斬鐵屍堂主】提刃縱馬殺入雁鳴峰重圍，正面硬撼刀槍不入的鐵屍堂主！（需武力≥63）",
-            reqStat: { wu: 63 }, allowFatalChallenge: true, isFatal: true,
+            text: "【單騎破圍 · 強斬鐵屍堂主】提刃縱馬殺入雁鳴峰重圍，正面硬撼刀槍不入的鐵屍堂主！（需武力≥75）",
+            reqStat: { wu: 75 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4C1_1",
             stats: { wu: 5, ming: 5, qing: 4 },
             result: "你連出重手法震裂鐵屍堂主的護心銅鏡，救出傷痕累累的執法長老！"
@@ -9082,8 +9082,8 @@ ${targetW.desc}
             nextBranch: "4C1_2"
           },
           {
-            text: "【攜傷癒同道兩面夾擊 · 穩紮穩打解圍】憑藉名望與德行率領丹廬剛痊癒的五十名好手結陣推進（需德行≥58、名望≥50）",
-            reqStat: { de: 58, ming: 50 }, lockIfUnmet: true,
+            text: "【攜傷癒同道兩面夾擊 · 穩紮穩打解圍】憑藉名望與德行率領丹廬剛痊癒的五十名好手結陣推進（需德行≥90、名望≥52）",
+            reqStat: { de: 90, ming: 52 }, lockIfUnmet: true,
             nextBranch: "4C1_3",
             stats: { de: 5, qing: 5, ming: 5 },
             result: "五十名感念你救命之恩的同道奮勇爭先，與雁鳴峰守軍裡應外合擊退強敵！"
@@ -9096,8 +9096,8 @@ ${targetW.desc}
         situationGuide: "【第 3 幕 · 3C2 分支】：三種護送解藥策略將分別導向 4C2_1、4C2_2、4C2_3 三條後續劇情！",
         choices: [
           {
-            text: "【背負藥箱 · 血戰開道強闖山門】親自背起百斤藥箱，持刃一路劈飛攔路屍傀殺向祝融峰！（需武力≥62）",
-            reqStat: { wu: 62 }, allowFatalChallenge: true, isFatal: true,
+            text: "【背負藥箱 · 血戰開道強闖山門】親自背起百斤藥箱，持刃一路劈飛攔路屍傀殺向祝融峰！（需武力≥74）",
+            reqStat: { wu: 74 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4C2_1",
             stats: { wu: 4, de: 5, ming: 5 },
             result: "你渾身浴血卻護得身後藥箱分毫不損，成功將救命靈湯送抵祝融峰前殿！"
@@ -9113,8 +9113,8 @@ ${targetW.desc}
             nextBranch: "4C2_2"
           },
           {
-            text: "【分段接力 · 號令各派義士結成護藥長龍】憑藉崇高德望組織沿途正道義士分段護送藥桶上山（需德行≥62、名望≥52）",
-            reqStat: { de: 62, ming: 52 }, lockIfUnmet: true,
+            text: "【分段接力 · 號令各派義士結成護藥長龍】憑藉崇高德望組織沿途正道義士分段護送藥桶上山（需德行≥94、名望≥54）",
+            reqStat: { de: 94, ming: 54 }, lockIfUnmet: true,
             nextBranch: "4C2_3",
             stats: { de: 5, ming: 5, qing: 5 },
             result: "百名正道義士以血肉之軀結成護藥長龍，一桶桶純陽百草湯源源不絕送入祖師殿！"
@@ -9127,8 +9127,8 @@ ${targetW.desc}
         situationGuide: "【第 3 幕 · 3C3 分支】：三種清剿石窟策略將分別導向 4C3_1、4C3_2、4C3_3 三條後續劇情！",
         choices: [
           {
-            text: "【殺入石窟 · 強斬煉傀大宗師】單槍匹馬殺入石窟深處，正面擊斃坐鎮石窟的九幽門煉傀宗師！（需武力≥63）",
-            reqStat: { wu: 63 }, allowFatalChallenge: true, isFatal: true,
+            text: "【殺入石窟 · 強斬煉傀大宗師】單槍匹馬殺入石窟深處，正面擊斃坐鎮石窟的九幽門煉傀宗師！（需武力≥75）",
+            reqStat: { wu: 75 }, allowFatalChallenge: true, isFatal: true,
             nextBranch: "4C3_1",
             stats: { wu: 5, ming: 5 },
             result: "你一舉斬殺煉傀宗師並救出石窟中尚未被煉化的三十名無辜山民！"
@@ -9144,8 +9144,8 @@ ${targetW.desc}
             nextBranch: "4C3_2"
           },
           {
-            text: "【以德化怨 · 喚醒石窟中半魔化弟子的神智】以純陽內功配合佛道清心鐘聲，喚醒尚存一線神智的受困弟子（需德行≥60、名望≥50）",
-            reqStat: { de: 60, ming: 50 }, lockIfUnmet: true,
+            text: "【以德化怨 · 喚醒石窟中半魔化弟子的神智】以純陽內功配合佛道清心鐘聲，喚醒尚存一線神智的受困弟子（需德行≥92、名望≥52）",
+            reqStat: { de: 92, ming: 52 }, lockIfUnmet: true,
             nextBranch: "4C3_3",
             stats: { de: 5, qing: 5, ming: 5 },
             result: "鐘聲入魂，數十名半魔化弟子流下熱淚恢復神智，調轉兵刃與你一同肅清魔窟！"
@@ -9157,35 +9157,35 @@ ${targetW.desc}
     // 自動生成第 4/5 幕的 27 個專屬分支節點 (4A1_1 ~ 4C3_3) 與第 5/5 幕終局節點 (5A ~ 5C)，構成完整 3×3×3 樹狀結構
     (function populateHengshan3x3x3Nodes() {
       const stage4Configs = [
-        ["4A1_1", "祝融前殿 · 碎鐘餘威戰血衛", "你劈碎攝魂血鐘後氣勢如虹，踏入祝融前殿廣場，九幽門少主麾下十二名『血煞親衛』結成刀陣攔路！", "5A1", 68],
-        ["4A1_2", "祝融前殿 · 龍吟破障突入正殿", "你以穿雲長嘯震潰天梯魔音後殺抵前殿，殿前毒霧翻湧，血煞親衛正欲合攏千斤殿門！", "5A1", 68],
-        ["4A1_3", "祝融前殿 · 雙俠並肩闖龍潭", "你與至交好友斬殺敲鐘護法後並肩殺上前殿丹墀，十二名血煞親衛持血滴子自殿頂撲下！", "5A1", 67],
-        ["4A2_1", "火谷秘道 · 提毒尊首級震群魔", "你提著黑袍毒尊首級自火谷秘道殺出，直抵祝融峰側殿，沿途九幽門徒無不駭然色變！", "5A2", 67],
-        ["4A2_2", "火谷秘道 · 借地火餘威攻側殿", "硫磺大火焚盡毒障後，你順著滾燙山道殺上祝融側殿，正逢魔門副帥督陣攻打祖師堂！", "5A2", 67],
-        ["4A2_3", "火谷秘道 · 攜解毒秘藥救掌門", "你自毒尊屍身搜出腐心毒母解藥，火速趕往祝融峰祖師殿救援重傷的雲夢山掌門！", "5A2", 66],
-        ["4A3_1", "南天門頂 · 破碑神威震祝融", "你在古碑林掌劈四鬼後威震全山，率領士氣大振的雲夢山弟子直撲祝融峰頂廣場！", "5A3", 67],
-        ["4A3_2", "南天門頂 · 回風劍意破魔罡", "你帶著自古碑領悟的回風落雁劍意殺上南天門頂，以雲夢山古劍法迎戰九幽門護法長老！", "5A3", 68],
-        ["4A3_3", "南天門頂 · 奇門大陣反包圍", "你與傳功長老利用碑林奇門陣困死屍傀主力後，率領生力軍從南天門居高臨下反包圍魔軍！", "5A3", 66],
+        ["4A1_1", "祝融前殿 · 碎鐘餘威戰血衛", "你劈碎攝魂血鐘後氣勢如虹，踏入祝融前殿廣場，九幽門少主麾下十二名『血煞親衛』結成刀陣攔路！", "5A1", 82],
+        ["4A1_2", "祝融前殿 · 龍吟破障突入正殿", "你以穿雲長嘯震潰天梯魔音後殺抵前殿，殿前毒霧翻湧，血煞親衛正欲合攏千斤殿門！", "5A1", 82],
+        ["4A1_3", "祝融前殿 · 雙俠並肩闖龍潭", "你與至交好友斬殺敲鐘護法後並肩殺上前殿丹墀，十二名血煞親衛持血滴子自殿頂撲下！", "5A1", 81],
+        ["4A2_1", "火谷秘道 · 提毒尊首級震群魔", "你提著黑袍毒尊首級自火谷秘道殺出，直抵祝融峰側殿，沿途九幽門徒無不駭然色變！", "5A2", 81],
+        ["4A2_2", "火谷秘道 · 借地火餘威攻側殿", "硫磺大火焚盡毒障後，你順著滾燙山道殺上祝融側殿，正逢魔門副帥督陣攻打祖師堂！", "5A2", 81],
+        ["4A2_3", "火谷秘道 · 攜解毒秘藥救掌門", "你自毒尊屍身搜出腐心毒母解藥，火速趕往祝融峰祖師殿救援重傷的雲夢山掌門！", "5A2", 80],
+        ["4A3_1", "南天門頂 · 破碑神威震祝融", "你在古碑林掌劈四鬼後威震全山，率領士氣大振的雲夢山弟子直撲祝融峰頂廣場！", "5A3", 81],
+        ["4A3_2", "南天門頂 · 回風劍意破魔罡", "你帶著自古碑領悟的回風落雁劍意殺上南天門頂，以雲夢山古劍法迎戰九幽門護法長老！", "5A3", 82],
+        ["4A3_3", "南天門頂 · 奇門大陣反包圍", "你與傳功長老利用碑林奇門陣困死屍傀主力後，率領生力軍從南天門居高臨下反包圍魔軍！", "5A3", 80],
 
-        ["4B1_1", "後山絕壁 · 母蠱既滅屍潮潰", "你斬碎金背屍王蠱後，全山屍傀失去控制，你趁勢從後山絕壁殺入祝融峰主戰場！", "5B1", 67],
-        ["4B1_2", "後山絕壁 · 朱砂破邪靖妖氛", "純陽朱砂破去血壇妖法後，你攜帶著滿身紅霞正氣自後山殺向祖師殿後門！", "5B1", 66],
-        ["4B1_3", "後山絕壁 · 率脫困菁英奇襲敵背", "你率領自血壇救出的數十名雲夢山內門菁英，如神兵天降般從後方突襲圍攻祖師殿的九幽門主力！", "5B1", 66],
-        ["4B2_1", "藏經閣道 · 護經功成援主峰", "保住藏經閣百年典籍後，雲夢山護閣長老傾囊相授破煞心訣，與你一同殺上祝融主峰！", "5B2", 67],
-        ["4B2_2", "藏經閣道 · 鐘鳴九響聚群雄", "你在藏經閣敲響警世銅鐘，四散的各派俠客聞聲向你靠攏，隨你合兵一處殺往祝融峰！", "5B2", 66],
-        ["4B2_3", "藏經閣道 · 啟動護山劍匣助戰", "獲救的藏經閣幼徒替你打開了歷代祖師留下的『雲夢山百兵匣』，助你披堅執銳殺向主殿！", "5B2", 65],
-        ["4B3_1", "靈泉源頭 · 碧水澄澈護仙山", "你守住山頂靈泉源頭後，順著飛瀑水道直插九幽門中軍指揮台！", "5B3", 66],
-        ["4B3_2", "靈泉源頭 · 飛瀑洗髓戰力飆", "你在百丈飛瀑中衝開淤穴、精神百倍，踏著湍急溪流一路殺入祝融峰前坪！", "5B3", 67],
-        ["4B3_3", "靈泉源頭 · 藥泉流布解群毒", "融入百草藥力的靈泉流遍全山，中毒守軍紛紛恢復戰力，隨你發起全面反擊！", "5B3", 65],
+        ["4B1_1", "後山絕壁 · 母蠱既滅屍潮潰", "你斬碎金背屍王蠱後，全山屍傀失去控制，你趁勢從後山絕壁殺入祝融峰主戰場！", "5B1", 81],
+        ["4B1_2", "後山絕壁 · 朱砂破邪靖妖氛", "純陽朱砂破去血壇妖法後，你攜帶著滿身紅霞正氣自後山殺向祖師殿後門！", "5B1", 80],
+        ["4B1_3", "後山絕壁 · 率脫困菁英奇襲敵背", "你率領自血壇救出的數十名雲夢山內門菁英，如神兵天降般從後方突襲圍攻祖師殿的九幽門主力！", "5B1", 80],
+        ["4B2_1", "藏經閣道 · 護經功成援主峰", "保住藏經閣百年典籍後，雲夢山護閣長老傾囊相授破煞心訣，與你一同殺上祝融主峰！", "5B2", 81],
+        ["4B2_2", "藏經閣道 · 鐘鳴九響聚群雄", "你在藏經閣敲響警世銅鐘，四散的各派俠客聞聲向你靠攏，隨你合兵一處殺往祝融峰！", "5B2", 80],
+        ["4B2_3", "藏經閣道 · 啟動護山劍匣助戰", "獲救的藏經閣幼徒替你打開了歷代祖師留下的『雲夢山百兵匣』，助你披堅執銳殺向主殿！", "5B2", 79],
+        ["4B3_1", "靈泉源頭 · 碧水澄澈護仙山", "你守住山頂靈泉源頭後，順著飛瀑水道直插九幽門中軍指揮台！", "5B3", 80],
+        ["4B3_2", "靈泉源頭 · 飛瀑洗髓戰力飆", "你在百丈飛瀑中衝開淤穴、精神百倍，踏著湍急溪流一路殺入祝融峰前坪！", "5B3", 81],
+        ["4B3_3", "靈泉源頭 · 藥泉流布解群毒", "融入百草藥力的靈泉流遍全山，中毒守軍紛紛恢復戰力，隨你發起全面反擊！", "5B3", 79],
 
-        ["4C1_1", "雁鳴峰頂 · 與執法長老合兵登頂", "你救下雁鳴峰執法長老後，兩路人馬合兵一處，浩浩蕩蕩殺向祝融峰頂！", "5C1", 66],
-        ["4C1_2", "雁鳴峰頂 · 雄黃火器營開道", "你率領裝備雄黃火雷的丹廬精銳，一路轟平屍傀路障推進至祖師殿外！", "5C1", 65],
-        ["4C1_3", "雁鳴峰頂 · 仁義之師勢如破竹", "五十名受你救命之恩的江湖好手人人死戰，護衛著你一路攻克祝融峰腰防線！", "5C1", 65],
-        ["4C2_1", "祖師殿外 · 浴血送藥挽狂瀾", "你浴血將純陽百草湯送入祖師殿，雲夢山掌門與眾長老服藥後壓下屍毒，與你並肩出殿迎敵！", "5C2", 66],
-        ["4C2_2", "祖師殿外 · 神速救援振軍心", "你抄懸崖小徑神速送達解藥，殿內數十名核心弟子轉危為安，士氣高漲至極點！", "5C2", 65],
-        ["4C2_3", "祖師殿外 · 百名義士共築鐵壁", "護藥長龍匯聚於祖師殿前，上百名正道義士在你的號令下結成連環正氣陣！", "5C2", 64],
-        ["4C3_1", "紫蓋山腹 · 攜獲救山民斷敵後路", "你鏟平煉傀石窟後，從山腹暗道直通祝融峰頂廣場，徹底截斷了九幽門的退路！", "5C3", 66],
-        ["4C3_2", "紫蓋山腹 · 毒窟崩塌魔軍喪膽", "山腹煉傀毒窟爆炸的濃煙直衝雲霄，峰頂圍攻的九幽門徒見老巢被毀，軍心大亂！", "5C3", 65],
-        ["4C3_3", "紫蓋山腹 · 喚醒弟子反戈一擊", "數十名恢復神智的半魔化弟子隨你殺出暗道，對九幽門展開最猛烈的復仇反擊！", "5C3", 65]
+        ["4C1_1", "雁鳴峰頂 · 與執法長老合兵登頂", "你救下雁鳴峰執法長老後，兩路人馬合兵一處，浩浩蕩蕩殺向祝融峰頂！", "5C1", 80],
+        ["4C1_2", "雁鳴峰頂 · 雄黃火器營開道", "你率領裝備雄黃火雷的丹廬精銳，一路轟平屍傀路障推進至祖師殿外！", "5C1", 79],
+        ["4C1_3", "雁鳴峰頂 · 仁義之師勢如破竹", "五十名受你救命之恩的江湖好手人人死戰，護衛著你一路攻克祝融峰腰防線！", "5C1", 79],
+        ["4C2_1", "祖師殿外 · 浴血送藥挽狂瀾", "你浴血將純陽百草湯送入祖師殿，雲夢山掌門與眾長老服藥後壓下屍毒，與你並肩出殿迎敵！", "5C2", 80],
+        ["4C2_2", "祖師殿外 · 神速救援振軍心", "你抄懸崖小徑神速送達解藥，殿內數十名核心弟子轉危為安，士氣高漲至極點！", "5C2", 79],
+        ["4C2_3", "祖師殿外 · 百名義士共築鐵壁", "護藥長龍匯聚於祖師殿前，上百名正道義士在你的號令下結成連環正氣陣！", "5C2", 78],
+        ["4C3_1", "紫蓋山腹 · 攜獲救山民斷敵後路", "你鏟平煉傀石窟後，從山腹暗道直通祝融峰頂廣場，徹底截斷了九幽門的退路！", "5C3", 80],
+        ["4C3_2", "紫蓋山腹 · 毒窟崩塌魔軍喪膽", "山腹煉傀毒窟爆炸的濃煙直衝雲霄，峰頂圍攻的九幽門徒見老巢被毀，軍心大亂！", "5C3", 79],
+        ["4C3_3", "紫蓋山腹 · 喚醒弟子反戈一擊", "數十名恢復神智的半魔化弟子隨你殺出暗道，對九幽門展開最猛烈的復仇反擊！", "5C3", 79]
       ];
 
       stage4Configs.forEach(([key, sub, narr, nextKey, reqWu]) => {
@@ -9212,8 +9212,8 @@ ${targetW.desc}
               nextBranch: nextKey
             },
             {
-              text: `【正道合擊 · 號令群雄結陣推進】憑藉威望與德行統率身邊同道結陣共進（需德行≥60、名望≥52）`,
-              reqStat: { de: 60, ming: 52 }, lockIfUnmet: true,
+              text: `【正道合擊 · 號令群雄結陣推進】憑藉威望與德行統率身邊同道結陣共進（需德行≥92、名望≥54）`,
+              reqStat: { de: 92, ming: 54 }, lockIfUnmet: true,
               nextBranch: nextKey,
               stats: { de: 5, qing: 5, ming: 5 },
               result: "正道群雄在你的指揮下進退有據，穩穩將九幽門少主包圍於祝融峰頂！"
@@ -9224,14 +9224,14 @@ ${targetW.desc}
 
       const stage5Configs = [
         ["5A1", "祝融絕巔 · 正面決戰九幽少主", "祝融峰頂血雨滂沱，九幽門少主催動『萬屍噬魂大法』，周身血霧化作百丈骷髏虛影，企圖做困獸之鬥！", 72],
-        ["5A2", "祝融絕巔 · 破毒誅魔定乾坤", "你攜火谷大勝之威踏上祝融絕巔，九幽門少主見黑袍毒尊已死，瘋狂燃燒精血向你撲來！", 70],
-        ["5A3", "祝融絕巔 · 五神劍意斬魔魁", "南天門古碑劍意與你的內息融為一體，你在祝融峰頂面對窮途末路的九幽門少主！", 70],
-        ["5B1", "祝融絕巔 · 母蠱俱滅斬首惡", "失去金背屍王蠱的九幽門少主功力大損，卻仍持淬毒血刃在祝融峰頂負隅頑抗！", 68],
-        ["5B2", "祝融絕巔 · 護經擎天靖衡陽", "你與雲夢山護閣長老合圍祝融峰頂，九幽門少主企圖挾持重傷弟子突圍逃遁！", 68],
-        ["5B3", "祝融絕巔 · 靈泉清氣滌魔氛", "滿山靈泉藥氣洗盡屍瘴，九幽門少主在祝融峰頂已成甕中之鱉！", 68],
-        ["5C1", "祝融絕巔 · 鐵壁合圍審魔首", "你與雁鳴峰、丹廬兩路大軍會師祝融峰頂，將九幽門少主重重圍困於絕壁之畔！", 66],
-        ["5C2", "祝融絕巔 · 仁者無敵平屍禍", "服下純陽百草湯的雲夢山掌門功力盡復，邀你一同出手徹底終結九幽門少主的罪惡！", 66],
-        ["5C3", "祝融絕巔 · 萬眾同心誅邪佞", "甦醒的雲夢山弟子與正道群雄萬劍齊指，九幽門少主在祝融峰頂陷入絕境！", 66]
+        ["5A2", "祝融絕巔 · 破毒誅魔定乾坤", "你攜火谷大勝之威踏上祝融絕巔，九幽門少主見黑袍毒尊已死，瘋狂燃燒精血向你撲來！", 85],
+        ["5A3", "祝融絕巔 · 五神劍意斬魔魁", "南天門古碑劍意與你的內息融為一體，你在祝融峰頂面對窮途末路的九幽門少主！", 85],
+        ["5B1", "祝融絕巔 · 母蠱俱滅斬首惡", "失去金背屍王蠱的九幽門少主功力大損，卻仍持淬毒血刃在祝融峰頂負隅頑抗！", 82],
+        ["5B2", "祝融絕巔 · 護經擎天靖衡陽", "你與雲夢山護閣長老合圍祝融峰頂，九幽門少主企圖挾持重傷弟子突圍逃遁！", 82],
+        ["5B3", "祝融絕巔 · 靈泉清氣滌魔氛", "滿山靈泉藥氣洗盡屍瘴，九幽門少主在祝融峰頂已成甕中之鱉！", 82],
+        ["5C1", "祝融絕巔 · 鐵壁合圍審魔首", "你與雁鳴峰、丹廬兩路大軍會師祝融峰頂，將九幽門少主重重圍困於絕壁之畔！", 80],
+        ["5C2", "祝融絕巔 · 仁者無敵平屍禍", "服下純陽百草湯的雲夢山掌門功力盡復，邀你一同出手徹底終結九幽門少主的罪惡！", 80],
+        ["5C3", "祝融絕巔 · 萬眾同心誅邪佞", "甦醒的雲夢山弟子與正道群雄萬劍齊指，九幽門少主在祝融峰頂陷入絕境！", 80]
       ];
 
       stage5Configs.forEach(([key, sub, narr, reqWu]) => {
@@ -9260,8 +9260,8 @@ ${targetW.desc}
               diceFailResult: "你一招重創九幽少主助群雄將其誅殺，惟撤招時被臨死魔氣擦傷經絡！"
             },
             {
-              text: `【群雄誅魔 · 主持正氣大陣共滅魔首】與雲夢山掌門及在場至交好友結成正氣大陣，穩妥誅滅魔首並救治全山百姓（需德行≥64、名望≥55）`,
-              reqStat: { de: 64, ming: 55 }, lockIfUnmet: true,
+              text: `【群雄誅魔 · 主持正氣大陣共滅魔首】與雲夢山掌門及在場至交好友結成正氣大陣，穩妥誅滅魔首並救治全山百姓（需德行≥96、名望≥58）`,
+              reqStat: { de: 96, ming: 58 }, lockIfUnmet: true,
               title: "南嶽仁俠",
               achievement: { id: "hengshan_benevolent", text: "南嶽仁俠 · 濟世救民平雲夢山" },
               stats: { de: 5, ming: 5, qing: 5, wu: 4 },
@@ -9343,10 +9343,13 @@ ${targetW.desc}
           txt = txt.replace(/武力\s*[≥>=]\s*\d+/g, `武力≥${newReq.wu} [基準${baseReq.wu}±33%]`);
         }
         if (newReq.de) {
-          txt = txt.replace(/德行\s*[≥>=]\s*\d+/g, `德行≥${newReq.de}`);
+          txt = txt.replace(/德行\s*[≥>=]\s*\d+/g, `德行≥${newReq.de} [基準${baseReq.de}±33%]`);
         }
         if (newReq.ming) {
-          txt = txt.replace(/名望\s*[≥>=]\s*\d+/g, `名望≥${newReq.ming}`);
+          txt = txt.replace(/名望\s*[≥>=]\s*\d+/g, `名望≥${newReq.ming} [基準${baseReq.ming}±33%]`);
+        }
+        if (newReq.qing) {
+          txt = txt.replace(/情義\s*[≥>=]\s*\d+/g, `情義≥${newReq.qing} [基準${baseReq.qing}±33%]`);
         }
         cloned.text = txt;
       }
@@ -9355,12 +9358,19 @@ ${targetW.desc}
 
     function formatFloatingStageGuide(guideText) {
       if (!guideText) return "";
-      return String(guideText).replace(/(檢定武力|建議武力\s*[≥>=]?|武力\s*[≥>=])\s*(\d+)/g, (m, prefix, numStr) => {
-        const base = parseInt(numStr, 10);
-        const low = Math.round(base * 0.67);
-        const high = Math.round(base * 1.33);
-        return `${prefix}${low}～${high}（中位數 ${base}±33% 浮動）`;
-      });
+      return String(guideText)
+        .replace(/(武力檢定|檢定武力|建議武力\s*[≥>=]?|武力\s*[≥>=])\s*(\d+)/g, (m, prefix, numStr) => {
+          const base = parseInt(numStr, 10);
+          const low = Math.round(base * 0.67);
+          const high = Math.round(base * 1.33);
+          return `${prefix}${low}～${high}（中位數 ${base}±33%）`;
+        })
+        .replace(/(德行\s*[≥>=]|名望\s*[≥>=]|情義\s*[≥>=])\s*(\d+)/g, (m, prefix, numStr) => {
+          const base = parseInt(numStr, 10);
+          const low = Math.round(base * 0.67);
+          const high = Math.round(base * 1.33);
+          return `${prefix}${low}～${high}[中位數${base}]`;
+        });
     }
 
     // 重大武林戰役（含越級逞強提前 GG 判定）
@@ -10459,7 +10469,7 @@ ${targetW.desc}
       setPauseState(true);
 
       const res = calculateWulinTournamentScore();
-      const winThreshold = 315;
+      const winThreshold = 268;
       const isWinner = res.totalScore >= winThreshold;
       const bestAtk = getBestLearnedSkillName("招式", "平生絕學");
       const bestInt = getBestLearnedSkillName("內功", "護體神功");
@@ -11999,15 +12009,15 @@ ${targetW.desc}
       // 檢查門派武力進階自主傳授 (16歲進階需武≥35 / 26歲上乘需武≥65 / 38歲鎮派需武≥80；僅限正式名門大派，避世隱退或散修不觸發)
       const isRegisteredSect = Object.values(DB.SECTS || {}).some(s => s && s.name === player.sect);
       if (isRegisteredSect && !player.lateLifeChosen && !player.fakedDeath) {
-        if (player.sectPromoStage === 0 && player.age >= 16 && (player.stats.wu >= 35 || player.age >= 18)) {
+        if (player.sectPromoStage === 0 && player.age >= 16 && (player.stats.wu >= 28 || player.age >= 18)) {
           triggerSectPromotion(1);
           return;
         }
-        if (player.sectPromoStage === 1 && player.age >= 26 && (player.stats.wu >= 65 || player.age >= 28)) {
+        if (player.sectPromoStage === 1 && player.age >= 26 && (player.stats.wu >= 68 || player.age >= 28)) {
           triggerSectPromotion(2);
           return;
         }
-        if (player.sectPromoStage === 2 && player.age >= 38 && (player.stats.wu >= 80 || player.age >= 40)) {
+        if (player.sectPromoStage === 2 && player.age >= 38 && (player.stats.wu >= 112 || player.age >= 40)) {
           triggerSectPromotion(3);
           return;
         }
