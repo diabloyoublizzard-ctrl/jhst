@@ -1096,7 +1096,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.07.2345</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.08.2340</span>
       </div>
 
       <div class="debug-row">
@@ -1144,7 +1144,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611072345"></script>
+  <script src="data.js?v=202611082340"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1157,7 +1157,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611072345"></script>
+  <script src="patches.js?v=202611082340"></script>
   <script>
 
   (function() {
@@ -2007,7 +2007,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.07.2345";
+    const GAME_VERSION = "v2026.11.08.2340";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -3245,7 +3245,7 @@
           if (options.customPendingLog) {
             addLog(options.customPendingLog, "milestone");
           } else if (player.age < 10) {
-            addLog(`📖 獲得《${sk.name}》${getSkillBadgeText(sk)}秘笈口訣！因年歲尚幼、當前武力不足，已收錄於右方武學欄【參悟中】，待日後根基足夠再行參悟。`, "milestone");
+            addLog(`📖 獲得《${sk.name}》${getSkillBadgeText(sk)}秘笈口訣！你有看沒有懂，但仍好好的把它給記住了。`, "milestone");
           } else if (!wuMet || !ageMet) {
             addLog(`📖 尋獲《${sk.name}》${getSkillBadgeText(sk)}秘笈傳承！因當前武力不足，已收錄於武學欄【參悟中】，待武力達標後融會貫通！`, "milestone");
           } else {
@@ -3740,7 +3740,7 @@
           if (!player.sealedWeapons.some(w => (w.name || w) === targetW.name)) {
             player.sealedWeapons.push(Object.assign({}, targetW));
           }
-          addLog(`匣【古煞未消 · 收入古兵匣收藏】你欲收取${targetW.tierName}【${targetW.name}】，奈何此兵塵封日久、器靈古煞尚未甦醒，暫無法直接配戴發揮威力，已先收入右欄【匣 古兵匣收藏】（每年可手動溫養開鋒 1 次，有 2/3 機率認主入庫；${chg.join("、")}）。`, "milestone");
+          addLog(`匣【古煞未消 · 收入古兵匣收藏】你欲收取${targetW.tierName}【${targetW.name}】，奈何此兵塵封日久、器靈古煞尚未甦醒，暫無法直接配戴發揮威力，已先收入左欄【匣 古兵匣收藏】（每年可手動溫養開鋒 1 次，有機率認主入庫；${chg.join("、")}）。`, "milestone");
           updateAllUI();
           setPauseState(false);
           return;
@@ -4137,7 +4137,7 @@ ${targetW.desc}
           if (!player.collectedManuals.some(m => (m.name || m) === targetSkill.name)) {
             player.collectedManuals.push(Object.assign({}, targetSkill));
           }
-          addLog(`📚【古卷晦澀 · 收入秘笈收藏】你仔細端詳《${targetSkill.name}》，發現其中行氣古字與隱語頗為晦澀，一時難以強行拆解，遂先將其妥善收入右欄【📚 秘笈收藏】（每年可手動點閱 1 次，有 2/3 機率轉為『參悟中』；${chg.join("、")}）。`, "milestone");
+          addLog(`📚【古卷晦澀 · 收入秘笈收藏】你仔細端詳《${targetSkill.name}》，發現其中行氣古字與隱語頗為晦澀，一時難以強行拆解，遂先將其妥善收入左欄【📚 秘笈收藏】（每年可手動點閱 1 次，有機率轉為『參悟中』；${chg.join("、")}）。`, "milestone");
           updateAllUI();
           setPauseState(false);
           return;
@@ -5096,7 +5096,7 @@ ${targetW.desc}
           waitMonths: 3 + Math.floor(Math.random() * 4),
           savedLifeGain: lifeGain
         };
-        addLog(`${target.icon || "🐎"}【靈獸初遇 · 結下善緣】你與${target.title}【${target.name}】初次相遇並結下善緣，【${target.name}】深深望了你一眼後隱入山林之中，似待日後重逢再續前緣！（${chg.join("、")}）`, "milestone");
+        addLog(`${target.icon || "🐎"}【靈獸初遇 · 結下善緣】你與${target.title}【${target.name}】初次相遇並結下善緣，【${target.name}】深深望了你一眼後隱入山林之中！（${chg.join("、")}）`, "milestone");
         updateAllUI();
         setPauseState(false);
       };
@@ -6039,8 +6039,12 @@ ${targetW.desc}
           onSelect: () => {
             player.artifacts.push(art);
             if (art.id === "taixu_armor") player.maxLifespan += 40;
+            if (typeof ROOT_TIERS !== "undefined" && (player.rootTierIndex || 0) < ROOT_TIERS.length - 1) {
+              player.rootTierIndex = (player.rootTierIndex || 0) + 1;
+            }
+            const curRootName = (typeof ROOT_TIERS !== "undefined" && ROOT_TIERS[player.rootTierIndex]) ? ROOT_TIERS[player.rootTierIndex].name : "下品真靈根";
             unlockHeldScripturesOnAwakening();
-            addLog(`✨【仙緣覺醒 · 打破凡塵桎梏】九天仙光垂落，你成功點亮靈根，打破凡人武力 120 上限，並獲得太虛神兵【${art.name}】！`, "immortal-log");
+            addLog(`✨【仙緣覺醒 · 打破凡塵桎梏】九天仙光垂落，你成功點亮並洗髓靈根（靈根晉升為【${curRootName}】！），打破凡人武力 120 上限，並獲得太虛神兵【${art.name}】！`, "immortal-log");
             unlockAchievement("immortal_awake", "太虛仙緣 · 靈根覺醒");
             renderSkillsTab();
             updateAllUI();
@@ -7416,15 +7420,18 @@ ${targetW.desc}
 
     function triggerProfessionSpecificEvent() {
       if (!player || !player.professionChosen) return false;
+      if (player.lastProfEventAge && (player.age - player.lastProfEventAge) < 5) return false;
       const prof = player.professionChosen;
       const pool = PROFESSION_EVENTS_POOL[prof];
       if (!Array.isArray(pool) || pool.length === 0) return false;
 
       player.usedEvents = player.usedEvents || new Set();
       let avail = pool.filter(e => !player.usedEvents.has(e.id));
-      if (avail.length === 0) avail = pool;
+      // 每個行當專屬劇本（如孤身獨闖黑水山寨救人質）一生僅觸發一次，絕不重複刷出！
+      if (avail.length === 0) return false;
       const ev = avail[Math.floor(Math.random() * avail.length)];
       player.usedEvents.add(ev.id);
+      player.lastProfEventAge = player.age;
 
       setPauseState(true);
       openEventModal(
@@ -13003,10 +13010,30 @@ ${targetW.desc}
       });
 
       const targetPool = fitPool.length > 0 ? fitPool : basePool;
-      let available = targetPool.filter(ev => !player.usedEvents.has(`${prefix}_${pool.indexOf(ev)}`));
+      MetaState.usedRoutineDeck = MetaState.usedRoutineDeck || {};
+      if (!(MetaState.usedRoutineDeck[prefix] instanceof Set)) {
+        MetaState.usedRoutineDeck[prefix] = new Set();
+      }
+      const deckSet = MetaState.usedRoutineDeck[prefix];
+      player.recentRoutineTexts = player.recentRoutineTexts || [];
+
+      const getEvKey = (ev) => `${prefix}::${ev.text || pool.indexOf(ev)}`;
+
+      // 優先排除此生與跨輪迴牌庫中已出現過的事件，確保全部輪替完畢前絕不重複！
+      let available = targetPool.filter(ev => {
+        const k = getEvKey(ev);
+        return !player.usedEvents.has(k) && !deckSet.has(k);
+      });
+
+      // 若當前年齡段與條件下的所有事件皆已全部輪替完畢，才重置該年齡段對應事件的牌庫紀錄，並排除最近剛出現過的 5 則事件防止頭尾相連重複
       if (available.length === 0) {
-        Array.from(player.usedEvents).forEach(k => { if (k.startsWith(prefix)) player.usedEvents.delete(k); });
-        available = [...targetPool];
+        targetPool.forEach(ev => {
+          const k = getEvKey(ev);
+          player.usedEvents.delete(k);
+          deckSet.delete(k);
+        });
+        const nonRecent = targetPool.filter(ev => !player.recentRoutineTexts.includes(ev.text));
+        available = nonRecent.length > 0 ? nonRecent : [...targetPool];
       }
 
       // 降低生平卷日常事件直接獲得武學與肉身升級的機率
@@ -13016,7 +13043,13 @@ ${targetW.desc}
       }
 
       const chosen = available[Math.floor(Math.random() * available.length)];
-      player.usedEvents.add(`${prefix}_${pool.indexOf(chosen)}`);
+      const chosenKey = getEvKey(chosen);
+      player.usedEvents.add(chosenKey);
+      deckSet.add(chosenKey);
+      if (chosen && chosen.text) {
+        player.recentRoutineTexts.push(chosen.text);
+        if (player.recentRoutineTexts.length > 6) player.recentRoutineTexts.shift();
+      }
       return chosen;
     }
 
@@ -14137,7 +14170,7 @@ ${targetW.desc}
                       <span class="skill-badge tier-${tierClean}" style="margin-left:4px;">${badgeText}</span>
                     </div>
                     <button class="ctrl-btn btn-study-manual" data-manual="${sk.name}" ${canStudyManualThisYear ? "" : "disabled"} style="padding:2px 10px;font-size:0.75rem;border-color:#ab47bc;color:#e1bee7;">
-                      ${canStudyManualThisYear ? "📖 點閱參詳 (2/3轉參悟中)" : "⏳ 今年已點閱"}
+                      ${canStudyManualThisYear ? "📖 點閱參詳" : "⏳ 今年已點閱"}
                     </button>
                   </div>
                   <div style="font-size:0.81rem;color:var(--text-muted);">${sk.desc}</div>
@@ -14164,7 +14197,7 @@ ${targetW.desc}
                       <span class="status-badge" style="color:var(--gold);border-color:var(--gold);margin-left:6px;">古兵匣收藏 · 未開鋒 (${w.tier}品 · 武力+${w.wu})</span>
                     </div>
                     <button class="ctrl-btn btn-unseal-weapon" data-sealed-weapon="${w.name}" ${canUnsealWeaponThisYear ? "" : "disabled"} style="padding:2px 10px;font-size:0.75rem;border-color:var(--gold);color:var(--gold-bright);">
-                      ${canUnsealWeaponThisYear ? "🔥 溫養開鋒 (2/3認主)" : "⏳ 今年已溫養"}
+                      ${canUnsealWeaponThisYear ? "🔥 溫養開鋒" : "⏳ 今年已溫養"}
                     </button>
                   </div>
                   <div style="font-size:0.81rem;color:var(--text-muted);">${w.desc}</div>
@@ -14323,7 +14356,7 @@ ${targetW.desc}
       const usedNames = new Set(player.disciples.map(d => d.name));
       const avail = DISCIPLE_NAMES_POOL.filter(d => !usedNames.has(d.name));
       const picked = avail.length > 0 ? avail[Math.floor(Math.random() * avail.length)] : DISCIPLE_NAMES_POOL[0];
-      const bestSk = getBestLearnedSkillName("招式", "本門絕學");
+      const bestSk = getBestLearnedSkillName("招式", "本門絕學").replace(/^[《「]+|[》」]+$/g, "");
       const newDisc = {
         name: picked.name,
         gender: picked.gender,
@@ -14383,7 +14416,7 @@ ${targetW.desc}
       const givenName = availGiven.length > 0 ? availGiven[Math.floor(Math.random() * availGiven.length)] : pool[0];
       const fullName = surname + givenName;
       const orderLabel = player.children.length === 0 ? (isBoy ? "長子" : "長女") : (isBoy ? "次子" : "次女");
-      const bestAtk = getBestLearnedSkillName("招式", "家傳武學");
+      const bestAtk = getBestLearnedSkillName("招式", "家傳武學").replace(/^[《「]+|[》」]+$/g, "");
 
       const desc = `春風送暖，喜鵲登枝！你與紅塵伴侶【${spouse.name}】相濡以沫、恩愛日深。\n\n` +
         `這一日產房外霞光微映，伴隨著一聲清脆響亮的啼哭，你們迎來了血脈相連的${orderLabel}——你與【${spouse.name}】相視一笑，為孩子取名為【${fullName}】！\n\n` +
@@ -14444,7 +14477,7 @@ ${targetW.desc}
       const usedNames = new Set(player.disciples.map(d => d.name));
       const avail = DISCIPLE_NAMES_POOL.filter(d => !usedNames.has(d.name));
       const cand = avail.length > 0 ? avail[Math.floor(Math.random() * avail.length)] : DISCIPLE_NAMES_POOL[0];
-      const bestSk = getBestLearnedSkillName("招式", "獨門絕學");
+      const bestSk = getBestLearnedSkillName("招式", "獨門絕學").replace(/^[《「]+|[》」]+$/g, "");
 
       const desc = `你在江湖上威名日盛，這一日行經風雪山神廟，見一名年約十四五歲的${cand.title}【${cand.name}】正咬牙在雪地裡以木枝演練殘缺招式，雖滿手凍瘡卻眼神堅毅（${cand.trait}）。\n\n` +
         `得知你便是名震天下的大俠後，【${cand.name}】噗通一聲跪在雪地裡連磕三個響頭：\n` +
@@ -14452,7 +14485,7 @@ ${targetW.desc}
 
       openEventModal(
         `🍵 薪火相傳 · 收錄親傳弟子【${cand.name}】`,
-        "師門傳承 · 佳徒拜師",
+        "衣缽傳承 · 佳徒拜師",
         desc,
         [
           {
@@ -14470,7 +14503,7 @@ ${targetW.desc}
                 lastInteractAge: -1
               });
               const chg = modifyStats({ de: 6, qing: 8, ming: 5 });
-              addLog(`🍵【開山收徒 · 薪火相傳】你收下天資聰穎的【${cand.name}】為親傳弟子，傳授《${bestSk}》，師門自此有了傳承後人！(${chg.join("、")})`, "milestone");
+              addLog(`🍵【開山收徒 · 薪火相傳】你收下天資聰穎的【${cand.name}】為親傳弟子，傳授《${bestSk}》，自此有了傳承後人！(${chg.join("、")})`, "milestone");
               renderBondsTab();
               updateAllUI();
               setPauseState(false);
@@ -14511,8 +14544,8 @@ ${targetW.desc}
       const spouseName = spouse ? spouse.name : (player.children[0]?.parentName || "伴侶");
       const child = player.children[Math.floor(Math.random() * player.children.length)];
       const disc = player.disciples[Math.floor(Math.random() * player.disciples.length)];
-      const bestAtk = getBestLearnedSkillName("招式", "家傳絕學");
-      const bestQg = getBestLearnedSkillName("輕功", "獨門身法");
+      const bestAtk = getBestLearnedSkillName("招式", "家傳絕學").replace(/^[《「]+|[》」]+$/g, "");
+      const bestQg = getBestLearnedSkillName("輕功", "獨門身法").replace(/^[《「]+|[》」]+$/g, "");
 
       const scenarios = [];
 
@@ -14672,7 +14705,7 @@ ${targetW.desc}
         return;
       }
       target.lastInteractAge = player.age;
-      const bestSk = getBestLearnedSkillName("招式", "家傳絕學");
+      const bestSk = getBestLearnedSkillName("招式", "家傳絕學").replace(/^[《「]+|[》」]+$/g, "");
       const chg = modifyStats({ qing: 4, wu: 2, ming: 2 });
       if (kind === "child") {
         addLog(`🏡【考校骨肉 · 家傳授藝】你在庭院中親自指點${target.orderLabel}【${target.name}】演練《${bestSk}》，一家人其樂融融！(${chg.join("、")})`, "good-log");
