@@ -1096,7 +1096,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.08.2340</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.10.0055</span>
       </div>
 
       <div class="debug-row">
@@ -17799,7 +17799,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.08.2340";
+    const GAME_VERSION = "v2026.11.10.0055";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -18406,11 +18406,10 @@ addGameData({
         if (cMatches.length > 0) pool = cMatches;
       }
 
-      // 關鍵過濾：只要池中有任何「進階(2) / 上乘(3) / 鎮派(4) / 曠世(5) / 自創(6)」武學，一律剔除「一般(1)」基礎武學（如太祖長拳、羅漢拳、基礎刀劍）
+      // 關鍵過濾：只要池中有任何「進階(2) / 上乘(3) / 鎮派(4) / 曠世(5) / 自創(6)」武學，一律剔除「一般(1)」基礎武學（如太祖長拳、羅漢拳、基礎刀劍），但保留所有進階以上武學參與隨機輪替！
       const maxTierInPool = Math.max(...pool.map(s => getSkillTierPriority(s.tier)));
       if (maxTierInPool >= 2) {
-        const minAllowedTier = Math.max(2, maxTierInPool - 1);
-        const highTierPool = pool.filter(s => getSkillTierPriority(s.tier) >= minAllowedTier);
+        const highTierPool = pool.filter(s => getSkillTierPriority(s.tier) >= 2);
         if (highTierPool.length > 0) pool = highTierPool;
       } else {
         // 若該分類只剩「一般」武學，但玩家在其他分類已有進階以上招式，且未強制限定輕功/內功，優先改用全武學池的高階招式
@@ -18418,21 +18417,19 @@ addGameData({
         if (globalHigh.length > 0) pool = globalHigh;
       }
 
-      // 若為招式且未指定特定兵器，優先挑選與玩家當前佩兵（刀/劍/槍/棍）相符的高階招式
-      if (!weaponHint && (!preferCategory || preferCategory === "招式") && player?.equippedWeapon?.name && pool.length > 1) {
-        const eqName = player.equippedWeapon.name;
-        let eqType = "";
-        if (/刀|刃/.test(eqName)) eqType = "刀";
-        else if (/劍/.test(eqName)) eqType = "劍";
-        else if (/槍|矛|戟/.test(eqName)) eqType = "槍";
-        else if (/棍|杖|棒/.test(eqName)) eqType = "棍";
-        if (eqType) {
-          const eqMatches = pool.filter(s => (s.weapon && s.weapon.includes(eqType)) || (s.name && s.name.includes(eqType)));
-          if (eqMatches.length > 0) pool = eqMatches;
-        }
-      }
-
       if (!allowRandom || pool.length === 1) return pool[0];
+
+      // 隨機挑選時避免連續兩次抽中同一門招式（當可用高階武學 >= 2 門時自動輪替）
+      if (player) {
+        player._lastPickedSkillMap = player._lastPickedSkillMap || {};
+        const catKey = `${preferCategory || "all"}_${weaponHint || "any"}`;
+        const lastPicked = player._lastPickedSkillMap[catKey];
+        const variedPool = pool.length > 1 ? pool.filter(s => s.name !== lastPicked) : pool;
+        const finalPool = variedPool.length > 0 ? variedPool : pool;
+        const chosen = finalPool[Math.floor(Math.random() * finalPool.length)];
+        if (chosen && chosen.name) player._lastPickedSkillMap[catKey] = chosen.name;
+        return chosen;
+      }
       return pool[Math.floor(Math.random() * pool.length)];
     }
 
@@ -18619,7 +18616,7 @@ addGameData({
       if (text.includes("【清音定魂 · 破魔長嘯】") && !text.includes("《")) {
         text = text.replace("【清音定魂 · 破魔長嘯】", `【清音定魂 · 催動${intName}】`);
       }
-      return text;
+      return text.replace(/《+/g, "《").replace(/》+/g, "》");
     }
 
     // 獲得修仙經典（生平卷有機會獲得；未開仙緣時無法使用，開啟仙緣後可參悟）
@@ -29717,7 +29714,8 @@ ${targetW.desc}
       const timeLabel = player.inImmortalPhase
         ? `[${getCurrentGanzhi()}年 · ${player.age}歲]`
         : `[${getCurrentGanzhi()}年 · ${player.age}歲${player.month}月]`;
-      div.innerHTML = `<span class="log-age-tag">${timeLabel}</span><span>${text}</span>`;
+      const cleanLogText = String(text || "").replace(/《+/g, "《").replace(/》+/g, "》");
+      div.innerHTML = `<span class="log-age-tag">${timeLabel}</span><span>${cleanLogText}</span>`;
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
     }
@@ -30141,6 +30139,74 @@ ${targetW.desc}
       return player.bonds.find(b => b && !b.isDead && (b.relationTag === "紅塵伴侶" || b.relationTag === "神仙眷侶"));
     }
 
+    // 依弟子特質智能匹配最契合的已學武學（如秦烈風【刀法狂野】優先傳授刀法 -> 內功心法 -> 輕功身法 -> 拳掌槍棍，絕不傳授不符敘述的劍法！）
+    function pickSkillForDisciple(cand) {
+      const mastered = getMasteredSkillsList().filter(s => s && !s.isScripture);
+      const sorted = [...mastered].sort((a, b) => getSkillTierPriority(b.tier) - getSkillTierPriority(a.tier));
+      const highPool = sorted.some(s => getSkillTierPriority(s.tier) >= 2)
+        ? sorted.filter(s => getSkillTierPriority(s.tier) >= 2)
+        : sorted;
+
+      const isBladeSkill = (s) => (s.weapon && /刀|刃/.test(s.weapon)) || /刀|斬/.test(s.name || "");
+      const isSwordSkill = (s) => (s.weapon && /劍/.test(s.weapon)) || /劍/.test(s.name || "");
+      const isInternalSkill = (s) => normalizeSkillType(s.type) === "內功" || /功|訣|心法|真氣|玄元/.test(s.name || "");
+      const isLightSkill = (s) => normalizeSkillType(s.type) === "輕功" || /步|縱|身法|掠影|留香|扶搖/.test(s.name || "");
+      const isFistOrSpear = (s) => !isSwordSkill(s) && !isBladeSkill(s);
+
+      let chosen = null;
+      let effectiveTrait = cand.trait || "天資聰穎";
+
+      if (cand.name === "秦烈風" || /刀法/.test(effectiveTrait)) {
+        // 優先順序：刀法 -> 內功心法 -> 輕功身法 -> 拳掌/槍棍（排除劍法）
+        const blades = highPool.filter(isBladeSkill);
+        const internals = highPool.filter(isInternalSkill);
+        const lights = highPool.filter(isLightSkill);
+        const nonSwords = highPool.filter(isFistOrSpear);
+        if (blades.length > 0) {
+          chosen = blades[Math.floor(Math.random() * blades.length)];
+        } else if (internals.length > 0) {
+          chosen = internals[Math.floor(Math.random() * internals.length)];
+          effectiveTrait = "天生神力、筋骨強橫";
+        } else if (lights.length > 0) {
+          chosen = lights[Math.floor(Math.random() * lights.length)];
+          effectiveTrait = "天生神力、步履矯健";
+        } else if (nonSwords.length > 0) {
+          chosen = nonSwords[Math.floor(Math.random() * nonSwords.length)];
+          effectiveTrait = "天生神力、筋骨強橫";
+        }
+      } else if (cand.name === "林驚羽" || /劍骨/.test(effectiveTrait)) {
+        // 優先順序：劍法 -> 內功心法 -> 輕功身法
+        const swords = highPool.filter(isSwordSkill);
+        const internals = highPool.filter(isInternalSkill);
+        const lights = highPool.filter(isLightSkill);
+        if (swords.length > 0) {
+          chosen = swords[Math.floor(Math.random() * swords.length)];
+        } else if (internals.length > 0) {
+          chosen = internals[Math.floor(Math.random() * internals.length)];
+          effectiveTrait = "根骨清奇、重情重義";
+        } else if (lights.length > 0) {
+          chosen = lights[Math.floor(Math.random() * lights.length)];
+          effectiveTrait = "根骨清奇、重情重義";
+        }
+      } else if (cand.name === "柳如煙" || /身法/.test(effectiveTrait)) {
+        const lights = highPool.filter(isLightSkill);
+        const internals = highPool.filter(isInternalSkill);
+        if (lights.length > 0) chosen = lights[Math.floor(Math.random() * lights.length)];
+        else if (internals.length > 0) chosen = internals[Math.floor(Math.random() * internals.length)];
+      } else if (cand.name === "蘇小婉" || cand.name === "葉知秋") {
+        const internals = highPool.filter(isInternalSkill);
+        const lights = highPool.filter(isLightSkill);
+        if (internals.length > 0) chosen = internals[Math.floor(Math.random() * internals.length)];
+        else if (lights.length > 0) chosen = lights[Math.floor(Math.random() * lights.length)];
+      }
+
+      if (!chosen && highPool.length > 0) {
+        chosen = highPool[Math.floor(Math.random() * highPool.length)];
+      }
+      const cleanName = (chosen ? chosen.name : getBestLearnedSkillName("招式", "獨門絕學")).replace(/^[《「]+|[》」]+$/g, "");
+      return { skillName: cleanName, trait: effectiveTrait };
+    }
+
     function ensureDiscipleRegistered(customReason = "") {
       if (!player) return null;
       if (!Array.isArray(player.disciples)) player.disciples = [];
@@ -30148,16 +30214,16 @@ ${targetW.desc}
       const usedNames = new Set(player.disciples.map(d => d.name));
       const avail = DISCIPLE_NAMES_POOL.filter(d => !usedNames.has(d.name));
       const picked = avail.length > 0 ? avail[Math.floor(Math.random() * avail.length)] : DISCIPLE_NAMES_POOL[0];
-      const bestSk = getBestLearnedSkillName("招式", "本門絕學").replace(/^[《「]+|[》」]+$/g, "");
+      const matched = pickSkillForDisciple(picked);
       const newDisc = {
         name: picked.name,
         gender: picked.gender,
         title: player.disciples.length === 0 ? "開山大弟子" : "關門小弟子",
         originTitle: picked.title,
-        trait: picked.trait,
+        trait: matched.trait,
         age: 14 + Math.floor(Math.random() * 4),
         recruitedAtPlayerAge: player.age,
-        inheritedSkill: bestSk,
+        inheritedSkill: matched.skillName,
         lastInteractAge: -1
       };
       player.disciples.push(newDisc);
@@ -30269,11 +30335,13 @@ ${targetW.desc}
       const usedNames = new Set(player.disciples.map(d => d.name));
       const avail = DISCIPLE_NAMES_POOL.filter(d => !usedNames.has(d.name));
       const cand = avail.length > 0 ? avail[Math.floor(Math.random() * avail.length)] : DISCIPLE_NAMES_POOL[0];
-      const bestSk = getBestLearnedSkillName("招式", "獨門絕學").replace(/^[《「]+|[》」]+$/g, "");
+      const matched = pickSkillForDisciple(cand);
+      const bestSk = matched.skillName;
+      const candTrait = matched.trait;
 
-      const desc = `你在江湖上威名日盛，這一日行經風雪山神廟，見一名年約十四五歲的${cand.title}【${cand.name}】正咬牙在雪地裡以木枝演練殘缺招式，雖滿手凍瘡卻眼神堅毅（${cand.trait}）。\n\n` +
+      const desc = `你在江湖上威名日盛，這一日行經風雪山神廟，見一名年約十四五歲的${cand.title}【${cand.name}】正咬牙在雪地裡苦練基本功，雖滿手凍瘡卻眼神堅毅（${candTrait}）。\n\n` +
         `得知你便是名震天下的大俠後，【${cand.name}】噗通一聲跪在雪地裡連磕三個響頭：\n` +
-        `「晚輩【${cand.name}】孤苦無依，唯願拜入前輩門下為親傳弟子，侍奉師父左右、傳承俠道！」`;
+        `「晚輩【${cand.name}】孤苦無依，唯願拜入前輩座下為親傳弟子，侍奉師父左右、傳承俠道！」`;
 
       openEventModal(
         `🍵 薪火相傳 · 收錄親傳弟子【${cand.name}】`,
@@ -30288,7 +30356,7 @@ ${targetW.desc}
                 gender: cand.gender,
                 title: player.disciples.length === 0 ? "開山大弟子" : "親傳弟子",
                 originTitle: cand.title,
-                trait: cand.trait,
+                trait: candTrait,
                 age: 15,
                 recruitedAtPlayerAge: player.age,
                 inheritedSkill: bestSk,
