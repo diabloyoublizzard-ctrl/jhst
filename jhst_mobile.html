@@ -752,7 +752,11 @@
       <span class="status-badge" id="ui-sect">無門無派</span>
       <span class="status-badge" id="ui-realm">凡胎俗骨</span>
       <span class="status-badge" id="ui-body-tier" title="當前肉身淬鍊境界">凡胎肉身</span>
-      <button class="ctrl-btn" id="btn-top-pause" title="快捷鍵：按 P 鍵可隨時暫停或繼續" style="margin-left:auto;padding:3px 10px;font-size:0.8rem;border-color:var(--gold);color:var(--gold-bright);font-weight:bold;z-index:120;white-space:nowrap;">⏸ 暫停 (P)</button>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:6px;z-index:120;">
+        <button class="ctrl-btn" id="btn-bgm-toggle" title="開啟或關閉原創古風背景音樂與音效（古琴／洞簫／戰鼓／玉磬）" style="padding:3px 10px;font-size:0.8rem;border-color:var(--jade);color:var(--jade-bright);font-weight:bold;white-space:nowrap;">🎵 雅樂：關</button>
+        <button class="ctrl-btn" id="btn-bgm-theme" title="切換背景音樂曲風（自動隨境／竹林古琴／金戈戰鼓／太虛仙音／故人長思）" style="display:none;padding:3px 8px;font-size:0.76rem;border-color:var(--gold);color:var(--gold-bright);white-space:nowrap;">🎼 曲風：自動隨境</button>
+        <button class="ctrl-btn" id="btn-top-pause" title="快捷鍵：按 P 鍵可隨時暫停或繼續" style="padding:3px 10px;font-size:0.8rem;border-color:var(--gold);color:var(--gold-bright);font-weight:bold;white-space:nowrap;">⏸ 暫停 (P)</button>
+      </div>
       <div id="ui-badges" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
 
@@ -1096,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.10.0055</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.10.0110</span>
       </div>
 
       <div class="debug-row">
@@ -17799,7 +17803,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.10.0055";
+    const GAME_VERSION = "v2026.11.10.0110";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -18055,6 +18059,320 @@ addGameData({
 
       refreshCharacterDropdowns();
     }
+
+    /* =========================================================================
+     * 零之二、 古韻天音 · 原創動態五聲古樂合成引擎 (Web Audio API 零外部依賴)
+     * 支援四大曲風：
+     *   1. roam     《竹林聽風 · 紅塵古琴》（宮調五聲：古琴吟猱 + 洞簫長音）
+     *   2. battle   《十面埋伏 · 金戈戰鼓》（羽調疾奏：琵琶輪指 + 沉雷戰鼓）
+     *   3. immortal 《太虛問道 · 雲海仙音》（太古清徵：玉磬泛音 + 仙雲共鳴）
+     *   4. elegy    《歲月滄桑 · 故人長思》（慢板悲商：孤簫幽咽 + 殘琴餘韻）
+     * ========================================================================= */
+    const WuxiaAudio = (() => {
+      let ctx = null;
+      let masterGain = null;
+      let isPlaying = false;
+      let mode = "auto"; // "auto" | "roam" | "battle" | "immortal" | "elegy"
+      let activeTheme = "roam";
+      let timerId = null;
+      let stepIdx = 0;
+
+      const THEME_LABELS = {
+        auto: "自動隨境",
+        roam: "竹林古琴",
+        battle: "金戈戰鼓",
+        immortal: "太虛仙音",
+        elegy: "故人長思"
+      };
+      const MODE_ORDER = ["auto", "roam", "battle", "immortal", "elegy"];
+
+      // 五聲音階頻率表 (D 宮調: D, E, F#, A, B 與 A 羽調: A, C, D, E, G)
+      const SCALES = {
+        roam:     [146.83, 164.81, 185.00, 220.00, 246.94, 293.66, 329.63, 369.99, 440.00, 493.88, 587.33],
+        battle:   [110.00, 130.81, 146.83, 164.81, 196.00, 220.00, 261.63, 293.66, 329.63, 392.00, 440.00],
+        immortal: [196.00, 220.00, 246.94, 293.66, 329.63, 392.00, 440.00, 493.88, 587.33, 659.25, 783.99],
+        elegy:    [130.81, 146.83, 164.81, 196.00, 220.00, 261.63, 293.66, 329.63, 392.00, 440.00]
+      };
+
+      // 精心編排的古風樂句序列（索引對應 SCALES，-1 為休止留白）
+      const MELODIES = {
+        roam: [
+          { guqin: 5, xiao: -1, bass: 0 }, { guqin: 6, xiao: -1, bass: -1 },
+          { guqin: 8, xiao: 8,  bass: 3 }, { guqin: -1, xiao: -1, bass: -1 },
+          { guqin: 9, xiao: -1, bass: -1 }, { guqin: 8, xiao: 6,  bass: 2 },
+          { guqin: 6, xiao: -1, bass: -1 }, { guqin: 5, xiao: -1, bass: 0 },
+          { guqin: 3, xiao: 5,  bass: 0 }, { guqin: 4, xiao: -1, bass: -1 },
+          { guqin: 5, xiao: -1, bass: 1 }, { guqin: -1, xiao: 3,  bass: -1 },
+          { guqin: 2, xiao: -1, bass: 0 }, { guqin: 3, xiao: -1, bass: -1 },
+          { guqin: 5, xiao: 5,  bass: 0 }, { guqin: -1, xiao: -1, bass: -1 }
+        ],
+        battle: [
+          { pipa: 5, drum: 1, bass: 0 }, { pipa: 5, drum: 0, bass: -1 },
+          { pipa: 7, drum: 0, bass: 2 }, { pipa: 8, drum: 1, bass: -1 },
+          { pipa: 9, drum: 1, bass: 3 }, { pipa: 8, drum: 0, bass: -1 },
+          { pipa: 7, drum: 0, bass: 2 }, { pipa: 5, drum: 1, bass: 0 },
+          { pipa: 6, drum: 1, bass: 1 }, { pipa: 7, drum: 0, bass: -1 },
+          { pipa: 9, drum: 1, bass: 4 }, { pipa: 10, drum: 1, bass: -1 },
+          { pipa: 9, drum: 0, bass: 3 }, { pipa: 7, drum: 1, bass: 2 },
+          { pipa: 5, drum: 1, bass: 0 }, { pipa: -1, drum: 1, bass: 0 }
+        ],
+        immortal: [
+          { chime: 5, pad: 0, guqin: 8 }, { chime: -1, pad: -1, guqin: 9 },
+          { chime: 7, pad: 3, guqin: -1 }, { chime: -1, pad: -1, guqin: 10 },
+          { chime: 8, pad: 4, guqin: 7 }, { chime: -1, pad: -1, guqin: -1 },
+          { chime: 9, pad: 5, guqin: 8 }, { chime: -1, pad: -1, guqin: 5 },
+          { chime: 6, pad: 2, guqin: 9 }, { chime: -1, pad: -1, guqin: -1 },
+          { chime: 5, pad: 0, guqin: 7 }, { chime: -1, pad: -1, guqin: 5 }
+        ],
+        elegy: [
+          { guqin: 4, xiao: 7, bass: 0 }, { guqin: -1, xiao: -1, bass: -1 },
+          { guqin: 6, xiao: 6, bass: -1 }, { guqin: 4, xiao: -1, bass: 1 },
+          { guqin: 3, xiao: 4, bass: -1 }, { guqin: -1, xiao: -1, bass: -1 },
+          { guqin: 2, xiao: 3, bass: 0 }, { guqin: 1, xiao: -1, bass: -1 },
+          { guqin: 0, xiao: 4, bass: 0 }, { guqin: -1, xiao: -1, bass: -1 }
+        ]
+      };
+
+      function ensureContext() {
+        if (!ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return false;
+          ctx = new AudioCtx();
+          masterGain = ctx.createGain();
+          masterGain.gain.value = 0.28;
+          masterGain.connect(ctx.destination);
+        }
+        if (ctx.state === "suspended") {
+          ctx.resume();
+        }
+        return true;
+      }
+
+      // 1. 古琴撥弦合成（含琴腔共鳴濾波與微妙吟猱滑音）
+      function playGuqinPluck(freq, duration = 2.6, volume = 0.28, slideRatio = 1.015) {
+        if (!ctx || !masterGain) return;
+        const now = ctx.currentTime;
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const filter = ctx.createBiquadFilter();
+        const gain = ctx.createGain();
+
+        osc1.type = "triangle";
+        osc2.type = "sawtooth";
+        osc1.frequency.setValueAtTime(freq, now);
+        osc1.frequency.exponentialRampToValueAtTime(freq * slideRatio, now + 0.18);
+        osc1.frequency.exponentialRampToValueAtTime(freq, now + 0.55);
+
+        osc2.frequency.setValueAtTime(freq * 2.0, now);
+
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(freq * 4.5, now);
+        filter.frequency.exponentialRampToValueAtTime(freq * 1.3, now + duration * 0.75);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(volume, now + 0.025);
+        gain.gain.exponentialRampToValueAtTime(volume * 0.35, now + 0.45);
+        gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
+
+        const g2 = ctx.createGain();
+        g2.gain.value = 0.22;
+
+        osc1.connect(filter);
+        osc2.connect(g2);
+        g2.connect(filter);
+        filter.connect(gain);
+        gain.connect(masterGain);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + duration);
+        osc2.stop(now + duration);
+      }
+
+      // 2. 洞簫吹奏合成（柔和正弦波 + 顫音 LFO）
+      function playBambooXiao(freq, duration = 3.0, volume = 0.14) {
+        if (!ctx || !masterGain) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const vib = ctx.createOscillator();
+        const vibGain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        const gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now);
+
+        vib.frequency.value = 4.8;
+        vibGain.gain.value = freq * 0.012;
+        vib.connect(vibGain);
+        vibGain.connect(osc.frequency);
+
+        filter.type = "lowpass";
+        filter.frequency.value = freq * 2.4;
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(volume, now + 0.38);
+        gain.gain.setValueAtTime(volume * 0.85, now + duration * 0.65);
+        gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(masterGain);
+
+        osc.start(now);
+        vib.start(now);
+        osc.stop(now + duration);
+        vib.stop(now + duration);
+      }
+
+      // 3. 戰鼓與琵琶疾奏合成（用於重大戰役與危機）
+      function playWarDrum(intensity = 1.0) {
+        if (!ctx || !masterGain) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(115 * intensity, now);
+        osc.frequency.exponentialRampToValueAtTime(38, now + 0.35);
+
+        gain.gain.setValueAtTime(0.36 * intensity, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
+
+        osc.connect(gain);
+        gain.connect(masterGain);
+        osc.start(now);
+        osc.stop(now + 0.44);
+      }
+
+      // 4. 太虛玉磬／編鐘泛音（用於修真與仙緣）
+      function playJadeChime(freq, duration = 3.2, volume = 0.16) {
+        if (!ctx || !masterGain) return;
+        const now = ctx.currentTime;
+        [1.0, 2.76, 5.4].forEach((ratio, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq * ratio, now);
+          const partVol = volume / (idx * 1.8 + 1);
+          const partDur = duration / (idx + 1);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(partVol, now + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0008, now + partDur);
+          osc.connect(gain);
+          gain.connect(masterGain);
+          osc.start(now);
+          osc.stop(now + partDur);
+        });
+      }
+
+      function detectAutoTheme() {
+        if (!player) return "roam";
+        const epModal = document.getElementById("modal-epilogue");
+        if (player.isDead || (epModal && epModal.classList.contains("show"))) return "elegy";
+        const evModal = document.getElementById("modal-event");
+        if (evModal && evModal.classList.contains("show")) {
+          const tagText = document.getElementById("ev-modal-tag")?.textContent || "";
+          const titleText = document.getElementById("ev-modal-title")?.textContent || "";
+          if (/浩劫|戰役|險境|風波|死劫|血戰|決戰/.test(tagText + titleText)) return "battle";
+        }
+        if (player.inImmortalPhase || player.isImmortalUnlocked) return "immortal";
+        return "roam";
+      }
+
+      function tickMusicStep() {
+        if (!isPlaying || !ctx) return;
+        activeTheme = (mode === "auto") ? detectAutoTheme() : mode;
+        const scale = SCALES[activeTheme] || SCALES.roam;
+        const seq = MELODIES[activeTheme] || MELODIES.roam;
+        const noteObj = seq[stepIdx % seq.length];
+        stepIdx++;
+
+        if (activeTheme === "roam") {
+          if (noteObj.guqin >= 0) playGuqinPluck(scale[noteObj.guqin], 2.6, 0.25, 1.016);
+          if (noteObj.xiao >= 0) playBambooXiao(scale[noteObj.xiao], 3.1, 0.13);
+          if (noteObj.bass >= 0) playGuqinPluck(scale[noteObj.bass] * 0.5, 3.4, 0.18, 1.005);
+        } else if (activeTheme === "battle") {
+          if (noteObj.pipa >= 0) playGuqinPluck(scale[noteObj.pipa], 0.85, 0.28, 1.03);
+          if (noteObj.drum > 0) playWarDrum(noteObj.drum === 1 ? 1.0 : 0.65);
+          if (noteObj.bass >= 0) playGuqinPluck(scale[noteObj.bass] * 0.5, 1.2, 0.22, 1.01);
+        } else if (activeTheme === "immortal") {
+          if (noteObj.chime >= 0) playJadeChime(scale[noteObj.chime], 3.4, 0.15);
+          if (noteObj.guqin >= 0) playGuqinPluck(scale[noteObj.guqin], 2.8, 0.18, 1.008);
+          if (noteObj.pad >= 0) playBambooXiao(scale[noteObj.pad], 3.8, 0.10);
+        } else if (activeTheme === "elegy") {
+          if (noteObj.guqin >= 0) playGuqinPluck(scale[noteObj.guqin], 3.5, 0.22, 0.985);
+          if (noteObj.xiao >= 0) playBambooXiao(scale[noteObj.xiao], 4.0, 0.15);
+          if (noteObj.bass >= 0) playGuqinPluck(scale[noteObj.bass] * 0.5, 4.2, 0.16, 1.0);
+        }
+
+        const stepInterval = activeTheme === "battle" ? 360 : (activeTheme === "elegy" ? 1350 : 920);
+        timerId = setTimeout(tickMusicStep, stepInterval);
+      }
+
+      function updateButtonsUI() {
+        const toggleBtn = document.getElementById("btn-bgm-toggle");
+        const themeBtn = document.getElementById("btn-bgm-theme");
+        if (toggleBtn) {
+          toggleBtn.textContent = isPlaying ? "🎵 雅樂：開" : "🎵 雅樂：關";
+          toggleBtn.style.borderColor = isPlaying ? "var(--gold-bright)" : "var(--jade)";
+          toggleBtn.style.color = isPlaying ? "var(--gold-bright)" : "var(--jade-bright)";
+        }
+        if (themeBtn) {
+          themeBtn.style.display = isPlaying ? "inline-block" : "none";
+          const subLabel = mode === "auto" ? `自動 (${THEME_LABELS[activeTheme] || "古琴"})` : THEME_LABELS[mode];
+          themeBtn.textContent = `🎼 曲風：${subLabel}`;
+        }
+      }
+
+      return {
+        toggle() {
+          if (!ensureContext()) return;
+          isPlaying = !isPlaying;
+          if (timerId) { clearTimeout(timerId); timerId = null; }
+          if (isPlaying) {
+            stepIdx = 0;
+            tickMusicStep();
+          }
+          updateButtonsUI();
+        },
+        cycleTheme() {
+          const curIdx = MODE_ORDER.indexOf(mode);
+          mode = MODE_ORDER[(curIdx + 1) % MODE_ORDER.length];
+          stepIdx = 0;
+          if (isPlaying) {
+            if (timerId) clearTimeout(timerId);
+            tickMusicStep();
+          }
+          updateButtonsUI();
+        },
+        refreshAutoTheme() {
+          if (!isPlaying || mode !== "auto") return;
+          const nextT = detectAutoTheme();
+          if (nextT !== activeTheme) {
+            activeTheme = nextT;
+            stepIdx = 0;
+            if (timerId) clearTimeout(timerId);
+            tickMusicStep();
+            updateButtonsUI();
+          }
+        },
+        playSfx(kind) {
+          if (!isPlaying || !ctx) return;
+          if (kind === "click") playGuqinPluck(587.33, 0.35, 0.10, 1.0);
+          else if (kind === "skill") playJadeChime(659.25, 1.8, 0.16);
+          else if (kind === "danger") playWarDrum(1.1);
+        }
+      };
+    })();
+    window.WuxiaAudio = WuxiaAudio;
+    setTimeout(() => {
+      document.getElementById("btn-bgm-toggle")?.addEventListener("click", () => {
+        if (window.WuxiaAudio) window.WuxiaAudio.toggle();
+      });
+      document.getElementById("btn-bgm-theme")?.addEventListener("click", () => {
+        if (window.WuxiaAudio) window.WuxiaAudio.cycleTheme();
+      });
+    }, 50);
 
     function startNewLife() {
       if (!candidateDraft) candidateDraft = generateCandidate();
@@ -29558,6 +29876,7 @@ ${targetW.desc}
 
     function triggerDeathOrAscension(reasonText) {
       if (!player) return;
+      setTimeout(() => { if (window.WuxiaAudio) window.WuxiaAudio.refreshAutoTheme(); }, 30);
       setPauseState(true);
       player.isDead = true;
       const isUninjuredElder = !player.inImmortalPhase && !player.fakedDeath && player.age >= 66 && player.age <= 120 &&
@@ -31010,6 +31329,7 @@ ${targetW.desc}
     // 動態前置條件過濾、標籤去重與渲染
     function openEventModal(title, tag, desc, rawChoices) {
       if (!player || player.isDead) return;
+      setTimeout(() => { if (window.WuxiaAudio) window.WuxiaAudio.refreshAutoTheme(); }, 30);
       player.lastEventContext = { title: String(title || ""), tag: String(tag || ""), age: player.age };
       document.getElementById("ev-modal-title").textContent = title;
       document.getElementById("ev-modal-tag").textContent = tag;
