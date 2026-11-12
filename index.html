@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.12.1710</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.12.1745</span>
       </div>
 
       <div class="debug-row">
@@ -1148,7 +1148,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611121710"></script>
+  <script src="data.js?v=202611121745"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1161,7 +1161,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611121710"></script>
+  <script src="patches.js?v=202611121745"></script>
   <script>
 
   (function() {
@@ -2011,7 +2011,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.12.1710";
+    const GAME_VERSION = "v2026.11.12.1745";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -2269,91 +2269,117 @@
     }
 
     /* =========================================================================
-     * 零之二、 古韻天音 · BGM 輪替播放器 (優先輪播 bgm/ 資料夾內的三首 MP3/WAV 配樂)
-     * 輪替曲目清單：
-     *   1. bgm/主選單音樂.mp3 (.wav 備援)       — 《雲嶺煙嵐 · 主選單音樂》
-     *   2. bgm/生平卷.mp3 (.wav 備援)           — 《竹林憶舊 · 生平卷》
-     *   3. bgm/九州大地圖_行俠探索曲.mp3 (.wav) — 《七峰破曉 · 九州行俠探索》
+     * 零之二、 古韻天音 · 情境優先與平滑淡入淡出 BGM 輪替播放器
+     *   - 平時（主選單／生平探索）：自動輪播 bgm/ 內的三首 128kbps MP3
+     *   - 重大戰役／死劫：音量平滑淡出，若有「bgm/重大戰役.mp3」則單曲循環戰役專曲；
+     *     若尚未放入戰役檔，則自動壓低環境音量並維持肅穆氛圍，戰役結束後平滑淡回原進度
+     *   - 支援瀏覽器本地快取（不重複消耗伺服器流量），且行動單頁版無音樂檔時自動靜默降級
      * ========================================================================= */
     const WuxiaAudio = (() => {
-      const PLAYLIST = [
-        {
-          id: "main_menu",
-          title: "主選單音樂",
-          shortLabel: "雲嶺煙嵐",
-          mp3: "bgm/主選單音樂.mp3",
-          wav: "bgm/主選單音樂.wav"
-        },
-        {
-          id: "life_scroll",
-          title: "生平卷",
-          shortLabel: "竹林憶舊",
-          mp3: "bgm/生平卷.mp3",
-          wav: "bgm/生平卷.wav"
-        },
-        {
-          id: "world_roam",
-          title: "九州大地圖_行俠探索曲",
-          shortLabel: "九州行俠",
-          mp3: "bgm/九州大地圖_行俠探索曲.mp3",
-          wav: "bgm/九州大地圖_行俠探索曲.wav"
-        }
+      const ROAM_PLAYLIST = [
+        { id: "main_menu",   title: "主選單音樂",             shortLabel: "雲嶺煙嵐", mp3: "bgm/主選單音樂.mp3" },
+        { id: "life_scroll", title: "生平卷",                 shortLabel: "竹林憶舊", mp3: "bgm/生平卷.mp3" },
+        { id: "world_roam",  title: "九州大地圖_行俠探索曲", shortLabel: "九州行俠", mp3: "bgm/九州大地圖_行俠探索曲.mp3" }
       ];
+      const BATTLE_TRACK = { id: "battle_theme", title: "重大戰役", shortLabel: "戰鼓催城", mp3: "bgm/重大戰役.mp3" };
 
+      const TARGET_VOL = 0.55;
+      const DUCK_VOL = 0.22; // 尚未放入獨立戰役 MP3 時，進入重大戰役自動將音量柔順壓低
       let audioEl = null;
       let isPlaying = false;
       let currentIdx = 0;
-      let usingWavFallback = false;
+      let savedRoamTime = 0;
+      let savedRoamIdx = 0;
+      let inBattleMode = false;
+      let battleTrackAvailable = null; // null=未測, true=存在, false=不存在
+      let fadeTimer = null;
 
       function ensureAudioElement() {
         if (!audioEl) {
           audioEl = new Audio();
-          audioEl.preload = "auto";
-          audioEl.volume = 0.55;
+          audioEl.preload = "none";
+          audioEl.volume = 0;
 
-          // 一首播畢後自動輪替播放下一首！
           audioEl.addEventListener("ended", () => {
             if (!isPlaying) return;
-            currentIdx = (currentIdx + 1) % PLAYLIST.length;
-            usingWavFallback = false;
-            loadAndPlayCurrent();
+            if (inBattleMode && battleTrackAvailable) {
+              // 戰役專曲單曲循環
+              audioEl.currentTime = 0;
+              audioEl.play().catch(() => {});
+              return;
+            }
+            currentIdx = (currentIdx + 1) % ROAM_PLAYLIST.length;
+            playTrackWithFade(ROAM_PLAYLIST[currentIdx], 0, TARGET_VOL);
           });
 
-          // 若 mp3 載入失敗則自動切換為 wav 備援，若仍失敗則跳下一首
           audioEl.addEventListener("error", () => {
             if (!isPlaying) return;
-            const track = PLAYLIST[currentIdx];
-            if (!usingWavFallback && track && track.wav) {
-              usingWavFallback = true;
-              audioEl.src = encodeURI(track.wav);
-              audioEl.play().catch(() => {});
+            if (inBattleMode && battleTrackAvailable === null) {
+              battleTrackAvailable = false;
+              // 尚未放置 bgm/重大戰役.mp3，改為平滑壓低平日曲音量以烘托肅穆感
+              playTrackWithFade(ROAM_PLAYLIST[savedRoamIdx], savedRoamTime, DUCK_VOL);
             }
           });
         }
         return audioEl;
       }
 
-      function loadAndPlayCurrent() {
+      function fadeVolumeTo(targetVol, durationMs = 800, onComplete = null) {
         const el = ensureAudioElement();
-        const track = PLAYLIST[currentIdx] || PLAYLIST[0];
-        usingWavFallback = false;
-        el.src = encodeURI(track.mp3);
-        el.play().then(() => {
-          updateButtonsUI();
-        }).catch(() => {
-          // 嘗試 wav 備援
-          usingWavFallback = true;
-          el.src = encodeURI(track.wav);
-          el.play().catch(() => {});
-          updateButtonsUI();
-        });
-        updateButtonsUI();
+        if (fadeTimer) { clearInterval(fadeTimer); fadeTimer = null; }
+        const startVol = el.volume;
+        const steps = Math.max(1, Math.round(durationMs / 40));
+        let step = 0;
+        fadeTimer = setInterval(() => {
+          step++;
+          const ratio = Math.min(1, step / steps);
+          el.volume = Math.max(0, Math.min(1, startVol + (targetVol - startVol) * ratio));
+          if (step >= steps) {
+            clearInterval(fadeTimer);
+            fadeTimer = null;
+            if (onComplete) onComplete();
+          }
+        }, 40);
+      }
+
+      function playTrackWithFade(track, startTime = 0, targetVol = TARGET_VOL) {
+        const el = ensureAudioElement();
+        const nextSrc = encodeURI(track.mp3);
+        const switchAndFadeIn = () => {
+          el.src = nextSrc;
+          el.volume = 0;
+          el.play().then(() => {
+            if (startTime > 0 && el.duration && startTime < el.duration) {
+              try { el.currentTime = startTime; } catch (_) {}
+            }
+            fadeVolumeTo(targetVol, 900);
+            updateButtonsUI();
+          }).catch(() => {
+            updateButtonsUI();
+          });
+        };
+
+        if (!el.paused && el.src) {
+          fadeVolumeTo(0, 600, switchAndFadeIn);
+        } else {
+          switchAndFadeIn();
+        }
+      }
+
+      function detectBattleContext() {
+        const evModal = document.getElementById("modal-event");
+        if (evModal && evModal.classList.contains("show")) {
+          const tagText = document.getElementById("ev-modal-tag")?.textContent || "";
+          const titleText = document.getElementById("ev-modal-title")?.textContent || "";
+          if (/浩劫|戰役|險境|風波|死劫|血戰|決戰/.test(tagText + titleText)) return true;
+        }
+        return false;
       }
 
       function updateButtonsUI() {
         const toggleBtn = document.getElementById("btn-bgm-toggle");
         const themeBtn = document.getElementById("btn-bgm-theme");
-        const track = PLAYLIST[currentIdx] || PLAYLIST[0];
+        const track = (inBattleMode && battleTrackAvailable) ? BATTLE_TRACK : (ROAM_PLAYLIST[currentIdx] || ROAM_PLAYLIST[0]);
         if (toggleBtn) {
           toggleBtn.textContent = isPlaying ? "🎵 雅樂：開" : "🎵 雅樂：關";
           toggleBtn.style.borderColor = isPlaying ? "var(--gold-bright)" : "var(--jade)";
@@ -2361,8 +2387,12 @@
         }
         if (themeBtn) {
           themeBtn.style.display = isPlaying ? "inline-block" : "none";
-          themeBtn.textContent = `🎼 輪播(${currentIdx + 1}/${PLAYLIST.length})：${track.shortLabel} ⏭`;
-          themeBtn.title = `正在輪替播放：《${track.title}》（點擊可立即切換下一首）`;
+          if (inBattleMode && battleTrackAvailable) {
+            themeBtn.textContent = `⚔️ 戰役專曲：${track.shortLabel}`;
+          } else {
+            themeBtn.textContent = `🎼 輪播(${currentIdx + 1}/${ROAM_PLAYLIST.length})：${track.shortLabel} ⏭`;
+          }
+          themeBtn.title = `目前播放：《${track.title}》（點擊可切換下一首）`;
         }
       }
 
@@ -2371,28 +2401,47 @@
           const el = ensureAudioElement();
           isPlaying = !isPlaying;
           if (isPlaying) {
+            inBattleMode = detectBattleContext();
             if (!el.src) {
-              loadAndPlayCurrent();
+              playTrackWithFade(ROAM_PLAYLIST[currentIdx], 0, inBattleMode ? DUCK_VOL : TARGET_VOL);
             } else {
-              el.play().catch(() => loadAndPlayCurrent());
+              el.play().then(() => fadeVolumeTo(inBattleMode ? DUCK_VOL : TARGET_VOL, 600)).catch(() => playTrackWithFade(ROAM_PLAYLIST[currentIdx]));
             }
           } else {
-            el.pause();
+            fadeVolumeTo(0, 450, () => el.pause());
           }
           updateButtonsUI();
         },
         cycleTheme() {
-          // 點擊「🎼 輪播」按鈕時直接切換至下一首曲目
-          currentIdx = (currentIdx + 1) % PLAYLIST.length;
-          if (isPlaying) {
-            loadAndPlayCurrent();
-          } else {
-            isPlaying = true;
-            loadAndPlayCurrent();
-          }
+          inBattleMode = false;
+          currentIdx = (currentIdx + 1) % ROAM_PLAYLIST.length;
+          if (!isPlaying) isPlaying = true;
+          playTrackWithFade(ROAM_PLAYLIST[currentIdx], 0, TARGET_VOL);
         },
         refreshAutoTheme() {
-          updateButtonsUI();
+          if (!isPlaying || !audioEl) return;
+          const shouldBattle = detectBattleContext();
+          if (shouldBattle === inBattleMode) return;
+          inBattleMode = shouldBattle;
+
+          if (inBattleMode) {
+            savedRoamIdx = currentIdx;
+            savedRoamTime = audioEl.currentTime || 0;
+            if (battleTrackAvailable !== false) {
+              playTrackWithFade(BATTLE_TRACK, 0, TARGET_VOL);
+            } else {
+              fadeVolumeTo(DUCK_VOL, 800);
+              updateButtonsUI();
+            }
+          } else {
+            if (battleTrackAvailable) {
+              currentIdx = savedRoamIdx;
+              playTrackWithFade(ROAM_PLAYLIST[currentIdx], savedRoamTime, TARGET_VOL);
+            } else {
+              fadeVolumeTo(TARGET_VOL, 900);
+              updateButtonsUI();
+            }
+          }
         },
         playSfx() {}
       };
