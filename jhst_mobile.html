@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.10.0120</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.12.1710</span>
       </div>
 
       <div class="debug-row">
@@ -17803,7 +17803,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.10.0120";
+    const GAME_VERSION = "v2026.11.12.1710";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -18061,381 +18061,91 @@ addGameData({
     }
 
     /* =========================================================================
-     * 零之二、 古韻天音 · 原創動態五聲古樂合成引擎 (Web Audio API 零外部依賴)
-     * 支援四大曲風：
-     *   1. roam     《春風策馬 · 少年遊》（平日闖蕩：輕快竹笛 + 柳琴跳音 + 輕巧馬蹄木魚節拍）
-     *   2. battle   《黑雲壓城 · 沉雷戰鼓》（重大戰役：低音沉重攻城巨鼓 + 肅殺低鳴古琴 + 寒鐵重音）
-     *   3. immortal 《太虛問道 · 雲海仙音》（太古清徵：玉磬泛音 + 仙雲共鳴）
-     *   4. elegy    《歲月滄桑 · 故人長思》（慢板悲商：孤簫幽咽 + 殘琴餘韻）
+     * 零之二、 古韻天音 · BGM 輪替播放器 (優先輪播 bgm/ 資料夾內的三首 MP3/WAV 配樂)
+     * 輪替曲目清單：
+     *   1. bgm/主選單音樂.mp3 (.wav 備援)       — 《雲嶺煙嵐 · 主選單音樂》
+     *   2. bgm/生平卷.mp3 (.wav 備援)           — 《竹林憶舊 · 生平卷》
+     *   3. bgm/九州大地圖_行俠探索曲.mp3 (.wav) — 《七峰破曉 · 九州行俠探索》
      * ========================================================================= */
     const WuxiaAudio = (() => {
-      let ctx = null;
-      let masterGain = null;
+      const PLAYLIST = [
+        {
+          id: "main_menu",
+          title: "主選單音樂",
+          shortLabel: "雲嶺煙嵐",
+          mp3: "bgm/主選單音樂.mp3",
+          wav: "bgm/主選單音樂.wav"
+        },
+        {
+          id: "life_scroll",
+          title: "生平卷",
+          shortLabel: "竹林憶舊",
+          mp3: "bgm/生平卷.mp3",
+          wav: "bgm/生平卷.wav"
+        },
+        {
+          id: "world_roam",
+          title: "九州大地圖_行俠探索曲",
+          shortLabel: "九州行俠",
+          mp3: "bgm/九州大地圖_行俠探索曲.mp3",
+          wav: "bgm/九州大地圖_行俠探索曲.wav"
+        }
+      ];
+
+      let audioEl = null;
       let isPlaying = false;
-      let mode = "auto"; // "auto" | "roam" | "battle" | "immortal" | "elegy"
-      let activeTheme = "roam";
-      let timerId = null;
-      let stepIdx = 0;
+      let currentIdx = 0;
+      let usingWavFallback = false;
 
-      const THEME_LABELS = {
-        auto: "自動隨境",
-        roam: "輕快江湖",
-        battle: "沉重戰鼓",
-        immortal: "太虛仙音",
-        elegy: "故人長思"
-      };
-      const MODE_ORDER = ["auto", "roam", "battle", "immortal", "elegy"];
+      function ensureAudioElement() {
+        if (!audioEl) {
+          audioEl = new Audio();
+          audioEl.preload = "auto";
+          audioEl.volume = 0.55;
 
-      // 音階頻率表：
-      // roam 使用明亮輕快的 G 大調五聲音階 (G4, A4, B4, D5, E5, G5, A5, B5)
-      // battle 使用低沉肅殺的 D 羽/角低音階 (D2=73.42, F2=87.31, G2=98.00, A2=110.00, C3=130.81, D3=146.83, F3=174.61, A3=220.00)
-      const SCALES = {
-        roam:     [196.00, 220.00, 246.94, 293.66, 329.63, 392.00, 440.00, 493.88, 587.33, 659.25, 783.99],
-        battle:   [73.42,  87.31,  98.00,  110.00, 130.81, 146.83, 174.61, 196.00, 220.00, 261.63],
-        immortal: [196.00, 220.00, 246.94, 293.66, 329.63, 392.00, 440.00, 493.88, 587.33, 659.25, 783.99],
-        elegy:    [130.81, 146.83, 164.81, 196.00, 220.00, 261.63, 293.66, 329.63, 392.00, 440.00]
-      };
+          // 一首播畢後自動輪替播放下一首！
+          audioEl.addEventListener("ended", () => {
+            if (!isPlaying) return;
+            currentIdx = (currentIdx + 1) % PLAYLIST.length;
+            usingWavFallback = false;
+            loadAndPlayCurrent();
+          });
 
-      // 精心編排的樂句序列：
-      // roam: 輕快跳躍的竹笛與古箏/柳琴對位（310ms 輕快八分音符節奏 + 輕巧木魚馬蹄拍點）
-      // battle: 沉重嚴肅的巨鼓與低音重弦（620ms 沉穩壓迫步伐 + 銅鐘低鳴）
-      const MELODIES = {
-        roam: [
-          { dizi: 5, pluck: 0, tap: 1, bass: 0 }, { dizi: 6, pluck: 3, tap: 0, bass: -1 },
-          { dizi: 7, pluck: 5, tap: 2, bass: 3 }, { dizi: 5, pluck: 3, tap: 0, bass: -1 },
-          { dizi: 8, pluck: 5, tap: 1, bass: 4 }, { dizi: 9, pluck: 6, tap: 0, bass: -1 },
-          { dizi: 8, pluck: 5, tap: 2, bass: 3 }, { dizi: -1, pluck: 3, tap: 0, bass: -1 },
-          { dizi: 7, pluck: 2, tap: 1, bass: 2 }, { dizi: 6, pluck: 4, tap: 0, bass: -1 },
-          { dizi: 5, pluck: 3, tap: 2, bass: 0 }, { dizi: 3, pluck: 2, tap: 0, bass: -1 },
-          { dizi: 4, pluck: 1, tap: 1, bass: 1 }, { dizi: 6, pluck: 3, tap: 0, bass: -1 },
-          { dizi: 5, pluck: 5, tap: 2, bass: 0 }, { dizi: -1, pluck: 0, tap: 0, bass: -1 }
-        ],
-        battle: [
-          { heavyDrum: 2, lowString: 0, horn: 0, gong: 1 }, { heavyDrum: 0, lowString: -1, horn: -1, gong: 0 },
-          { heavyDrum: 1, lowString: 3, horn: -1, gong: 0 }, { heavyDrum: 1, lowString: 2, horn: -1, gong: 0 },
-          { heavyDrum: 2, lowString: 5, horn: 3, gong: 0 }, { heavyDrum: 0, lowString: -1, horn: -1, gong: 0 },
-          { heavyDrum: 1, lowString: 4, horn: -1, gong: 0 }, { heavyDrum: 0, lowString: 3, horn: -1, gong: 0 },
-          { heavyDrum: 2, lowString: 1, horn: 1, gong: 1 }, { heavyDrum: 0, lowString: -1, horn: -1, gong: 0 },
-          { heavyDrum: 1, lowString: 2, horn: -1, gong: 0 }, { heavyDrum: 1, lowString: 3, horn: -1, gong: 0 },
-          { heavyDrum: 2, lowString: 0, horn: 0, gong: 0 }, { heavyDrum: 1, lowString: 0, horn: -1, gong: 0 },
-          { heavyDrum: 2, lowString: 0, horn: 0, gong: 1 }, { heavyDrum: 0, lowString: -1, horn: -1, gong: 0 }
-        ],
-        immortal: [
-          { chime: 5, pad: 0, guqin: 8 }, { chime: -1, pad: -1, guqin: 9 },
-          { chime: 7, pad: 3, guqin: -1 }, { chime: -1, pad: -1, guqin: 10 },
-          { chime: 8, pad: 4, guqin: 7 }, { chime: -1, pad: -1, guqin: -1 },
-          { chime: 9, pad: 5, guqin: 8 }, { chime: -1, pad: -1, guqin: 5 },
-          { chime: 6, pad: 2, guqin: 9 }, { chime: -1, pad: -1, guqin: -1 },
-          { chime: 5, pad: 0, guqin: 7 }, { chime: -1, pad: -1, guqin: 5 }
-        ],
-        elegy: [
-          { guqin: 4, xiao: 7, bass: 0 }, { guqin: -1, xiao: -1, bass: -1 },
-          { guqin: 6, xiao: 6, bass: -1 }, { guqin: 4, xiao: -1, bass: 1 },
-          { guqin: 3, xiao: 4, bass: -1 }, { guqin: -1, xiao: -1, bass: -1 },
-          { guqin: 2, xiao: 3, bass: 0 }, { guqin: 1, xiao: -1, bass: -1 },
-          { guqin: 0, xiao: 4, bass: 0 }, { guqin: -1, xiao: -1, bass: -1 }
-        ]
-      };
-
-      function ensureContext() {
-        if (!ctx) {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (!AudioCtx) return false;
-          ctx = new AudioCtx();
-          masterGain = ctx.createGain();
-          masterGain.gain.value = 0.30;
-          masterGain.connect(ctx.destination);
+          // 若 mp3 載入失敗則自動切換為 wav 備援，若仍失敗則跳下一首
+          audioEl.addEventListener("error", () => {
+            if (!isPlaying) return;
+            const track = PLAYLIST[currentIdx];
+            if (!usingWavFallback && track && track.wav) {
+              usingWavFallback = true;
+              audioEl.src = encodeURI(track.wav);
+              audioEl.play().catch(() => {});
+            }
+          });
         }
-        if (ctx.state === "suspended") {
-          ctx.resume();
-        }
-        return true;
+        return audioEl;
       }
 
-      // 1a. 輕快柳琴／古箏清脆彈撥（用於平日輕快配樂）
-      function playLivelyPluck(freq, duration = 0.65, volume = 0.20) {
-        if (!ctx || !masterGain) return;
-        const now = ctx.currentTime;
-        const osc1 = ctx.createOscillator();
-        const osc2 = ctx.createOscillator();
-        const filter = ctx.createBiquadFilter();
-        const gain = ctx.createGain();
-
-        osc1.type = "triangle";
-        osc2.type = "sine";
-        osc1.frequency.setValueAtTime(freq, now);
-        osc2.frequency.setValueAtTime(freq * 2.0, now);
-
-        filter.type = "lowpass";
-        filter.frequency.setValueAtTime(freq * 6.0, now);
-        filter.frequency.exponentialRampToValueAtTime(freq * 1.8, now + duration);
-
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.linearRampToValueAtTime(volume, now + 0.012);
-        gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
-
-        osc1.connect(filter);
-        osc2.connect(filter);
-        filter.connect(gain);
-        gain.connect(masterGain);
-
-        osc1.start(now);
-        osc2.start(now);
-        osc1.stop(now + duration);
-        osc2.stop(now + duration);
-      }
-
-      // 1b. 清脆竹笛（含裝飾倚音，輕快明亮）
-      function playBrightDizi(freq, duration = 0.55, volume = 0.16) {
-        if (!ctx || !masterGain) return;
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const filter = ctx.createBiquadFilter();
-        const gain = ctx.createGain();
-
-        osc.type = "triangle";
-        // 輕快笛音前綴裝飾滑音 (Grace note)
-        osc.frequency.setValueAtTime(freq * 1.12, now);
-        osc.frequency.exponentialRampToValueAtTime(freq, now + 0.045);
-
-        filter.type = "lowpass";
-        filter.frequency.value = freq * 3.5;
-
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.linearRampToValueAtTime(volume, now + 0.025);
-        gain.gain.setValueAtTime(volume * 0.75, now + duration * 0.6);
-        gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
-
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(masterGain);
-
-        osc.start(now);
-        osc.stop(now + duration);
-      }
-
-      // 1c. 輕巧木魚／馬蹄節拍器（增添平日游歷的輕快律動感）
-      function playLightWoodTap(accent = false) {
-        if (!ctx || !masterGain) return;
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "sine";
-        const baseF = accent ? 780 : 580;
-        osc.frequency.setValueAtTime(baseF, now);
-        osc.frequency.exponentialRampToValueAtTime(baseF * 0.45, now + 0.045);
-
-        gain.gain.setValueAtTime(accent ? 0.08 : 0.05, now);
-        gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.05);
-
-        osc.connect(gain);
-        gain.connect(masterGain);
-        osc.start(now);
-        osc.stop(now + 0.055);
-      }
-
-      // 2a. 重大戰役專屬：沉重攻城巨鼓（深沉低頻 42Hz~85Hz，莊重肅殺）
-      function playHeavySiegeDrum(isMainBeat = true) {
-        if (!ctx || !masterGain) return;
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const subOsc = ctx.createOscillator();
-        const filter = ctx.createBiquadFilter();
-        const gain = ctx.createGain();
-
-        osc.type = "sine";
-        subOsc.type = "triangle";
-        const startF = isMainBeat ? 88 : 68;
-        const endF = isMainBeat ? 36 : 32;
-        const dur = isMainBeat ? 0.78 : 0.48;
-        const vol = isMainBeat ? 0.48 : 0.28;
-
-        osc.frequency.setValueAtTime(startF, now);
-        osc.frequency.exponentialRampToValueAtTime(endF, now + dur * 0.85);
-        subOsc.frequency.setValueAtTime(startF * 0.5, now);
-        subOsc.frequency.exponentialRampToValueAtTime(24, now + dur);
-
-        filter.type = "lowpass";
-        filter.frequency.value = 160;
-
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.linearRampToValueAtTime(vol, now + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0008, now + dur);
-
-        osc.connect(filter);
-        subOsc.connect(filter);
-        filter.connect(gain);
-        gain.connect(masterGain);
-
-        osc.start(now);
-        subOsc.start(now);
-        osc.stop(now + dur);
-        subOsc.stop(now + dur);
-      }
-
-      // 2b. 重大戰役專屬：低音肅殺重弦與銅鐘低鳴（營造大軍壓境的嚴肅壓迫感）
-      function playSolemnBattleDrone(freq, duration = 1.35, volume = 0.22) {
-        if (!ctx || !masterGain) return;
-        const now = ctx.currentTime;
-        const osc1 = ctx.createOscillator();
-        const osc2 = ctx.createOscillator();
-        const filter = ctx.createBiquadFilter();
-        const gain = ctx.createGain();
-
-        osc1.type = "sawtooth";
-        osc2.type = "triangle";
-        osc1.frequency.setValueAtTime(freq, now);
-        osc2.frequency.setValueAtTime(freq * 1.5, now); // 五度沉厚共鳴
-
-        filter.type = "lowpass";
-        filter.frequency.setValueAtTime(freq * 2.6, now);
-        filter.frequency.exponentialRampToValueAtTime(freq * 1.1, now + duration);
-
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.linearRampToValueAtTime(volume, now + 0.06);
-        gain.gain.setValueAtTime(volume * 0.75, now + duration * 0.6);
-        gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
-
-        osc1.connect(filter);
-        osc2.connect(filter);
-        filter.connect(gain);
-        gain.connect(masterGain);
-
-        osc1.start(now);
-        osc2.start(now);
-        osc1.stop(now + duration);
-        osc2.stop(now + duration);
-      }
-
-      // 2c. 重大戰役專屬：青銅大鐘沉鳴
-      function playBronzeWarGong() {
-        if (!ctx || !masterGain) return;
-        const now = ctx.currentTime;
-        [110.0, 164.81, 246.94].forEach((f, idx) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(f, now);
-          const v = 0.14 / (idx + 1);
-          gain.gain.setValueAtTime(0.001, now);
-          gain.gain.linearRampToValueAtTime(v, now + 0.03);
-          gain.gain.exponentialRampToValueAtTime(0.0008, now + 2.2);
-          osc.connect(gain);
-          gain.connect(masterGain);
-          osc.start(now);
-          osc.stop(now + 2.25);
+      function loadAndPlayCurrent() {
+        const el = ensureAudioElement();
+        const track = PLAYLIST[currentIdx] || PLAYLIST[0];
+        usingWavFallback = false;
+        el.src = encodeURI(track.mp3);
+        el.play().then(() => {
+          updateButtonsUI();
+        }).catch(() => {
+          // 嘗試 wav 備援
+          usingWavFallback = true;
+          el.src = encodeURI(track.wav);
+          el.play().catch(() => {});
+          updateButtonsUI();
         });
-      }
-
-      // 3. 古琴與洞簫（用於仙音與故人長思）
-      function playGuqinPluck(freq, duration = 2.6, volume = 0.24, slideRatio = 1.015) {
-        if (!ctx || !masterGain) return;
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const filter = ctx.createBiquadFilter();
-        const gain = ctx.createGain();
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(freq, now);
-        osc.frequency.exponentialRampToValueAtTime(freq * slideRatio, now + 0.18);
-        osc.frequency.exponentialRampToValueAtTime(freq, now + 0.55);
-        filter.type = "lowpass";
-        filter.frequency.setValueAtTime(freq * 3.8, now);
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.linearRampToValueAtTime(volume, now + 0.025);
-        gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(masterGain);
-        osc.start(now);
-        osc.stop(now + duration);
-      }
-
-      function playBambooXiao(freq, duration = 3.0, volume = 0.14) {
-        if (!ctx || !masterGain) return;
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(freq, now);
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.linearRampToValueAtTime(volume, now + 0.35);
-        gain.gain.exponentialRampToValueAtTime(0.0008, now + duration);
-        osc.connect(gain);
-        gain.connect(masterGain);
-        osc.start(now);
-        osc.stop(now + duration);
-      }
-
-      function playJadeChime(freq, duration = 3.2, volume = 0.15) {
-        if (!ctx || !masterGain) return;
-        const now = ctx.currentTime;
-        [1.0, 2.76].forEach((ratio, idx) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(freq * ratio, now);
-          gain.gain.setValueAtTime(0.001, now);
-          gain.gain.linearRampToValueAtTime(volume / (idx * 2 + 1), now + 0.015);
-          gain.gain.exponentialRampToValueAtTime(0.0008, now + duration / (idx + 1));
-          osc.connect(gain);
-          gain.connect(masterGain);
-          osc.start(now);
-          osc.stop(now + duration / (idx + 1));
-        });
-      }
-
-      function detectAutoTheme() {
-        if (!player) return "roam";
-        const epModal = document.getElementById("modal-epilogue");
-        if (player.isDead || (epModal && epModal.classList.contains("show"))) return "elegy";
-        const evModal = document.getElementById("modal-event");
-        if (evModal && evModal.classList.contains("show")) {
-          const tagText = document.getElementById("ev-modal-tag")?.textContent || "";
-          const titleText = document.getElementById("ev-modal-title")?.textContent || "";
-          if (/浩劫|戰役|險境|風波|死劫|血戰|決戰|武林大會|盟主/.test(tagText + titleText)) return "battle";
-        }
-        if (player.inImmortalPhase) return "immortal";
-        return "roam";
-      }
-
-      function tickMusicStep() {
-        if (!isPlaying || !ctx) return;
-        activeTheme = (mode === "auto") ? detectAutoTheme() : mode;
-        const scale = SCALES[activeTheme] || SCALES.roam;
-        const seq = MELODIES[activeTheme] || MELODIES.roam;
-        const noteObj = seq[stepIdx % seq.length];
-        stepIdx++;
-
-        if (activeTheme === "roam") {
-          // 平日：輕快明亮的竹笛 + 柳琴/古箏彈撥 + 輕巧馬蹄節拍
-          if (noteObj.dizi >= 0) playBrightDizi(scale[noteObj.dizi], 0.42, 0.16);
-          if (noteObj.pluck >= 0) playLivelyPluck(scale[noteObj.pluck], 0.50, 0.18);
-          if (noteObj.bass >= 0) playLivelyPluck(scale[noteObj.bass] * 0.5, 0.60, 0.14);
-          if (noteObj.tap > 0) playLightWoodTap(noteObj.tap === 1);
-        } else if (activeTheme === "battle") {
-          // 重大戰役：沉重嚴肅的攻城戰鼓 + 低音肅殺重弦 + 青銅沉鐘
-          if (noteObj.heavyDrum > 0) playHeavySiegeDrum(noteObj.heavyDrum === 2);
-          if (noteObj.lowString >= 0) playSolemnBattleDrone(scale[noteObj.lowString], 1.15, 0.24);
-          if (noteObj.horn >= 0) playSolemnBattleDrone(scale[noteObj.horn] * 0.5, 1.6, 0.20);
-          if (noteObj.gong > 0) playBronzeWarGong();
-        } else if (activeTheme === "immortal") {
-          if (noteObj.chime >= 0) playJadeChime(scale[noteObj.chime], 3.4, 0.15);
-          if (noteObj.guqin >= 0) playGuqinPluck(scale[noteObj.guqin], 2.8, 0.18, 1.008);
-          if (noteObj.pad >= 0) playBambooXiao(scale[noteObj.pad], 3.8, 0.10);
-        } else if (activeTheme === "elegy") {
-          if (noteObj.guqin >= 0) playGuqinPluck(scale[noteObj.guqin], 3.5, 0.22, 0.985);
-          if (noteObj.xiao >= 0) playBambooXiao(scale[noteObj.xiao], 4.0, 0.15);
-          if (noteObj.bass >= 0) playGuqinPluck(scale[noteObj.bass] * 0.5, 4.2, 0.16, 1.0);
-        }
-
-        // roam 採 300ms 輕快馬蹄節奏；battle 採 620ms 沉重嚴肅戰鼓步伐
-        const stepInterval = activeTheme === "roam" ? 300 : (activeTheme === "battle" ? 620 : (activeTheme === "elegy" ? 1350 : 920));
-        timerId = setTimeout(tickMusicStep, stepInterval);
+        updateButtonsUI();
       }
 
       function updateButtonsUI() {
         const toggleBtn = document.getElementById("btn-bgm-toggle");
         const themeBtn = document.getElementById("btn-bgm-theme");
+        const track = PLAYLIST[currentIdx] || PLAYLIST[0];
         if (toggleBtn) {
           toggleBtn.textContent = isPlaying ? "🎵 雅樂：開" : "🎵 雅樂：關";
           toggleBtn.style.borderColor = isPlaying ? "var(--gold-bright)" : "var(--jade)";
@@ -18443,49 +18153,40 @@ addGameData({
         }
         if (themeBtn) {
           themeBtn.style.display = isPlaying ? "inline-block" : "none";
-          const subLabel = mode === "auto" ? `自動 (${THEME_LABELS[activeTheme] || "輕快江湖"})` : THEME_LABELS[mode];
-          themeBtn.textContent = `🎼 曲風：${subLabel}`;
+          themeBtn.textContent = `🎼 輪播(${currentIdx + 1}/${PLAYLIST.length})：${track.shortLabel} ⏭`;
+          themeBtn.title = `正在輪替播放：《${track.title}》（點擊可立即切換下一首）`;
         }
       }
 
       return {
         toggle() {
-          if (!ensureContext()) return;
+          const el = ensureAudioElement();
           isPlaying = !isPlaying;
-          if (timerId) { clearTimeout(timerId); timerId = null; }
           if (isPlaying) {
-            stepIdx = 0;
-            tickMusicStep();
+            if (!el.src) {
+              loadAndPlayCurrent();
+            } else {
+              el.play().catch(() => loadAndPlayCurrent());
+            }
+          } else {
+            el.pause();
           }
           updateButtonsUI();
         },
         cycleTheme() {
-          const curIdx = MODE_ORDER.indexOf(mode);
-          mode = MODE_ORDER[(curIdx + 1) % MODE_ORDER.length];
-          stepIdx = 0;
+          // 點擊「🎼 輪播」按鈕時直接切換至下一首曲目
+          currentIdx = (currentIdx + 1) % PLAYLIST.length;
           if (isPlaying) {
-            if (timerId) clearTimeout(timerId);
-            tickMusicStep();
+            loadAndPlayCurrent();
+          } else {
+            isPlaying = true;
+            loadAndPlayCurrent();
           }
-          updateButtonsUI();
         },
         refreshAutoTheme() {
-          if (!isPlaying || mode !== "auto") return;
-          const nextT = detectAutoTheme();
-          if (nextT !== activeTheme) {
-            activeTheme = nextT;
-            stepIdx = 0;
-            if (timerId) clearTimeout(timerId);
-            tickMusicStep();
-            updateButtonsUI();
-          }
+          updateButtonsUI();
         },
-        playSfx(kind) {
-          if (!isPlaying || !ctx) return;
-          if (kind === "click") playLivelyPluck(587.33, 0.25, 0.10);
-          else if (kind === "skill") playJadeChime(659.25, 1.8, 0.16);
-          else if (kind === "danger") playHeavySiegeDrum(true);
-        }
+        playSfx() {}
       };
     })();
     window.WuxiaAudio = WuxiaAudio;
