@@ -16348,18 +16348,6 @@ ${targetW.desc}
       }
     }
 
-    // 啟動初始化
-    window.addEventListener("DOMContentLoaded", () => {
-      initEventListeners();
-      candidateDraft = generateCandidate();
-      renderStartModal();
-      document.getElementById("modal-start").classList.add("show");
-    });
-  })();
-  
-
-  </script>
-<script>
 
 /* ============================================================================
  * 《江湖仙途 · 雙生天命》 v2026.11.13.0125 核心劇本與邏輯升級補丁
@@ -16376,7 +16364,7 @@ ${targetW.desc}
  * 10. 「故人危殆 · 千里馳援」武力門檻改為隨年齡與境界動態成長 + ±33% 浮動檢定
  * ============================================================================ */
 (function applyV20261113Patch() {
-  if (window._JHST_PATCH_20261113_APPLIED) return;
+  if (typeof DB === "undefined" || window._JHST_PATCH_20261113_APPLIED) return;
   window._JHST_PATCH_20261113_APPLIED = true;
 
   // --------------------------------------------------------------------------
@@ -16466,8 +16454,12 @@ ${targetW.desc}
   // --------------------------------------------------------------------------
   // 3. 強化 pickLearnedSkill：確保輕功、內功、招式皆在所有「進階以上」已學武學中隨機輪替！
   // --------------------------------------------------------------------------
-  if (typeof window.pickLearnedSkill === "function") {
-    window.pickLearnedSkill = function(preferCategory = null, allowRandom = true, weaponHint = null) {
+  if (typeof pickLearnedSkill === "function" || typeof window.pickLearnedSkill === "function") {
+    pickLearnedSkill = window.pickLearnedSkill = function(preferCategory = null, weaponHint = null, allowRandom = true) {
+      if (typeof weaponHint === "boolean") {
+        allowRandom = weaponHint;
+        weaponHint = null;
+      }
       const mastered = (typeof getMasteredSkillsList === "function" ? getMasteredSkillsList() : []).filter(s => s && !s.isScripture);
       if (mastered.length === 0) return null;
 
@@ -16480,7 +16472,7 @@ ${targetW.desc}
 
       let pool = [...mastered];
       if (preferCategory) {
-        const catMatches = pool.filter(s => normType(s.type) === preferCategory);
+        const catMatches = pool.filter(s => normType(s.type) === preferCategory || (s.type && s.type.includes(preferCategory)) || (s.weapon && s.weapon.includes(preferCategory)));
         if (catMatches.length > 0) pool = catMatches;
       }
       if (weaponHint) {
@@ -16535,9 +16527,9 @@ ${targetW.desc}
   // (A) 替換重複的「寒潭觀影」為 16 組不重複因緣際會劇本
   // (B) 處理毒酒等內功/武力鎖定條件
   // (C) 清理贅字與張玄素改名
-  const origOpenEventModal = window.openEventModal;
+  const origOpenEventModal = typeof openEventModal === "function" ? openEventModal : window.openEventModal;
   if (typeof origOpenEventModal === "function") {
-    window.openEventModal = function(title, tag, desc, rawChoices) {
+    openEventModal = window.openEventModal = function(title, tag, desc, rawChoices) {
       if (!player || player.isDead) return;
       title = sanitizeGlobalText(title);
       tag = sanitizeGlobalText(tag);
@@ -16648,7 +16640,7 @@ ${targetW.desc}
   //    - 嚴格區分幼年(1~11歲)、少年(12~21歲)、成年(22歲+)劇本
   //    - 嚴格檢查伴侶是否在世（若伴侶已故，觸發攜子女祭拜亡妻/亡夫或夜話追思，絕不出現亡者逛夜市）
   // --------------------------------------------------------------------------
-  window.triggerFamilyAndDiscipleEvent = function(forceDebug = false) {
+  triggerFamilyAndDiscipleEvent = window.triggerFamilyAndDiscipleEvent = function(forceDebug = false) {
     if (!player || player.isDead) return false;
     if (!Array.isArray(player.children)) player.children = [];
     if (!Array.isArray(player.disciples)) player.disciples = [];
@@ -16865,10 +16857,38 @@ ${targetW.desc}
   // --------------------------------------------------------------------------
   // 10. 升級「🚨 故人危殆 · 千里馳援」：門檻隨年齡與境界動態成長 + ±33% 浮動檢定！
   // --------------------------------------------------------------------------
-  window.triggerCompanionRescueModal = function(bond, causeText,graveyardText) {
-    if (!player || player.isDead || !bond) return;
+  triggerCompanionRescueModal = window.triggerCompanionRescueModal = function(bond, causeOrScriptObj, graveyardText) {
+    if (!player || player.isDead || !bond) return false;
     setPauseState(true);
-    const rTag = bond.relationTag || (typeof INTIMACY_LEVELS !== "undefined" ? INTIMACY_LEVELS[bond.intimacyIndex || 0]?.name : "好友");
+    bond.savedFromEarlyDeath = true;
+    const rTag = bond.relationTag || (typeof INTIMACY_LEVELS !== "undefined" ? (INTIMACY_LEVELS[bond.intimacyIndex || 0]?.name || INTIMACY_LEVELS[bond.intimacyIndex || 0]) : "好友");
+
+    let causeText = "";
+    if (typeof causeOrScriptObj === "string") {
+      causeText = causeOrScriptObj;
+    } else if (causeOrScriptObj && typeof causeOrScriptObj === "object") {
+      const rawYoungText = causeOrScriptObj.young || "在江湖險境中為護道義獨抗十餘名黑衣死士，兵刃將斷、血染征袍";
+      causeText = rawYoungText
+        .replace(/劍斷人亡/g, "佩劍寸斷、身受重創")
+        .replace(/，臨終前猶望向與你同遊的方向含笑而逝/g, "，身陷重圍、命懸一線")
+        .replace(/拄著長槍立於天池風雪中氣絕而亡/g, "拄著染血長槍立於天池風雪中苦苦支撐，氣息將絕")
+        .replace(/力竭長逝，青衫染血不改神捕傲骨/g, "真氣將竭、青衫盡染鮮血，仍死戰不退")
+        .replace(/縱馬引開敵群力戰而亡，化作天山腳下一抹烈火孤魂/g, "縱馬引開敵群浴血死戰，身中數創、陷入重圍")
+        .replace(/手腕銀鈴滑落青石，化作漫天五彩靈蝶消散於海棠花海/g, "手腕銀鈴染血滑落青石，氣息奄奄、危在旦夕")
+        .replace(/人刀俱碎、含笑立斃/g, "長刀崩裂、渾身浴血，已至強弩之末")
+        .replace(/真元耗盡、長劍折斷，化作一道清風消散於太華山雲海/g, "真元幾近耗盡、佩劍折斷，眼看便要遭魔氣吞噬")
+        .replace(/毅然祭出上古靈神聖靈真身化道鎮淵，唯留碧玉靈杖立於滄海之畔/g, "拼盡聖靈真元獨撐狂瀾，手握碧玉靈杖搖搖欲墜")
+        .replace(/遭十面埋伏力戰香消玉殞，玉琵琶弦斷音絕/g, "遭十面埋伏浴血苦戰，玉琵琶弦斷、身受重傷")
+        .replace(/自身亦心脈俱碎，持刀傲立不倒而亡/g, "自身亦心脈受創、鮮血狂湧，持刀苦撐不倒")
+        .replace(/自己卻力竭被洪流吞沒/g, "自己卻體力將竭，眼看便要被狂暴洪流吞沒")
+        .replace(/於萬軍陣前慷慨陳詞後震斷心脈，天地同悲/g, "於萬軍陣前獨抗千軍，內息逆亂、喋血不止")
+        .replace(/高舉金鈴吟唱古老祝禱直至元神燃盡，化作一縷純白聖焰/g, "高舉金鈴吟唱祝禱鎮壓地脈，本命元神將近燃盡")
+        .replace(/身中數十箭仍高舉王旗開路，血盡墮馬而亡/g, "身中數箭仍高舉王旗浴血開路，搖搖欲墜")
+        .replace(/一劍斬盡群魔後仰天飲盡壺中殘酒，含笑坐化/g, "連斬群魔後力竭重傷，護體真元即將潰散");
+    } else {
+      causeText = "在江湖險境中為護道義獨抗十餘名黑衣死士，兵刃將斷、血染征袍";
+    }
+    graveyardText = graveyardText || bond.restingPlace || "荒山古道";
 
     // 依據玩家當前年齡與修真階段動態計算基準門檻（20歲約65，35歲約125，50歲約185，65歲+約235），再加上 ±33% 浮動！
     const ageFactor = Math.max(20, Math.min(85, player.age || 25));
@@ -16946,11 +16966,22 @@ ${targetW.desc}
         }
       ]
     );
+    return true;
   };
 
   console.log("✅ 已載入 v2026.11.13.0125 十大劇本與邏輯升級補丁！");
 })();
 
-</script>
+    // 啟動初始化
+    window.addEventListener("DOMContentLoaded", () => {
+      initEventListeners();
+      candidateDraft = generateCandidate();
+      renderStartModal();
+      document.getElementById("modal-start").classList.add("show");
+    });
+  })();
+  
+
+  </script>
 </body>
 </html>
