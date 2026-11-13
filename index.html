@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.14.0236</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.14.0328</span>
       </div>
 
       <div class="debug-row">
@@ -1148,7 +1148,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611140236"></script>
+  <script src="data.js?v=202611140328"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1161,7 +1161,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611140236"></script>
+  <script src="patches.js?v=202611140328"></script>
   <script>
 
   (function() {
@@ -2011,7 +2011,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.14.0236";
+    const GAME_VERSION = "v2026.11.14.0328";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -2296,6 +2296,7 @@
       let manualRoamInImmortal = false;
       let battleTrackAvailable = null;   // null=未測, true=存在, false=不存在
       let immortalTrackAvailable = null; // null=未測, true=存在, false=不存在
+      let currentTrackId = null;
       let fadeTimer = null;
 
       function ensureAudioElement() {
@@ -2353,7 +2354,13 @@
       function playTrackWithFade(track, startTime = 0, targetVol = TARGET_VOL) {
         const el = ensureAudioElement();
         const nextSrc = encodeURI(track.mp3);
+        if (currentTrackId === track.id && el.src && !el.paused) {
+          fadeVolumeTo(targetVol, 400);
+          updateButtonsUI();
+          return;
+        }
         const switchAndFadeIn = () => {
+          currentTrackId = track.id;
           el.src = nextSrc;
           el.volume = 0;
           if (startTime > 0) {
@@ -2386,11 +2393,15 @@
       }
 
       function detectScene() {
+        if (typeof player !== "undefined" && player && !player.isDead && player.inMajorBattle) {
+          return "battle";
+        }
         const evModal = document.getElementById("modal-event");
         if (evModal && evModal.classList.contains("show")) {
           const tagText = document.getElementById("ev-modal-tag")?.textContent || "";
-          const titleText = document.getElementById("ev-modal-title")?.textContent || "";
-          if (/浩劫|戰役|險境|風波|死劫|血戰|決戰|天劫|雷劫/.test(tagText + titleText)) return "battle";
+          if (!tagText.includes("江湖風波") && /武林浩劫|浩劫風雲|重大戰役/.test(tagText)) {
+            return "battle";
+          }
         }
         if (typeof player !== "undefined" && player && !player.isDead && (player.isImmortalUnlocked || player.inImmortalPhase)) {
           return "immortal";
@@ -2591,6 +2602,7 @@
         bodyTierIndex: 0,
         rootTierIndex: 0,
         fakedDeath: false,
+        inMajorBattle: false,
         isDead: false,
         deathReason: "",
         customDeathSeal: null,
@@ -9821,6 +9833,7 @@ ${targetW.desc}
 
       player.triggeredBattles.add(battle.id);
       setPauseState(true);
+      player.inMajorBattle = true;
 
       // 若該戰役配置了 5 幕連貫多階段戰役（或為雲夢澤之劫／戮神殿樹狀戰役）
       const isTreeBattle = (battle.id === "hengshan_crisis" || battle.id === "battle_hengshan" || (battle.title || "").includes("雲夢澤之劫") || battle.id === "wushendian_final" || battle.id === "battle_wushendian" || (battle.title || "").includes("戮神殿終戰") || battle.id === "cangzhou_tieshidu" || (battle.title || "").includes("滄州鐵獅渡"));
@@ -9856,6 +9869,7 @@ ${targetW.desc}
                 }
                 chg = modifyStats(rSt);
               }
+              player.inMajorBattle = false;
               addLog(`⚔️【${battle.title}】${opt.result || "你審時度勢做出了自己的抉擇，避開了正面戰場，保全性命。"}${chg.length ? " (" + chg.join("、") + ")" : ""}`, "milestone");
               updateAllUI();
               setPauseState(false);
@@ -9883,6 +9897,7 @@ ${targetW.desc}
         cost: c.cost,
         allowFatalChallenge: c.allowFatalChallenge,
         onSelect: () => {
+          player.inMajorBattle = false;
           if (c.allowFatalChallenge && c.reqStat) {
             const passed = Object.keys(c.reqStat).every(k => (player.stats[k] || 0) >= c.reqStat[k]);
             if (!passed) {
@@ -9916,7 +9931,11 @@ ${targetW.desc}
 
     // 5 幕重大戰役推進（支援戮神殿 31 節點樹狀分支、同伴助陣武力×1.2、三段式救人傷亡判定與戰役武力隨機 +3~+5）
     function playBattleStage(battle, stageNum, branchKey = null) {
-      if (!player || player.isDead) return;
+      if (!player || player.isDead) {
+        if (player) player.inMajorBattle = false;
+        return;
+      }
+      player.inMajorBattle = true;
       const isWushendian = (battle.id === "wushendian_final" || battle.id === "battle_wushendian" || (battle.title || "").includes("戮神殿終戰"));
       const isHengshan = (battle.id === "hengshan_crisis" || battle.id === "battle_hengshan" || (battle.title || "").includes("雲夢澤之劫"));
       const isCangzhou = (battle.id === "cangzhou_tieshidu" || (battle.title || "").includes("滄州鐵獅渡"));
@@ -9935,6 +9954,7 @@ ${targetW.desc}
       }
 
       if (!stage) {
+        player.inMajorBattle = false;
         addLog(`🏆【重大戰役落幕】${battle.title} 終得平息，天下格局自此改寫！`, "milestone");
         updateAllUI();
         setPauseState(false);
@@ -10156,6 +10176,7 @@ ${targetW.desc}
           if (stageNum < 5 && stageNum < maxStages) {
             playBattleStage(battle, stageNum + 1, c.nextBranch || null);
           } else {
+            player.inMajorBattle = false;
             addLog(`🏆【重大戰役落幕】${battle.title} 終得平息，天下格局自此改寫！`, "milestone");
             updateAllUI();
             setPauseState(false);
@@ -14029,6 +14050,7 @@ ${targetW.desc}
       setTimeout(() => { if (window.WuxiaAudio) window.WuxiaAudio.refreshAutoTheme(); }, 30);
       setPauseState(true);
       player.isDead = true;
+      player.inMajorBattle = false;
       const isUninjuredElder = !player.inImmortalPhase && !player.fakedDeath && player.age >= 66 && player.age <= 120 &&
         (player.lightInjuries || 0) === 0 && (player.heavyInjuries || 0) === 0 && (player.injuries || 0) === 0;
       if (isUninjuredElder && reasonText && !reasonText.includes("飛昇") && !reasonText.includes("封測調試台")) {
@@ -15549,6 +15571,9 @@ ${targetW.desc}
     // 動態前置條件過濾、標籤去重與渲染
     function openEventModal(title, tag, desc, rawChoices) {
       if (!player || player.isDead) return;
+      if (player.inMajorBattle && !/武林浩劫|浩劫風雲|重大戰役/.test(tag || "")) {
+        player.inMajorBattle = false;
+      }
       setTimeout(() => { if (window.WuxiaAudio) window.WuxiaAudio.refreshAutoTheme(); }, 30);
       player.lastEventContext = { title: String(title || ""), tag: String(tag || ""), age: player.age };
       document.getElementById("ev-modal-title").textContent = title;
