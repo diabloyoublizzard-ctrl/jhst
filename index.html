@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.13.0125</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.14.0012</span>
       </div>
 
       <div class="debug-row">
@@ -1148,7 +1148,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611130125"></script>
+  <script src="data.js?v=202611140012"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1161,7 +1161,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611130125"></script>
+  <script src="patches.js?v=202611140012"></script>
   <script>
 
   (function() {
@@ -2011,7 +2011,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.13.0125";
+    const GAME_VERSION = "v2026.11.14.0012";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -2348,7 +2348,17 @@
         const switchAndFadeIn = () => {
           el.src = nextSrc;
           el.volume = 0;
+          if (startTime > 0) {
+            const seekOnce = () => {
+              el.removeEventListener("loadedmetadata", seekOnce);
+              if (el.duration && startTime < el.duration) {
+                try { el.currentTime = startTime; } catch (_) {}
+              }
+            };
+            el.addEventListener("loadedmetadata", seekOnce);
+          }
           el.play().then(() => {
+            if (track.id === BATTLE_TRACK.id) battleTrackAvailable = true;
             if (startTime > 0 && el.duration && startTime < el.duration) {
               try { el.currentTime = startTime; } catch (_) {}
             }
@@ -2403,9 +2413,17 @@
           if (isPlaying) {
             inBattleMode = detectBattleContext();
             if (!el.src) {
-              playTrackWithFade(ROAM_PLAYLIST[currentIdx], 0, inBattleMode ? DUCK_VOL : TARGET_VOL);
+              if (inBattleMode && battleTrackAvailable !== false) {
+                savedRoamIdx = currentIdx;
+                savedRoamTime = 0;
+                playTrackWithFade(BATTLE_TRACK, 0, TARGET_VOL);
+              } else {
+                playTrackWithFade(ROAM_PLAYLIST[currentIdx], 0, inBattleMode ? DUCK_VOL : TARGET_VOL);
+              }
             } else {
-              el.play().then(() => fadeVolumeTo(inBattleMode ? DUCK_VOL : TARGET_VOL, 600)).catch(() => playTrackWithFade(ROAM_PLAYLIST[currentIdx]));
+              const targetTrack = (inBattleMode && battleTrackAvailable) ? BATTLE_TRACK : ROAM_PLAYLIST[currentIdx];
+              const targetVol = (inBattleMode && !battleTrackAvailable) ? DUCK_VOL : TARGET_VOL;
+              el.play().then(() => fadeVolumeTo(targetVol, 600)).catch(() => playTrackWithFade(targetTrack));
             }
           } else {
             fadeVolumeTo(0, 450, () => el.pause());
