@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.14.0230</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.14.0236</span>
       </div>
 
       <div class="debug-row">
@@ -18425,7 +18425,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.14.0230";
+    const GAME_VERSION = "v2026.11.14.0236";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -28767,66 +28767,7 @@ ${targetW.desc}
         }
 
         // 隨行靈獸與名駒每年年齡增長與壽終判定（凡塵階段達品種壽元上限時安詳長眠，絕不出現年齡超過上限如 87/50 歲之異常）
-        // 紅塵家室 · 子女與親傳弟子專區
-      const childrenList = Array.isArray(player.children) ? player.children : [];
-      const disciplesList = Array.isArray(player.disciples) ? player.disciples : [];
-      if (childrenList.length > 0 || disciplesList.length > 0) {
-        const famCards = [
-          ...childrenList.map((c, idx) => {
-            const curAge = Math.max(1, player.age - (c.bornAtPlayerAge || player.age) + 1);
-            const acted = c.lastInteractAge === player.age;
-            return `
-              <div class="card-item" style="border-color:#e3b341;background:rgba(212,175,55,0.08);margin-bottom:8px;padding:9px 12px;">
-                <div class="card-header" style="margin-bottom:4px;">
-                  <div>
-                    <strong style="color:var(--gold-bright);font-size:0.95rem;">👶 ${c.name}</strong>
-                    <span class="status-badge" style="margin-left:5px;font-size:0.72rem;color:#ffdfb6;border-color:#d4af37;">${c.orderLabel} · ${curAge}歲</span>
-                  </div>
-                  <span class="status-badge" style="color:#56d364;border-color:#2ea043;font-size:0.72rem;">血脈傳承</span>
-                </div>
-                <div style="font-size:0.8rem;color:#dedad0;line-height:1.5;">
-                  <div>💖 生母/生父：<span style="color:var(--gold);">${c.parentName}</span> ｜ 根骨：${c.aptitude || "將門虎子"}</div>
-                  <div>⚔️ 家傳絕學：《${c.inheritedSkill || "家傳武學"}》</div>
-                </div>
-                <button class="ctrl-btn" onclick="window.interactWithFamilyMember('child', ${idx})" ${acted ? "disabled" : ""} style="margin-top:6px;width:100%;padding:4px 8px;font-size:0.78rem;border-color:${acted ? "#555" : "var(--gold)"};color:${acted ? "#888" : "var(--gold-bright)"};">
-                  ${acted ? "✓ 今年已指點陪伴過" : "🏡 考校家傳武學 · 共享天倫 (情義+4、武力+2)"}
-                </button>
-              </div>
-            `;
-          }),
-          ...disciplesList.map((d, idx) => {
-            const curAge = Math.max(14, (d.age || 15) + Math.max(0, player.age - (d.recruitedAtPlayerAge || player.age)));
-            const acted = d.lastInteractAge === player.age;
-            return `
-              <div class="card-item" style="border-color:var(--jade);background:rgba(59,156,133,0.08);margin-bottom:8px;padding:9px 12px;">
-                <div class="card-header" style="margin-bottom:4px;">
-                  <div>
-                    <strong style="color:var(--jade-bright);font-size:0.95rem;">🍵 ${d.name}</strong>
-                    <span class="status-badge" style="margin-left:5px;font-size:0.72rem;color:#a5f3fc;border-color:var(--jade);">${d.title} · ${curAge}歲</span>
-                  </div>
-                  <span class="status-badge" style="color:var(--jade-bright);border-color:var(--jade);font-size:0.72rem;">衣缽傳人</span>
-                </div>
-                <div style="font-size:0.8rem;color:#dedad0;line-height:1.5;">
-                  <div>🌱 出身：${d.originTitle || "寒門少俠"}（${d.trait || "天資聰穎"}）</div>
-                  <div>📘 親傳絕學：《${d.inheritedSkill || "本門絕學"}》</div>
-                </div>
-                <button class="ctrl-btn" onclick="window.interactWithFamilyMember('disciple', ${idx})" ${acted ? "disabled" : ""} style="margin-top:6px;width:100%;padding:4px 8px;font-size:0.78rem;border-color:${acted ? "#555" : "var(--jade)"};color:${acted ? "#888" : "var(--jade-bright)"};">
-                  ${acted ? "✓ 今年已考校傳功過" : "⚔️ 考校親傳武學 · 師徒拆招 (情義+4、武力+2)"}
-                </button>
-              </div>
-            `;
-          })
-        ].join("");
-
-        box.innerHTML = `
-          <div style="margin-bottom:12px;padding-bottom:8px;border-bottom:1px dashed var(--border-subtle);">
-            <div style="font-size:0.84rem;color:var(--gold-bright);margin-bottom:8px;font-weight:bold;">🏡 紅塵家室 · 骨肉與親傳門徒（${childrenList.length + disciplesList.length}）</div>
-            ${famCards}
-          </div>
-        ` + box.innerHTML;
-      }
-
-      if (Array.isArray(player.mounts) && player.mounts.length > 0) {
+        if (Array.isArray(player.mounts) && player.mounts.length > 0) {
           player.mounts.forEach(m => {
             if (!m || m.isDead) return;
             assignMountLifespan(m);
@@ -31610,6 +31551,65 @@ ${targetW.desc}
           </div>
         `;
       }).join("");
+
+      // 紅塵家室 · 子女與親傳弟子專區（置於羈絆分頁頂部）
+      const childrenList = Array.isArray(player.children) ? player.children : [];
+      const disciplesList = Array.isArray(player.disciples) ? player.disciples : [];
+      if (childrenList.length > 0 || disciplesList.length > 0) {
+        const famCards = [
+          ...childrenList.map((c, idx) => {
+            const curAge = Math.max(1, player.age - (c.bornAtPlayerAge || player.age) + 1);
+            const acted = c.lastInteractAge === player.age;
+            return `
+              <div class="card-item" style="border-color:#e3b341;background:rgba(212,175,55,0.08);margin-bottom:8px;padding:9px 12px;">
+                <div class="card-header" style="margin-bottom:4px;">
+                  <div>
+                    <strong style="color:var(--gold-bright);font-size:0.95rem;">👶 ${c.name}</strong>
+                    <span class="status-badge" style="margin-left:5px;font-size:0.72rem;color:#ffdfb6;border-color:#d4af37;">${c.orderLabel} · ${curAge}歲</span>
+                  </div>
+                  <span class="status-badge" style="color:#56d364;border-color:#2ea043;font-size:0.72rem;">血脈傳承</span>
+                </div>
+                <div style="font-size:0.8rem;color:#dedad0;line-height:1.5;">
+                  <div>💖 生母/生父：<span style="color:var(--gold);">${c.parentName}</span> ｜ 根骨：${c.aptitude || "將門虎子"}</div>
+                  <div>⚔️ 家傳絕學：《${c.inheritedSkill || "家傳武學"}》</div>
+                </div>
+                <button class="ctrl-btn" onclick="window.interactWithFamilyMember('child', ${idx})" ${acted ? "disabled" : ""} style="margin-top:6px;width:100%;padding:4px 8px;font-size:0.78rem;border-color:${acted ? "#555" : "var(--gold)"};color:${acted ? "#888" : "var(--gold-bright)"};">
+                  ${acted ? "✓ 今年已指點陪伴過" : "🏡 考校家傳武學 · 共享天倫 (情義+4、武力+2)"}
+                </button>
+              </div>
+            `;
+          }),
+          ...disciplesList.map((d, idx) => {
+            const curAge = Math.max(14, (d.age || 15) + Math.max(0, player.age - (d.recruitedAtPlayerAge || player.age)));
+            const acted = d.lastInteractAge === player.age;
+            return `
+              <div class="card-item" style="border-color:var(--jade);background:rgba(59,156,133,0.08);margin-bottom:8px;padding:9px 12px;">
+                <div class="card-header" style="margin-bottom:4px;">
+                  <div>
+                    <strong style="color:var(--jade-bright);font-size:0.95rem;">🍵 ${d.name}</strong>
+                    <span class="status-badge" style="margin-left:5px;font-size:0.72rem;color:#a5f3fc;border-color:var(--jade);">${d.title} · ${curAge}歲</span>
+                  </div>
+                  <span class="status-badge" style="color:var(--jade-bright);border-color:var(--jade);font-size:0.72rem;">衣缽傳人</span>
+                </div>
+                <div style="font-size:0.8rem;color:#dedad0;line-height:1.5;">
+                  <div>🌱 出身：${d.originTitle || "寒門少俠"}（${d.trait || "天資聰穎"}）</div>
+                  <div>📘 親傳絕學：《${d.inheritedSkill || "本門絕學"}》</div>
+                </div>
+                <button class="ctrl-btn" onclick="window.interactWithFamilyMember('disciple', ${idx})" ${acted ? "disabled" : ""} style="margin-top:6px;width:100%;padding:4px 8px;font-size:0.78rem;border-color:${acted ? "#555" : "var(--jade)"};color:${acted ? "#888" : "var(--jade-bright)"};">
+                  ${acted ? "✓ 今年已考校傳功過" : "⚔️ 考校親傳武學 · 師徒拆招 (情義+4、武力+2)"}
+                </button>
+              </div>
+            `;
+          })
+        ].join("");
+
+        box.innerHTML = `
+          <div style="margin-bottom:12px;padding-bottom:8px;border-bottom:1px dashed var(--border-subtle);">
+            <div style="font-size:0.84rem;color:var(--gold-bright);margin-bottom:8px;font-weight:bold;">🏡 紅塵家室 · 骨肉與親傳門徒（${childrenList.length + disciplesList.length}）</div>
+            ${famCards}
+          </div>
+        ` + box.innerHTML;
+      }
 
       if (Array.isArray(player.mounts) && player.mounts.length > 0) {
         const activeMountsCount = getActiveMounts().length;
