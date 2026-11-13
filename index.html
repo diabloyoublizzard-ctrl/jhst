@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.14.0221</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.14.0230</span>
       </div>
 
       <div class="debug-row">
@@ -1148,7 +1148,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611140221"></script>
+  <script src="data.js?v=202611140230"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1161,7 +1161,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611140221"></script>
+  <script src="patches.js?v=202611140230"></script>
   <script>
 
   (function() {
@@ -2011,7 +2011,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.14.0221";
+    const GAME_VERSION = "v2026.11.14.0230";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -10498,19 +10498,27 @@ ${targetW.desc}
     }
 
     function triggerFakeDeathModal() {
-      if (!player || player.fakedDeath) return;
+      if (!player || player.fakedDeath || player.inImmortalPhase) return;
       setPauseState(true);
 
       // 嚴格過濾：只有【尚在人世】的健在同伴才會前來墓前祭奠！已故同伴絕不可「起死回生」跑來祭奠！
       const livingBonds = (player.bonds || []).filter(b => b && !b.isDead && (!b.status || !b.status.includes("長眠")));
+      const isElder = player.age >= 90;
+      const modalTag = isElder ? "九十高齡秘聞" : "斬斷紅塵 · 金蟬脫殼";
+      const modalDesc = isElder
+        ? "你已年過九旬，看透江湖恩怨。是否要在山巔立下一座衣冠假塚，對外散布坐化死訊，自己則金蟬脫殼、隱於後山雲海松林之間，靜看昔日故人前來墓前說些什麼？\n（立塚後世人將以為你已逝去，你可選擇隱姓埋名避世歸隱安度餘生；若已悟得仙緣，亦可藉此斬斷紅塵因果踏入修仙卷）"
+        : "你已悟得太虛仙緣，看淡紅塵名利與江湖紛爭。是否要在山巔立下一座衣冠假塚，對外散布坐化死訊，自己則金蟬脫殼、隱於後山雲海松林之間，靜看昔日故人前來墓前說些什麼，並藉此斬斷凡塵因果、直接踏入【洞天修真卷】？";
+      const proceedText = player.isImmortalUnlocked
+        ? "立下假塚，暗中傾聽在世故人祭奠，金蟬脫殼（可直入洞天修真卷或避世退隱）"
+        : "立下假塚，暗中傾聽在世故人祭奠，金蟬脫殼避世退隱（壽元+10載）";
 
       openEventModal(
         "⚰️ 假死立塚 · 金蟬脫殼",
-        "九十高齡秘聞",
-        "你已年過九旬，看透江湖恩怨。是否要在山巔立下一座衣冠假塚，對外散布坐化死訊，自己則金蟬脫殼、隱於後山雲海松林之間，靜看昔日故人前來墓前說些什麼？\n（立塚後世人將以為你已逝去，你可選擇隱姓埋名避世歸隱安度餘生；若已悟得仙緣，亦可藉此斬斷紅塵因果踏入修仙卷）",
+        modalTag,
+        modalDesc,
         [
           {
-            text: "立下假塚，暗中傾聽在世故人祭奠，金蟬脫殼避世退隱（壽元+10載）",
+            text: proceedText,
             onSelect: () => {
               player.fakedDeath = true;
               document.getElementById("btn-fake-death").style.display = "none";
@@ -10540,26 +10548,13 @@ ${targetW.desc}
                 logSummary = sortedLiving.map(b => `【${b.name}】${getCompanionTombstoneLine(DB.CHARACTERS.find(c => c && c.id === b.id), b)}`).join(" | ");
               }
 
-              // 假死立塚不強制綁定修仙！提供凡俗歸隱路線與仙道飛昇路線
-              const tombChoices = [
-                {
-                  text: "🍃 【金蟬脫殼 · 獨自歸隱深山】紅塵恩怨皆成過眼雲煙，從此隱姓埋名、結廬名山安度晚年！（凡俗退隱，壽元+10載，不入仙門）",
-                  onSelect: () => retireToHermitFromTomb(logSummary, null)
-                }
-              ];
-
-              // 若有尚在人世的【紅塵伴侶】、【義結金蘭】或【生死至交】，可選擇攜手凡俗退隱
+              // 假死立塚提供仙道飛昇路線（置頂）與凡俗歸隱路線
+              const tombChoices = [];
               const closeAliveBonds = livingBonds.filter(b =>
                 (b.relationTag === "紅塵伴侶" || b.relationTag === "義結金蘭" || (b.intimacyIndex || 0) >= 5)
               );
-              closeAliveBonds.slice(0, 2).forEach(cb => {
-                tombChoices.push({
-                  text: `💖 【暗中現身 · 攜${cb.name}一同歸隱】不忍見【${cb.name}】塚前悲慟，暗中傳音引其入林，相伴結廬隱居！（凡俗退隱，壽元+10載，不入仙門）`,
-                  onSelect: () => retireToHermitFromTomb(logSummary, cb)
-                });
-              });
 
-              // 仙緣路線（唯有已開啟仙緣者，方能藉假死立塚轉入修仙卷）
+              // 仙緣路線（唯有已開啟仙緣者，方能藉假死立塚轉入修仙卷，排於最上方）
               if (player.isImmortalUnlocked) {
                 tombChoices.push({
                   text: "🌌 【超脫凡塵 · 轉入洞天修真卷】見此情景紅塵因果皆消，借假死立塚超脫凡俗，踏入洞天修仙求長生！",
@@ -10573,6 +10568,19 @@ ${targetW.desc}
                   });
                 });
               }
+
+              tombChoices.push({
+                text: "🍃 【金蟬脫殼 · 獨自歸隱深山】紅塵恩怨皆成過眼雲煙，從此隱姓埋名、結廬名山安度晚年！（凡俗退隱，壽元+10載，不入仙門）",
+                onSelect: () => retireToHermitFromTomb(logSummary, null)
+              });
+
+              // 若有尚在人世的【紅塵伴侶】、【義結金蘭】或【生死至交】，可選擇攜手凡俗退隱
+              closeAliveBonds.slice(0, 2).forEach(cb => {
+                tombChoices.push({
+                  text: `💖 【暗中現身 · 攜${cb.name}一同歸隱】不忍見【${cb.name}】塚前悲慟，暗中傳音引其入林，相伴結廬隱居！（凡俗退隱，壽元+10載，不入仙門）`,
+                  onSelect: () => retireToHermitFromTomb(logSummary, cb)
+                });
+              });
 
               openEventModal("⚰️ 假死立塚 · 暗中窺碑", "金蟬脫殼 · 避世退隱", eavesdropModalHtml, tombChoices);
               return;
@@ -11331,6 +11339,64 @@ ${targetW.desc}
           }
         ]
       );
+    }
+
+    // 當已開啟仙緣且所有曾結識的同伴羈絆皆已過世時，彈窗確認是否直接踏入洞天修真卷（可選暫留紅塵）
+    function checkAndTriggerAllBondsDeadAscension() {
+      if (!player || player.isDead || !player.isImmortalUnlocked || player.inImmortalPhase) return false;
+      if (!Array.isArray(player.bonds) || player.bonds.length === 0) return false;
+      const allBondsDead = player.bonds.every(b => b && (b.isDead || (b.status && b.status.includes("長眠"))));
+      if (!allBondsDead) return false;
+      if (player._allBondsDeadPromptedCount === player.bonds.length) return false;
+
+      const evModal = document.getElementById("modal-event");
+      if (evModal && evModal.classList.contains("show")) return false;
+
+      player._allBondsDeadPromptedCount = player.bonds.length;
+      setPauseState(true);
+
+      openEventModal(
+        "🍂 故人盡凋零 · 褪凡入洞天",
+        "紅塵已盡 · 仙途問心",
+        `回首半生江湖，昔日與你並肩同行、生死相託的 ${player.bonds.length} 位紅塵故人，如今皆已先你化作青山黃土。\n` +
+        `微風拂過空山，你既已悟得太虛仙緣，是否就此斬斷凡塵餘念，直接踏入【洞天修真卷】（歲月改以每 5～10 年推進）？`,
+        [
+          {
+            text: "🌌 【斬斷紅塵 · 立即踏入洞天修真卷】故人已逝、塵緣已了，就此超脫凡俗專心求道！",
+            onSelect: () => {
+              player.inImmortalPhase = true;
+              player.immortalStage = Math.max(0, player.immortalStage || 0);
+              const realmObj = IMMORTAL_REALMS[player.immortalStage];
+              player.title = realmObj.title;
+              player.maxLifespan = Math.max(player.maxLifespan + 8, realmObj.lifespan);
+
+              document.getElementById("btn-leave-sect").style.display = "none";
+              document.getElementById("btn-fake-death").style.display = "none";
+              const immTabBtn = document.getElementById("tab-btn-immortal");
+              if (immTabBtn) {
+                immTabBtn.classList.remove("hidden");
+                immTabBtn.click();
+              }
+              document.getElementById("ui-life-stage-title").textContent = "🌌 洞天修真卷";
+
+              addLog(`🌌【故人皆逝 · 褪凡入洞天】紅塵故人盡數凋零，你斬斷最後一絲凡塵羈絆，於 ${player.age} 歲之齡提前踏入【洞天修真卷】（每 5～10 年推進）！`, "immortal-log");
+              unlockAchievement("enter_immortal_bonds_gone", "紅塵皆盡 · 踏入洞天");
+              renderBondsTab();
+              updateAllUI();
+              setPauseState(false);
+            }
+          },
+          {
+            text: "🍃 【暫留紅塵 · 稍後再自行立塚入仙】人間尚有餘事未了，再於凡塵盤桓幾載（日後隨時可按『金蟬脫殼』入仙）",
+            onSelect: () => {
+              addLog(`🍃【紅塵未盡 · 暫留凡塵】雖見故人皆逝，你決定再於人間盤桓片刻；日後隨時可點擊下方『金蟬脫殼 · 立塚入仙』踏入洞天修真卷。`, "good-log");
+              updateAllUI();
+              setPauseState(false);
+            }
+          }
+        ]
+      );
+      return true;
     }
 
     /* =========================================================================
@@ -12131,7 +12197,7 @@ ${targetW.desc}
             return;
           }
         }
-        if (player.age >= 90 && player.age <= 100 && !player.fakedDeath) {
+        if (!player.inImmortalPhase && !player.fakedDeath && (player.isImmortalUnlocked || (player.age >= 90 && player.age <= 100))) {
           document.getElementById("btn-fake-death").style.display = "inline-block";
         }
 
@@ -12422,6 +12488,11 @@ ${targetW.desc}
           triggerImmortalAwakening();
           return;
         }
+      }
+
+      // 同伴羈絆皆已故時，彈窗確認是否直接踏入洞天修真卷（可選暫留紅塵）
+      if (checkAndTriggerAllBondsDeadAscension()) {
+        return;
       }
 
       // 假死退隱後的清修晚年日常（若未入仙門，享受安寧祥和的凡塵世外桃源生活）
@@ -14284,6 +14355,16 @@ ${targetW.desc}
         }
         return `<span class="status-badge ${(b.includes("輕傷") || b.includes("重傷") || b.includes("舊傷") || b.includes("道傷") || b.includes("輕損") || b.includes("重創")) ? "injury" : "good"}">${b}</span>`;
       }).join("");
+
+      const fakeDeathBtn = document.getElementById("btn-fake-death");
+      if (fakeDeathBtn) {
+        const canFakeDeath = !player.isDead && !player.inImmortalPhase && !player.fakedDeath &&
+          (player.isImmortalUnlocked || (player.age >= 90 && player.age <= 100));
+        fakeDeathBtn.style.display = canFakeDeath ? "inline-block" : "none";
+        if (canFakeDeath) {
+          fakeDeathBtn.textContent = player.isImmortalUnlocked ? "⚰️ 金蟬脫殼 · 立塚入仙" : "⚰️ 假死立塚";
+        }
+      }
     }
 
     function renderSkillsTab() {
@@ -16311,7 +16392,7 @@ ${targetW.desc}
         recordYearlyWorldNews(getCurrentGanzhi());
         if (player.age >= CFG.kungfuEnlightenAge) checkAge16KungfuEnlightenment();
         if (player.age >= 80) document.getElementById("btn-leave-sect").style.display = "none";
-        if (player.age >= 90 && !player.fakedDeath && !player.inImmortalPhase) document.getElementById("btn-fake-death").style.display = "inline-block";
+        if (!player.inImmortalPhase && !player.fakedDeath && (player.isImmortalUnlocked || player.age >= 90)) document.getElementById("btn-fake-death").style.display = "inline-block";
         addLog(`🛠️【封測調試】時光飛逝，年齡推進 10 載，當前 ${player.age} 歲。`, "milestone");
         updateAllUI();
       });
