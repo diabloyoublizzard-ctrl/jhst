@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.14.0012</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.14.0221</span>
       </div>
 
       <div class="debug-row">
@@ -18425,7 +18425,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.14.0012";
+    const GAME_VERSION = "v2026.11.14.0221";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -18684,9 +18684,9 @@ addGameData({
 
     /* =========================================================================
      * 零之二、 古韻天音 · 情境優先與平滑淡入淡出 BGM 輪替播放器
-     *   - 平時（主選單／生平探索）：自動輪播 bgm/ 內的三首 128kbps MP3
-     *   - 重大戰役／死劫：音量平滑淡出，若有「bgm/重大戰役.mp3」則單曲循環戰役專曲；
-     *     若尚未放入戰役檔，則自動壓低環境音量並維持肅穆氛圍，戰役結束後平滑淡回原進度
+     *   - 凡塵平時（主選單／江湖探索）：自動輪播 bgm/ 內的三首 128kbps MP3
+     *   - 開啟仙緣／洞天修真：自動切換為「bgm/洞天修真.mp3」單曲循環
+     *   - 重大戰役／死劫／天劫：優先切換「bgm/重大戰役.mp3」單曲循環；戰役結束平滑淡回原進度
      *   - 支援瀏覽器本地快取（不重複消耗伺服器流量），且行動單頁版無音樂檔時自動靜默降級
      * ========================================================================= */
     const WuxiaAudio = (() => {
@@ -18695,17 +18695,21 @@ addGameData({
         { id: "life_scroll", title: "生平卷",                 shortLabel: "竹林憶舊", mp3: "bgm/生平卷.mp3" },
         { id: "world_roam",  title: "九州大地圖_行俠探索曲", shortLabel: "九州行俠", mp3: "bgm/九州大地圖_行俠探索曲.mp3" }
       ];
-      const BATTLE_TRACK = { id: "battle_theme", title: "重大戰役", shortLabel: "戰鼓催城", mp3: "bgm/重大戰役.mp3" };
+      const IMMORTAL_TRACK = { id: "immortal_theme", title: "洞天修真", shortLabel: "洞天修真", mp3: "bgm/洞天修真.mp3" };
+      const BATTLE_TRACK   = { id: "battle_theme",   title: "重大戰役", shortLabel: "戰鼓催城", mp3: "bgm/重大戰役.mp3" };
 
       const TARGET_VOL = 0.55;
       const DUCK_VOL = 0.22; // 尚未放入獨立戰役 MP3 時，進入重大戰役自動將音量柔順壓低
       let audioEl = null;
       let isPlaying = false;
       let currentIdx = 0;
+      let currentScene = "roam"; // "roam" | "immortal" | "battle"
+      let savedReturnScene = "roam";
       let savedRoamTime = 0;
       let savedRoamIdx = 0;
-      let inBattleMode = false;
-      let battleTrackAvailable = null; // null=未測, true=存在, false=不存在
+      let manualRoamInImmortal = false;
+      let battleTrackAvailable = null;   // null=未測, true=存在, false=不存在
+      let immortalTrackAvailable = null; // null=未測, true=存在, false=不存在
       let fadeTimer = null;
 
       function ensureAudioElement() {
@@ -18716,8 +18720,9 @@ addGameData({
 
           audioEl.addEventListener("ended", () => {
             if (!isPlaying) return;
-            if (inBattleMode && battleTrackAvailable) {
-              // 戰役專曲單曲循環
+            if ((currentScene === "battle" && battleTrackAvailable) ||
+                (currentScene === "immortal" && !manualRoamInImmortal && immortalTrackAvailable)) {
+              // 戰役或洞天修真專曲單曲循環
               audioEl.currentTime = 0;
               audioEl.play().catch(() => {});
               return;
@@ -18728,10 +18733,13 @@ addGameData({
 
           audioEl.addEventListener("error", () => {
             if (!isPlaying) return;
-            if (inBattleMode && battleTrackAvailable === null) {
+            if (currentScene === "battle" && battleTrackAvailable === null) {
               battleTrackAvailable = false;
-              // 尚未放置 bgm/重大戰役.mp3，改為平滑壓低平日曲音量以烘托肅穆感
-              playTrackWithFade(ROAM_PLAYLIST[savedRoamIdx], savedRoamTime, DUCK_VOL);
+              const fallbackTrack = (savedReturnScene === "immortal" && immortalTrackAvailable) ? IMMORTAL_TRACK : ROAM_PLAYLIST[savedRoamIdx];
+              playTrackWithFade(fallbackTrack, savedRoamTime, DUCK_VOL);
+            } else if (currentScene === "immortal" && immortalTrackAvailable === null) {
+              immortalTrackAvailable = false;
+              playTrackWithFade(ROAM_PLAYLIST[currentIdx], 0, TARGET_VOL);
             }
           });
         }
@@ -18773,6 +18781,7 @@ addGameData({
           }
           el.play().then(() => {
             if (track.id === BATTLE_TRACK.id) battleTrackAvailable = true;
+            if (track.id === IMMORTAL_TRACK.id) immortalTrackAvailable = true;
             if (startTime > 0 && el.duration && startTime < el.duration) {
               try { el.currentTime = startTime; } catch (_) {}
             }
@@ -18790,20 +18799,29 @@ addGameData({
         }
       }
 
-      function detectBattleContext() {
+      function detectScene() {
         const evModal = document.getElementById("modal-event");
         if (evModal && evModal.classList.contains("show")) {
           const tagText = document.getElementById("ev-modal-tag")?.textContent || "";
           const titleText = document.getElementById("ev-modal-title")?.textContent || "";
-          if (/浩劫|戰役|險境|風波|死劫|血戰|決戰/.test(tagText + titleText)) return true;
+          if (/浩劫|戰役|險境|風波|死劫|血戰|決戰|天劫|雷劫/.test(tagText + titleText)) return "battle";
         }
-        return false;
+        if (typeof player !== "undefined" && player && !player.isDead && (player.isImmortalUnlocked || player.inImmortalPhase)) {
+          return "immortal";
+        }
+        return "roam";
+      }
+
+      function getActiveTrack() {
+        if (currentScene === "battle" && battleTrackAvailable) return BATTLE_TRACK;
+        if (currentScene === "immortal" && !manualRoamInImmortal && immortalTrackAvailable !== false) return IMMORTAL_TRACK;
+        return ROAM_PLAYLIST[currentIdx] || ROAM_PLAYLIST[0];
       }
 
       function updateButtonsUI() {
         const toggleBtn = document.getElementById("btn-bgm-toggle");
         const themeBtn = document.getElementById("btn-bgm-theme");
-        const track = (inBattleMode && battleTrackAvailable) ? BATTLE_TRACK : (ROAM_PLAYLIST[currentIdx] || ROAM_PLAYLIST[0]);
+        const track = getActiveTrack();
         if (toggleBtn) {
           toggleBtn.textContent = isPlaying ? "🎵 雅樂：開" : "🎵 雅樂：關";
           toggleBtn.style.borderColor = isPlaying ? "var(--gold-bright)" : "var(--jade)";
@@ -18811,8 +18829,10 @@ addGameData({
         }
         if (themeBtn) {
           themeBtn.style.display = isPlaying ? "inline-block" : "none";
-          if (inBattleMode && battleTrackAvailable) {
+          if (track.id === BATTLE_TRACK.id) {
             themeBtn.textContent = `⚔️ 戰役專曲：${track.shortLabel}`;
+          } else if (track.id === IMMORTAL_TRACK.id) {
+            themeBtn.textContent = `✨ 仙緣仙韻：${track.shortLabel} ⏭`;
           } else {
             themeBtn.textContent = `🎼 輪播(${currentIdx + 1}/${ROAM_PLAYLIST.length})：${track.shortLabel} ⏭`;
           }
@@ -18825,18 +18845,20 @@ addGameData({
           const el = ensureAudioElement();
           isPlaying = !isPlaying;
           if (isPlaying) {
-            inBattleMode = detectBattleContext();
+            currentScene = detectScene();
             if (!el.src) {
-              if (inBattleMode && battleTrackAvailable !== false) {
+              if (currentScene === "battle" && battleTrackAvailable !== false) {
+                savedReturnScene = (typeof player !== "undefined" && player && (player.isImmortalUnlocked || player.inImmortalPhase)) ? "immortal" : "roam";
                 savedRoamIdx = currentIdx;
                 savedRoamTime = 0;
                 playTrackWithFade(BATTLE_TRACK, 0, TARGET_VOL);
               } else {
-                playTrackWithFade(ROAM_PLAYLIST[currentIdx], 0, inBattleMode ? DUCK_VOL : TARGET_VOL);
+                const track = getActiveTrack();
+                playTrackWithFade(track, 0, currentScene === "battle" ? DUCK_VOL : TARGET_VOL);
               }
             } else {
-              const targetTrack = (inBattleMode && battleTrackAvailable) ? BATTLE_TRACK : ROAM_PLAYLIST[currentIdx];
-              const targetVol = (inBattleMode && !battleTrackAvailable) ? DUCK_VOL : TARGET_VOL;
+              const targetTrack = getActiveTrack();
+              const targetVol = (currentScene === "battle" && !battleTrackAvailable) ? DUCK_VOL : TARGET_VOL;
               el.play().then(() => fadeVolumeTo(targetVol, 600)).catch(() => playTrackWithFade(targetTrack));
             }
           } else {
@@ -18845,18 +18867,31 @@ addGameData({
           updateButtonsUI();
         },
         cycleTheme() {
-          inBattleMode = false;
-          currentIdx = (currentIdx + 1) % ROAM_PLAYLIST.length;
+          if (currentScene === "battle" && battleTrackAvailable) return; // 戰役期間保留戰役專曲氛圍
+          if (currentScene === "immortal") {
+            if (!manualRoamInImmortal) {
+              manualRoamInImmortal = true;
+              currentIdx = 0;
+            } else if (currentIdx < ROAM_PLAYLIST.length - 1) {
+              currentIdx++;
+            } else {
+              manualRoamInImmortal = false;
+            }
+          } else {
+            currentIdx = (currentIdx + 1) % ROAM_PLAYLIST.length;
+          }
           if (!isPlaying) isPlaying = true;
-          playTrackWithFade(ROAM_PLAYLIST[currentIdx], 0, TARGET_VOL);
+          playTrackWithFade(getActiveTrack(), 0, TARGET_VOL);
         },
         refreshAutoTheme() {
           if (!isPlaying || !audioEl) return;
-          const shouldBattle = detectBattleContext();
-          if (shouldBattle === inBattleMode) return;
-          inBattleMode = shouldBattle;
+          const nextScene = detectScene();
+          if (nextScene === currentScene) return;
+          const prevScene = currentScene;
+          currentScene = nextScene;
 
-          if (inBattleMode) {
+          if (nextScene === "battle") {
+            savedReturnScene = prevScene;
             savedRoamIdx = currentIdx;
             savedRoamTime = audioEl.currentTime || 0;
             if (battleTrackAvailable !== false) {
@@ -18865,13 +18900,27 @@ addGameData({
               fadeVolumeTo(DUCK_VOL, 800);
               updateButtonsUI();
             }
-          } else {
-            if (battleTrackAvailable) {
-              currentIdx = savedRoamIdx;
-              playTrackWithFade(ROAM_PLAYLIST[currentIdx], savedRoamTime, TARGET_VOL);
-            } else {
+          } else if (nextScene === "immortal") {
+            if (prevScene === "roam") manualRoamInImmortal = false;
+            if (prevScene === "battle" && !battleTrackAvailable) {
               fadeVolumeTo(TARGET_VOL, 900);
               updateButtonsUI();
+            } else if (!manualRoamInImmortal && immortalTrackAvailable !== false) {
+              const resumeTime = (prevScene === "battle" && savedReturnScene === "immortal") ? savedRoamTime : 0;
+              playTrackWithFade(IMMORTAL_TRACK, resumeTime, TARGET_VOL);
+            } else {
+              currentIdx = savedRoamIdx;
+              playTrackWithFade(ROAM_PLAYLIST[currentIdx], prevScene === "battle" ? savedRoamTime : 0, TARGET_VOL);
+            }
+          } else {
+            // 回到凡塵探索（含重開新局）
+            manualRoamInImmortal = false;
+            if (prevScene === "battle" && !battleTrackAvailable) {
+              fadeVolumeTo(TARGET_VOL, 900);
+              updateButtonsUI();
+            } else {
+              currentIdx = (prevScene === "battle") ? savedRoamIdx : currentIdx;
+              playTrackWithFade(ROAM_PLAYLIST[currentIdx], prevScene === "battle" ? savedRoamTime : 0, TARGET_VOL);
             }
           }
         },
@@ -31827,6 +31876,7 @@ ${targetW.desc}
       updateImmortalTabUI();
       renderCategorizedBaixiao();
       renderAchievementsList();
+      if (window.WuxiaAudio) window.WuxiaAudio.refreshAutoTheme();
     }
 
     // 動態前置條件過濾、標籤去重與渲染
