@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.15.1504</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.15.1953</span>
       </div>
 
       <div class="debug-row">
@@ -18425,7 +18425,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.15.1504";
+    const GAME_VERSION = "v2026.11.15.1953";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -22365,42 +22365,82 @@ ${targetW.desc}
       }
 
       let scenarioOptions = (scenario.options || []).map(o => Object.assign({}, o));
-      if (!isPasserby) {
-        scenarioOptions.forEach(o => {
-          if (!o.reqSkillTier && /施展(極限|上乘|絕頂)輕功/.test(o.text || "")) {
+      // 1. 自動補齊既有高階武學／輕功／內功選項的品階與分類檢定（含同行奇遇與萍水相逢），避免劇本文字與實際檢定脫節
+      scenarioOptions.forEach(o => {
+        const oText = o.text || "";
+        if (!oText || /無武力門檻|需習得進階以上/.test(oText)) return;
+
+        if (!o.reqSkillTier) {
+          if (/絕世武功|絕世神功|絕頂武學|蓋世武威|你的絕學|平生最強合擊|畢生功力|畢生修為|畢生絕學|半生功力|逆轉全身功力|連破魔教三大長老|衝入百刀大陣|演練『萬劍訣』|雙令合璧，引動冥山萬丈聖火/.test(oText)) {
+            o.reqSkillTier = "鎮派";
+            if (/輕功|身法|踏波|踏浪|縱躍|騰空/.test(oText)) {
+              o.reqSkillCategory = "輕功";
+            } else if (/功力|修為|內功|內力|真氣|逆轉全身功力/.test(oText) && !/劈|劍|刀|槍|掌|拳|斬|破/.test(oText)) {
+              o.reqSkillCategory = "內功";
+            } else if (/仗劍|拔劍|拔刃|劈開|劍訣|百刀|魔教三大長老|絕世武功|絕世神功|絕頂武學|蓋世武威|你的絕學|最強合擊|萬劍訣|雙令合璧/.test(oText)) {
+              o.reqSkillCategory = "招式";
+            } else {
+              o.reqSkillCategory = "";
+            }
+            const zSlot = o.reqSkillCategory === "內功" ? "內功名" : (o.reqSkillCategory === "輕功" ? "輕功名" : (o.reqSkillCategory === "招式" ? "招式名" : "武學名"));
+            let nextText = oText.replace(/仗劍開道，以絕世武功/g, "拔刃開道，施展《招式名》絕世武功");
+            if (!/《(武學|招式|輕功|內功)名》/.test(nextText)) {
+              nextText = nextText.replace(/(以|施展|催動|展露)(絕世武功|絕世神功|絕頂武學|蓋世武威)/g, `$1《${zSlot}》$2`);
+            }
+            o.text = nextText;
+          } else if (/(施展|運轉|以)(極限|上乘|絕頂|精妙)(輕功|身法)|施展(極速|雷霆|瀟灑)身法|以瀟灑身法|踏波躍上畫舫三招|順應湖風水勢踏浪而行|凌空縱躍殺入狼群/.test(oText)) {
             o.reqSkillTier = "上乘";
             o.reqSkillCategory = "輕功";
-            o.text = (o.text || "").replace(/施展(極限|上乘|絕頂)輕功/g, "施展《輕功名》");
-          } else if (!o.reqSkillTier && /運轉(深厚|無上|上乘|絕頂)內功/.test(o.text || "")) {
+            o.text = oText.replace(/(施展|運轉|以)(極限|上乘|絕頂|精妙|極速|雷霆|瀟灑)(輕功|身法)/g, "$1《輕功名》");
+          } else if (/(運轉|運起|以|露出一手|展示自身|耗費|渡入|催動)(自身)?(深厚|無上|上乘|絕頂|渾厚|純陽|精純|純正|溫和道家|陰陽周天|本源|精血|醇厚)(內功|內力|真氣|功力|內息)|逆轉周天真氣|運起十成功力|撐開全身護體罡氣|道家清心音律與純厚真氣|運起全身真氣替她逆轉|耗損自身三成真氣/.test(oText)) {
             o.reqSkillTier = "上乘";
             o.reqSkillCategory = "內功";
-            o.text = (o.text || "").replace(/運轉(深厚|無上|上乘|絕頂)內功/g, "運轉《內功名》");
+            o.text = oText.replace(/(運轉|運起|以|露出一手|展示自身|催動)(自身)?(深厚|無上|上乘|絕頂|渾厚|純陽|精純|純正|溫和道家|陰陽周天|醇厚)(內功|內力|真氣|功力|內息)/g, (_, v, _s, _adj, noun) => noun === "內功" ? `${v}《內功名》` : `${v}《內功名》${noun}`);
+          } else if (/(展露一手|以四兩撥千斤的)精妙武功|以精妙(劍氣|招式)|施展精妙擒拿手|露出一手看家絕學|亮出自身正大光明的武學|十招(之)?內(破其|連敗)|十招絕殺|(雙劍|槍劍|刀劍)(合璧|合擊)|連斬十二名催動火精|孤身殺入黑水漩渦斬斷|一劍劈碎聽雨閣血令|拔劍與她的紅袖共舞|全力硬接一掌不退半步|硬生生卸開蕭烈山七成掌力|結成兄弟同心陣，連敗|閃電般一劍劈飛他手中斷箭|催動全身真氣殺入三十六名|大戰炎洲三大神使|一劍斬落白狼王首級/.test(oText)) {
+            o.reqSkillTier = "上乘";
+            o.reqSkillCategory = "招式";
+            o.text = oText
+              .replace(/(展露一手|以四兩撥千斤的)精妙武功/g, "$1《招式名》")
+              .replace(/以精妙(劍氣|招式)/g, "以《招式名》$1")
+              .replace(/露出一手看家絕學/g, "露出一手《招式名》看家絕學");
           }
-        });
+        }
 
+        if (!o.reqSkillTier) {
+          if (!o.reqQinggong && /(施展|憑藉|動用|催動).*(輕功|身法)|飛簷走壁|凌空躍/.test(oText)) {
+            o.reqQinggong = true;
+          }
+          if (!o.reqNeigong && /(運轉|催動|調息).*(內功|內力|真氣|內息)|以內力逼毒|輸出一股內力/.test(oText)) {
+            o.reqNeigong = true;
+          }
+        }
+      });
+
+      if (!isPasserby) {
+        const hasNativeZhenpai = scenarioOptions.some(o => o.reqSkillTier === "鎮派" || o.reqSkillTier === 4);
         const scFullText = `${scenario.title || ""} ${scenario.desc || ""}`;
         const isMartialOrCrisis = /伏擊|刺殺|黑衣|匪|盜|殺手|圍攻|暗算|比武|切磋|過招|論劍|險境|劫|戰|毒|敵|奪|救|追擊|夜襲|宗門|長老|山寨|惡徒|陰謀|危機|逼退|血/.test(scFullText);
-        if (isMartialOrCrisis) {
-          if (!scenarioOptions.some(o => o.reqSkillTier === "上乘" || o.reqSkillTier === 3)) {
-            const needsLight = /追擊|潛入|逃|輕功|飛|懸崖|屋脊|趕回|圍困|院外|翻牆|破窗/.test(scFullText);
-            const needsInternal = /毒|重傷|寒氣|內傷|走火|封穴|解毒/.test(scFullText);
-            const t3Cat = needsLight ? "輕功" : (needsInternal ? "內功" : "招式");
-            const t3Text = needsLight
-              ? `施展《輕功名》鬼魅身法搶占先機，與【${targetChar.name}】一前一後封死敵人退路！`
-              : (needsInternal
-                ? `催動《內功名》護脈辟邪並輸出一股醇厚真元助【${targetChar.name}】穩住陣腳！`
-                : `運起上乘造詣施展《招式名》，凌厲劍氣直逼對手破綻，助【${targetChar.name}】一舉定局！`);
-            scenarioOptions.push({
-              reqSkillTier: "上乘",
-              reqSkillCategory: t3Cat,
-              text: t3Text,
-              intimacyDelta: 1,
-              tacitDelta: 1,
-              stats: { wu: 2, ming: 1, qing: 2 },
-              reply: `你臨陣展現的上乘武學火候恰到好處，令【${targetChar.name}】眼神一亮，兩人順勢聯手化解危局！`
-            });
-          }
-          if (!scenarioOptions.some(o => o.reqSkillTier === "鎮派" || o.reqSkillTier === 4)) {
+        if (!hasNativeZhenpai) {
+          if (isMartialOrCrisis) {
+            if (!scenarioOptions.some(o => o.reqSkillTier === "上乘" || o.reqSkillTier === 3)) {
+              const needsLight = /追擊|潛入|逃|輕功|飛|懸崖|屋脊|趕回|圍困|院外|翻牆|破窗/.test(scFullText);
+              const needsInternal = /毒|重傷|寒氣|內傷|走火|封穴|解毒/.test(scFullText);
+              const t3Cat = needsLight ? "輕功" : (needsInternal ? "內功" : "招式");
+              const t3Text = needsLight
+                ? `施展《輕功名》鬼魅身法搶占先機，與【${targetChar.name}】一前一後封死敵人退路！`
+                : (needsInternal
+                  ? `催動《內功名》護脈辟邪並輸出一股醇厚真元助【${targetChar.name}】穩住陣腳！`
+                  : `運起上乘造詣施展《招式名》，凌厲劍氣直逼對手破綻，助【${targetChar.name}】一舉定局！`);
+              scenarioOptions.push({
+                reqSkillTier: "上乘",
+                reqSkillCategory: t3Cat,
+                text: t3Text,
+                intimacyDelta: 1,
+                tacitDelta: 1,
+                stats: { wu: 2, ming: 1, qing: 2 },
+                reply: `你臨陣展現的上乘武學火候恰到好處，令【${targetChar.name}】眼神一亮，兩人順勢聯手化解危局！`
+              });
+            }
             scenarioOptions.push({
               reqSkillTier: "鎮派",
               reqSkillCategory: "",
@@ -22410,18 +22450,34 @@ ${targetW.desc}
               stats: { wu: 3, ming: 3, qing: 2 },
               reply: `你舉手投足間流露的鎮派以上絕世風範震撼全場，【${targetChar.name}】在旁歎為觀止，對你的敬重與傾心更進一層！`
             });
+          } else if (scenarioOptions.length <= 3 && !scenarioOptions.some(o => o.reqSkillTier)) {
+            scenarioOptions.push({
+              reqSkillTier: "鎮派",
+              reqSkillCategory: "",
+              text: `順勢演練《武學名》一二式宗師氣象，為【${targetChar.name}】印證武道心得`,
+              intimacyDelta: 1,
+              tacitDelta: 1,
+              stats: { wu: 2, ming: 2, qing: 2 },
+              reply: `你隨手演示的鎮派以上絕學精義直指武道本源，【${targetChar.name}】觀後拍案叫絕，兩人神交更深！`
+            });
           }
-        } else if (scenarioOptions.length <= 3 && !scenarioOptions.some(o => o.reqSkillTier)) {
-          scenarioOptions.push({
-            reqSkillTier: "鎮派",
-            reqSkillCategory: "",
-            text: `順勢演練《武學名》一二式宗師氣象，為【${targetChar.name}】印證武道心得`,
-            intimacyDelta: 1,
-            tacitDelta: 1,
-            stats: { wu: 2, ming: 2, qing: 2 },
-            reply: `你隨手演示的鎮派以上絕學精義直指武道本源，【${targetChar.name}】觀後拍案叫絕，兩人神交更深！`
-          });
         }
+      }
+
+      // 保底：若全場所有「不會倒扣好感 (intimacyDelta >= 0)」的選項皆設有武學/屬性/銀兩等門檻，補入 1 個無門檻正向應對選項，避免玩家被迫扣好感或無路可走
+      const hasUngatedPositiveOpt = scenarioOptions.some(o => {
+        const dInt = o.intimacyDelta !== undefined ? o.intimacyDelta : (o.bondGain !== undefined ? o.bondGain : 1);
+        const hasCaiCost = !!(o.cost && o.cost.cai > 0) || !!(o.stats && o.stats.cai < 0);
+        return dInt >= 0 && !o.reqSkillTier && !o.reqQinggong && !o.reqNeigong && !o.reqZhaoshi && !o.reqStat && !o.reqProfession && !o.reqWeapon && !hasCaiCost;
+      });
+      if (!hasUngatedPositiveOpt) {
+        scenarioOptions.push({
+          text: `與【${targetChar.name}】並肩應對、憑藉默契與急智共度難關`,
+          intimacyDelta: 1,
+          tacitDelta: 0,
+          stats: { qing: 2, de: 1 },
+          reply: `雖未必有絕世神功護身，但你關鍵時刻毫不退縮，與【${targetChar.name}】同進同退，總算化險為夷。`
+        });
       }
 
       const foresight = hasForesight();
@@ -22455,7 +22511,11 @@ ${targetW.desc}
           reqProfession: opt.reqProfession,
           reqSkillTier: opt.reqSkillTier,
           reqSkillCategory: opt.reqSkillCategory,
+          reqQinggong: opt.reqQinggong,
+          reqZhaoshi: opt.reqZhaoshi,
+          reqNeigong: opt.reqNeigong,
           reqWeapon: opt.reqWeapon || /祭出隨身神兵/.test(opt.text || ""),
+          lockIfUnmet: opt.lockIfUnmet,
           onSelect: () => {
             if (inferredCaiCost > 0) modifyStats({ cai: -inferredCaiCost });
             if (isMingDice) {
@@ -32181,7 +32241,18 @@ ${targetW.desc}
       (rawChoices || []).forEach(c => {
         if (!c) return;
         let prefixBadges = "";
-        let displayText = c.reqSkillTier ? (c.text || "") : personalizeSkillAndBodyText(c.text || "", tag, title);
+        let effectiveSkillTier = c.reqSkillTier || "";
+        let effectiveSkillCategory = c.reqSkillCategory || "";
+        let rawChoiceText = c.text || "";
+        if (!effectiveSkillTier && !/無武力門檻|需習得進階以上/.test(rawChoiceText) && /以絕世武功|展露絕頂武學|以蓋世武威/.test(rawChoiceText)) {
+          effectiveSkillTier = "鎮派";
+          if (!effectiveSkillCategory && /劈|劍|刀|殺|斬|打/.test(rawChoiceText)) {
+            effectiveSkillCategory = "招式";
+          }
+          const slotTag = effectiveSkillCategory === "招式" ? "招式名" : "武學名";
+          rawChoiceText = rawChoiceText.replace(/(以|展露)(絕世武功|絕頂武學|蓋世武威)/g, `$1《${slotTag}》$2`);
+        }
+        let displayText = effectiveSkillTier ? rawChoiceText : personalizeSkillAndBodyText(rawChoiceText, tag, title);
 
         // 1. 檢定行當（例如：因為你是郎中 / 商賈 / 獵戶）
         const isBattleModal = /武林浩劫/.test(tag || "") || !!c.lockIfUnmet;
@@ -32288,9 +32359,9 @@ ${targetW.desc}
 
         // 4. 檢定武力或其他屬性門檻
         let statMet = true;
-        let requiresQinggong = !!(c.reqQinggong || (!c.reqSkillTier && /《靈動身法》|攀附險峻冰岩|踏著絕壁青藤|遊走四周|踏水而行/.test(rawChoices ? (c.text || "") + displayText : displayText)));
-        let requiresZhaoshi = !!(c.reqZhaoshi || (!c.reqSkillTier && /《基礎招式》|繞至敵後施展|連環奇襲|以剛猛招式/.test((c.text || "") + displayText)));
-        let requiresNeigong = !!(c.reqNeigong || (!c.reqSkillTier && /《基礎吐納》|《護體心法》|運轉體內深厚內息|清音定魂/.test((c.text || "") + displayText)));
+        let requiresQinggong = !!(c.reqQinggong || (!effectiveSkillTier && /《靈動身法》|攀附險峻冰岩|踏著絕壁青藤|遊走四周|踏水而行/.test(rawChoices ? (c.text || "") + displayText : displayText)));
+        let requiresZhaoshi = !!(c.reqZhaoshi || (!effectiveSkillTier && /《基礎招式》|繞至敵後施展|連環奇襲|以剛猛招式/.test((c.text || "") + displayText)));
+        let requiresNeigong = !!(c.reqNeigong || (!effectiveSkillTier && /《基礎吐納》|《護體心法》|運轉體內深厚內息|清音定魂/.test((c.text || "") + displayText)));
 
         if (c.reqStat && player) {
           statMet = Object.keys(c.reqStat).every(k => (player.stats[k] || 0) >= c.reqStat[k]);
@@ -32401,9 +32472,9 @@ ${targetW.desc}
         // 5. 檢定武學品階（上乘 / 鎮派以上）、對應輕功/招式/內功、隨身神兵、銀兩、修為或【自創武學】條件（不足時禁用並紅字提示）
         let lackSkillTier = false;
         let lackSkillTierLabel = "";
-        if (c.reqSkillTier) {
-          const minTierPrio = (c.reqSkillTier === "鎮派" || c.reqSkillTier === 4 || c.reqSkillTier === "鎮派以上") ? 4 : 3;
-          const catFilter = c.reqSkillCategory || "";
+        if (effectiveSkillTier) {
+          const minTierPrio = (effectiveSkillTier === "鎮派" || effectiveSkillTier === 4 || effectiveSkillTier === "鎮派以上") ? 4 : 3;
+          const catFilter = effectiveSkillCategory || "";
           const tierLabel = minTierPrio >= 4 ? "鎮派以上" : "上乘以上";
           const catLabel = catFilter === "輕功" ? "輕功/身法" : (catFilter === "內功" ? "內功/心法" : (catFilter === "招式" ? "武學招式" : "武學"));
           const catShort = catFilter || "武學";
@@ -32427,7 +32498,14 @@ ${targetW.desc}
           } else {
             lackSkillTier = true;
             lackSkillTierLabel = `${tierLabel}${catLabel}`;
-            displayText = displayText.replace(/《(武學|招式|輕功|內功)名》/g, `【${tierLabel}${catShort}】`);
+            displayText = displayText
+              .replace(/《(武學|招式|輕功|內功)名》(絕世武功|絕世神功|絕頂武學|蓋世武威|看家絕學|絕學)/g, "$2")
+              .replace(/《內功名》(內力|真氣|功力|內息)/g, "深厚$1")
+              .replace(/《招式名》(劍氣|刀芒|拳勁|槍罡|招式)/g, "精妙$1")
+              .replace(/《輕功名》/g, "上乘輕功")
+              .replace(/《內功名》/g, "深厚內功")
+              .replace(/《招式名》/g, "高深招式")
+              .replace(/《武學名》/g, "絕世武學");
             prefixBadges = `<span class="prereq-tag danger">🔒 【需${tierLabel}${catShort}】</span>` + prefixBadges;
           }
         }
