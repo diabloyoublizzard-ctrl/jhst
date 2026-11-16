@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.15.2310</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.16.1159</span>
       </div>
 
       <div class="debug-row">
@@ -18425,7 +18425,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.15.2310";
+    const GAME_VERSION = "v2026.11.16.1159";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -22426,7 +22426,7 @@ ${targetW.desc}
         const hasAnyTierGate = scenarioOptions.some(o => !!o.reqSkillTier);
         const scFullText = `${scenario.title || ""} ${scenario.desc || ""}`;
         const hasExplicitEnemy = /伏擊|圍攻|刺客|殺手|山賊|惡徒|匪徒|叛黨|死士|強敵|黑衣/.test(scenario.desc || "");
-        const isSurvivalOrHealing = /沙暴|岩洞|風暴|雪毒|冷箭|中毒|療傷|逼毒|取暖|清水|放血|迷途|共濟/.test(scFullText) && !hasExplicitEnemy;
+        const isSurvivalOrHealing = /沙暴|岩洞|風暴|雪毒|冷箭|中毒|療傷|逼毒|取暖|清水|放血|迷途|共濟|大典|結盟|立誓|和平|盟約/.test(scFullText) && !hasExplicitEnemy;
         const isMartialOrCrisis = /伏擊|刺殺|黑衣|匪|盜|殺手|圍攻|暗算|比武|切磋|過招|論劍|險境|劫|戰|敵|奪|救|追擊|夜襲|宗門|長老|山寨|惡徒|陰謀|危機|逼退/.test(scFullText) && !isSurvivalOrHealing;
         if (!hasAnyTierGate && scenarioOptions.length < 3 && !isSurvivalOrHealing) {
           if (isMartialOrCrisis) {
@@ -30369,7 +30369,8 @@ ${targetW.desc}
       // 生死紀事與宿疾／戰役因果追溯（精準區分「舊傷暗疾爆發」與「沙場當場壯烈成仁」）
       let antecedentText = "";
       const injHist = player.injuryHistory || [];
-      const diedOfOldInjury = cleanReason.includes("舊傷") || cleanReason.includes("暗疾") || cleanReason.includes("傷勢過重") || cleanReason.includes("經脈盡碎") || cleanReason.includes("氣血枯竭");
+      const isNaturalEnd = cleanReason.includes("壽終正寢") || cleanReason.includes("身無半點舊傷");
+      const diedOfOldInjury = !isNaturalEnd && (cleanReason.includes("舊傷") || cleanReason.includes("暗疾") || cleanReason.includes("傷勢過重") || cleanReason.includes("經脈盡碎") || cleanReason.includes("氣血枯竭"));
       const diedInBattle = cleanReason.includes("【") || cleanReason.includes("戰") || cleanReason.includes("擋劫") || cleanReason.includes("陣亡") || cleanReason.includes("斃命");
 
       if (diedOfOldInjury && injHist.length > 0) {
@@ -30523,8 +30524,16 @@ ${targetW.desc}
           afterwordLines.push(`🌱 薪火傳承：${heirsStr}跪於你的碑前立誓繼承遺志，此後攜手闖蕩九州江湖，令你一脈的俠名傳頌百年不衰。`);
         }
         if (equippedWeaponName) {
-          const markerNoun = /刀|刃/.test(equippedWeaponName) ? "刀標" : (/槍|矛|戟/.test(equippedWeaponName) ? "槍標" : (/棍|杖|棒/.test(equippedWeaponName) ? "兵標" : "劍標"));
-          afterwordLines.push(`你生前佩帶的【${equippedWeaponName}】斜插於青塚之前化作${markerNoun}，每逢風雨之夜猶自清鳴。`);
+          if (/手套|拳套|護腕|指環|爪|掌套/.test(equippedWeaponName)) {
+            afterwordLines.push(`你生前佩帶的【${equippedWeaponName}】靜置於青塚石案之上，至今仍隱隱透著溫潤內息。`);
+          } else if (/針|鏢|袖箭|暗器|飛蝗/.test(equippedWeaponName)) {
+            afterwordLines.push(`你生前隨身佩帶的【${equippedWeaponName}】封存於青塚石匣之中，江湖後輩每過墓前無不肅然起敬。`);
+          } else if (/琴|笛|簫|琵琶|扇|筆|傘|拂塵/.test(equippedWeaponName)) {
+            afterwordLines.push(`你生前常伴身側的【${equippedWeaponName}】安放於青塚之前，山風拂過時猶如故人輕吟。`);
+          } else {
+            const markerNoun = /刀|刃/.test(equippedWeaponName) ? "刀標" : (/槍|矛|戟/.test(equippedWeaponName) ? "槍標" : (/棍|杖|棒/.test(equippedWeaponName) ? "兵標" : "劍標"));
+            afterwordLines.push(`你生前佩帶的【${equippedWeaponName}】斜插於青塚之前化作${markerNoun}，每逢風雨之夜猶自清鳴。`);
+          }
         } else if ((player.skills || []).length >= 4) {
           afterwordLines.push(`你生前留下的《${player.skills[0].name}》手札在江湖輾轉流傳，成了後世少年俠客夢寐以求的武道遺篇。`);
         }
@@ -31598,7 +31607,7 @@ ${targetW.desc}
       };
 
       openEventModal(
-        `👶 紅塵添丁 · 與${spouse.name}喜獲${orderLabel}【${fullName}】`,
+        `👶 ${isBoy ? "喜獲麟兒" : "喜獲千金"} · 與${spouse.name}喜獲${orderLabel}【${fullName}】`,
         "紅塵家室 · 血脈傳承",
         desc,
         [
@@ -31834,6 +31843,106 @@ ${targetW.desc}
                 onSelect: () => {
                   const chg = modifyStats({ de: 8, qing: 8 });
                   addLog(`🍵【言傳身教 · 養氣修心】你與【${spouseName}】溫言點撥【${child.name}】制怒養氣之道，孩子恍然受教，氣度更趨沉穩！(${chg.join("、")})`, "good-log");
+                  setPauseState(false);
+                }
+              }
+            ]
+          },
+          {
+            id: "fam_child_toddler_scroll",
+            title: `📜 幼年抓周 · 【${child.name}】翻出你的壓箱密卷`,
+            tag: "紅塵家室 · 童年趣事",
+            desc: `午後書房陽光暖融融的，你與【${spouseName}】一回頭，竟看見年幼的【${child.name}】搖搖晃晃爬上書案，抱著你珍藏多年的《${bestAtk}》手抄圖譜啃得津津有味，小手還對著空氣有模有樣地比劃起來！\n\n` +
+              `【${spouseName}】忍俊不禁：「這小傢伙，倒像是打娘胎裡就惦記著你的看家絕學呢！」`,
+            choices: [
+              {
+                text: `📖 【順勢啟蒙 · 簡化一招基本步法逗孩子玩耍】寓教於樂，替其打下活絡筋骨的基礎 (武力+3、情義+8)`,
+                onSelect: () => {
+                  const chg = modifyStats({ wu: 3, qing: 8 });
+                  addLog(`📜【稚子啟蒙】你手把手教【${child.name}】比劃基本架勢，孩子咯咯直笑，筋骨日漸強健！(${chg.join("、")})`, "good-log");
+                  setPauseState(false);
+                }
+              },
+              {
+                text: `✒️ 【備下筆墨與藥草 · 教導孩子識字辨藥】不急著練武，先養一顆細心仁厚的性情 (德行+7、情義+8)`,
+                onSelect: () => {
+                  const chg = modifyStats({ de: 7, qing: 8 });
+                  addLog(`✒️【書香門第】你與【${spouseName}】陪著【${child.name}】在暖陽下認字辨草，歲月靜好。(${chg.join("、")})`, "good-log");
+                  setPauseState(false);
+                }
+              }
+            ]
+          },
+          {
+            id: "fam_child_market_justice",
+            title: `⚖️ 市集風波 · 【${child.name}】替老農出頭後的家法評理`,
+            tag: "紅塵家室 · 少年俠心",
+            desc: `傍晚【${child.name}】一身泥灰跑回家，眼眶微紅卻昂著頭——原來白天在西市看見惡霸踢翻老菜農的竹簍，【${child.name}】忍不住出手推開惡霸，雖護住了菜農，自己胳膊也被劃了一道淺口子。\n\n` +
+              `【${spouseName}】一邊替孩子塗藥，一邊把評理的目光投向你：「這孩子沒學壞，可往後江湖險惡，你打算怎麼教？」`,
+            choices: [
+              {
+                text: `🛡️ 【肯定俠義 · 傳授『先護身後救人』的實戰分寸】教導遇險時如何借力打力、保全自身 (武力+4、德行+5、情義+7)`,
+                onSelect: () => {
+                  const chg = modifyStats({ wu: 4, de: 5, qing: 7 });
+                  addLog(`🛡️【俠心初成】你先讚許【${child.name}】見義勇為，再細細拆解以弱勝強的避險之法，孩子銘記於心。(${chg.join("、")})`, "good-log");
+                  setPauseState(false);
+                }
+              },
+              {
+                text: `💰 【帶孩子同去探望老農 · 補貼生計並立威】讓孩子親眼看見善舉之後的責任與擔當 (德行+8、名望+5、情義+6)`,
+                onSelect: () => {
+                  const chg = modifyStats({ de: 8, ming: 5, qing: 6 });
+                  addLog(`🌾【善始善終】你攜【${child.name}】親自上門安頓老農，市井百姓紛紛稱讚你家風仁厚。(${chg.join("、")})`, "good-log");
+                  setPauseState(false);
+                }
+              }
+            ]
+          },
+          {
+            id: "fam_child_first_letter",
+            title: `✉️ 鴻雁傳書 · 【${child.name}】初闖江湖的第一封家書`,
+            tag: "紅塵家室 · 雛鳳試啼",
+            desc: `這日門房送來一封從三百里外寄來的火漆家書，字跡雖還帶著幾分青澀，卻透著掩不住的意氣飛揚：\n\n` +
+              `「爹娘見字如晤：孩兒已依約獨自走過三州七縣，昨夜在渡口客棧遇見兩名山賊攔路，孩兒謹記家中所授《${bestQg}》與《${bestAtk}》，三招便將他們制住送官！客棧掌櫃聽聞孩兒姓氏，還多送了兩盤滷牛肉呢！」`,
+            choices: [
+              {
+                text: `💌 【提筆回信勉勵 · 另附一份江湖人脈暗記】叮囑遇事多留三分餘地，莫忘初心 (名望+8、情義+9、德行+4)`,
+                onSelect: () => {
+                  const chg = modifyStats({ ming: 8, qing: 9, de: 4 });
+                  addLog(`✉️【家書萬金】你與【${spouseName}】在燈下替【${child.name}】寫了整整三頁叮囑，字字皆是父母牽掛與期許。(${chg.join("、")})`, "milestone");
+                  setPauseState(false);
+                }
+              },
+              {
+                text: `🎁 【託鏢局捎去防身盤纏與傷藥】孩子出門在外，父母總是恨不得把最好的都塞進行囊 (情義+11、財富-2、名望+4)`,
+                onSelect: () => {
+                  const chg = modifyStats({ qing: 11, cai: -2, ming: 4 });
+                  addLog(`🎁【慈母手中線 · 千里寄行囊】你請熟識鏢頭將上好金創藥與盤纏送往【${child.name}】落腳處，令孩子倍感溫暖。(${chg.join("、")})`, "good-log");
+                  setPauseState(false);
+                }
+              }
+            ]
+          },
+          {
+            id: "fam_child_homecoming_spar",
+            title: `🍂 藝成省親 · 【${child.name}】攜一壺老酒歸來請教`,
+            tag: "紅塵家室 · 薪火相映",
+            desc: `秋風起時，歷練多時的【${child.name}】風塵僕僕回到家中，眉宇間已褪去稚氣，多了一分從容沉穩。他／她將一壺塞外帶回的陳年佳釀放在桌上，眼底閃著期待的光：\n\n` +
+              `「這一路遇過不少名家高手，孩兒把他們的好招式記在心裡，總算把家傳《${bestAtk}》又往前推了一步。今日回來，想請爹／娘親自試試孩兒這幾年的長進！」`,
+            choices: [
+              {
+                text: `⚔️ 【庭院試招 · 不留餘力拆解三十回合】在切磋中彼此印證，意外觸動你的武道靈感 (武力+6、情義+8、名望+6)`,
+                onSelect: () => {
+                  const chg = modifyStats({ wu: 6, qing: 8, ming: 6 });
+                  addLog(`⚔️【後浪推前浪】你與【${child.name}】於秋風落葉間拆招三十合，見其武藝大成、招意新穎，反倒令你觸類旁通，武力更進！(${chg.join("、")})`, "milestone");
+                  setPauseState(false);
+                }
+              },
+              {
+                text: `🍶 【不比武藝 · 溫酒話家常至深夜】聽孩子細說一路見聞與結識的知己故人 (情義+12、德行+6)`,
+                onSelect: () => {
+                  const chg = modifyStats({ qing: 12, de: 6 });
+                  addLog(`🍶【團圓夜話】一家人圍爐溫酒，聽【${child.name}】談起江湖見聞，滿室溫馨令連日疲憊一掃而空。(${chg.join("、")})`, "good-log");
                   setPauseState(false);
                 }
               }
@@ -32521,7 +32630,11 @@ ${targetW.desc}
           if (statMet && c.reqStat.wu) {
             displayText = displayText.replace(/^【因為你[^】]+】/, "");
             let wuBadgeLabel = "因為你武功高";
-            if (player.title && ["開山祖師", "一代名師", "武林宿老", "武林至尊"].includes(player.title)) {
+            if (player.title === "開山祖師") {
+              if (player.sect && player.sect !== "無門無派") {
+                wuBadgeLabel = `因為你是${player.sect}開山祖師`;
+              }
+            } else if (player.title && ["一代名師", "武林宿老", "武林至尊"].includes(player.title)) {
               wuBadgeLabel = `因為你是${player.title}`;
             }
             prefixBadges += `<span class="prereq-tag gold">【${wuBadgeLabel}】</span>`;
