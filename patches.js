@@ -6187,6 +6187,61 @@ addGameData({
       }
     }
 
+
+    // 【C】當僅有親傳弟子（無子女）時：專屬師徒互動與弟子下山歷練劇本！
+    if (!child && disc) {
+      scenarios.push(
+        {
+          id: "fam_disc_only_spar",
+          title: `🍵 演武堂傳功 · 指點親傳弟子【${disc.name}】(${discAge}歲)拆解招式`,
+          tag: "衣缽傳承 · 師徒拆招",
+          desc: `清晨演武場薄霧未散，你的${disc.title}【${disc.name}】（年方 ${discAge} 歲）已在場中演練《${disc.inheritedSkill || bestAtk}》百餘遍，汗透青衫卻氣息愈發沉穩。見你緩步走來，【${disc.name}】收招行禮，虛心請教招式收放間的最後一處滯澀。`,
+          choices: [
+            {
+              text: `⚔️ 【親自下場餵招 · 拆解三十餘合】以實戰氣機點破其破綻 (武力+3、情義+8、名望+4)`,
+              onSelect: () => {
+                const chg = modifyStats({ wu: 3, qing: 8, ming: 4 });
+                addLog(`⚔️【名師餵招 · 弟子精進】你親自與親傳弟子【${disc.name}】（${discAge}歲）拆解《${disc.inheritedSkill || bestAtk}》關竅，【${disc.name}】豁然貫通，功力大進！(${chg.join("、")})`, "milestone");
+                setPauseState(false);
+              }
+            },
+            {
+              text: `📘 【取出一卷前人註疏 · 勉勵先修德行再精武藝】教導俠義立身之道 (德行+8、情義+8)`,
+              onSelect: () => {
+                const chg = modifyStats({ de: 8, qing: 8 });
+                addLog(`📘【春風化雨 · 傳道授業】你於燈下為【${disc.name}】（${discAge}歲）細講武道與俠義本心，師徒情義更深！(${chg.join("、")})`, "good-log");
+                setPauseState(false);
+              }
+            }
+          ]
+        },
+        {
+          id: "fam_disc_only_errand",
+          title: `🐎 弟子揚威 · 【${disc.name}】(${discAge}歲)獨挑惡寨捷報傳回`,
+          tag: "衣缽傳承 · 門徒揚名",
+          desc: `半月前你命【${disc.name}】（${discAge}歲）獨自下山查探黑風嶺劫鏢案。今日【${disc.name}】風塵僕僕歸來，不僅奪回全數失鏢分文不少，更將山寨雙煞綁在門外石柱上請你發落，沿途州縣百姓紛紛誇讚你教徒有方！`,
+          choices: [
+            {
+              text: `🏆 【欣慰嘉許 · 賞賜佳釀與護身盤纏】讚許其初試啼聲便有大俠氣象 (名望+10、情義+8、武力+2)`,
+              onSelect: () => {
+                const chg = modifyStats({ ming: 10, qing: 8, wu: 2 });
+                addLog(`🏆【名師高徒 · 初試啼聲】你的${disc.title}【${disc.name}】（${discAge}歲）獨挑黑風寨奪回失鏢，江湖茶肆紛紛傳頌你教導有方！(${chg.join("、")})`, "milestone");
+                setPauseState(false);
+              }
+            },
+            {
+              text: `⚖️ 【命其將餘賊押交官府 · 再往災區施藥濟貧】磨練其心性不驕不躁 (德行+10、情義+6、名望+5)`,
+              onSelect: () => {
+                const chg = modifyStats({ de: 10, qing: 6, ming: 5 });
+                addLog(`⚖️【戒驕戒躁 · 仁俠傳承】你叮囑【${disc.name}】（${discAge}歲）勝不驕敗不餒，並令其將賞銀分濟災民，令眾人更敬服！(${chg.join("、")})`, "good-log");
+                setPauseState(false);
+              }
+            }
+          ]
+        }
+      );
+    }
+
     const picked = scenarios[Math.floor(Math.random() * scenarios.length)];
     if (!picked) return false;
     player.lastFamilyEventAge = player.age;

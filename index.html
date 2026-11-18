@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.16.1159</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.19.0710</span>
       </div>
 
       <div class="debug-row">
@@ -1148,7 +1148,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611161159"></script>
+  <script src="data.js?v=202611190710"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1161,7 +1161,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611161159"></script>
+  <script src="patches.js?v=202611190710"></script>
   <script>
 
   (function() {
@@ -2011,7 +2011,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.16.1159";
+    const GAME_VERSION = "v2026.11.19.0710";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -3921,7 +3921,10 @@
         equipWeapon(wObj.name, true);
         if (!silent) {
           if (curWeapon) {
-            addLog(`🗡️【更換高階佩兵】你獲得了【${wObj.name}】（${wObj.tierName}，裝備武力+${wObj.wu}），品階高於原本的「${curWeapon.name}」，已自動配戴並收入武道神兵庫！`, "milestone");
+            const tierCompareNote = (wObj.tier || 0) >= (curWeapon.tier || 0)
+              ? `品階高於原本的「${curWeapon.name}」`
+              : `雖為${wObj.tierName}，但與你精擅武學極為契合（合計戰力 +${newTotalWu} 勝過「${curWeapon.name}」的 +${curTotalWu}）`;
+            addLog(`🗡️【更換佩兵】你獲得了【${wObj.name}】（${wObj.tierName}，裝備武力+${wObj.wu}），${tierCompareNote}，已自動配戴並收入武道神兵庫！`, "milestone");
           } else {
             addLog(`🗡️【獲得隨身佩兵】你獲得了【${wObj.name}】（${wObj.tierName}，裝備武力+${wObj.wu}），將其配於腰間！`, "milestone");
           }
@@ -4032,7 +4035,7 @@
             },
             {
               extra: { de: 2 },
-              log: `🌟【天命旁落 · 另擇明主】正當你握住【${targetW.name}】之際，一名氣運加身的年輕俠客踏風而至，【${targetW.name}】竟發出清越龍吟主動飛向對方！名匠長嘆「神兵擇主乃天命」，你豁達一笑拱手讓賢。(${chg.join("、")}、德行+2)`
+              log: `🌟【天命旁落 · 另擇明主】正當你握住【${targetW.name}】之際，一名氣運加身的年輕俠客踏風而至，【${targetW.name}】竟發出清越龍吟主動飛向對方！名匠長嘆「神兵擇主乃天命」，你豁達一笑拱手讓賢。(${chg.join("、")}，豁達讓賢再獲 德行+2)`
             },
             {
               extra: { cai: 5 },
@@ -4366,11 +4369,14 @@ ${targetW.desc}
       const hasDodge = masteredList.some(s => normalizeSkillType(s.type) === "輕功");
       const hasInternal = masteredList.some(s => normalizeSkillType(s.type) === "內功");
 
-      const normalPool = candidates.filter(sk => sk.tier === "一般");
-      const advPool = candidates.filter(sk => sk.tier === "進階");
-      const basicAndAdvPool = candidates.filter(sk => sk.tier === "一般" || sk.tier === "進階");
-      const supPool = candidates.filter(sk => sk.tier === "上乘");
-      const peerlessPool = candidates.filter(sk => sk.tier === "鎮派");
+      const isVeteran = (player.age || 0) >= 45 || (player.stats.wu || 0) >= 100 || player.title === "武林盟主";
+      const nonNormalPool = candidates.filter(sk => sk.tier !== "一般");
+      const effectivePool = (isVeteran && nonNormalPool.length > 0) ? nonNormalPool : candidates;
+      const normalPool = effectivePool.filter(sk => sk.tier === "一般");
+      const advPool = effectivePool.filter(sk => sk.tier === "進階");
+      const basicAndAdvPool = effectivePool.filter(sk => sk.tier === "一般" || sk.tier === "進階");
+      const supPool = effectivePool.filter(sk => sk.tier === "上乘");
+      const peerlessPool = effectivePool.filter(sk => sk.tier === "鎮派");
 
       // 若缺漏核心三類（招式/輕功/內功），優先從一般/進階池中補齊該類別，避免玩家遇到需要輕功或招式的劇本時無技可用
       let missingCatPool = [];
@@ -4378,7 +4384,7 @@ ${targetW.desc}
       else if (!hasAtk) missingCatPool = basicAndAdvPool.filter(sk => normalizeSkillType(sk.type) === "招式");
       else if (!hasInternal) missingCatPool = basicAndAdvPool.filter(sk => normalizeSkillType(sk.type) === "內功");
 
-      let targetSkill = candidates[Math.floor(Math.random() * candidates.length)];
+      let targetSkill = effectivePool[Math.floor(Math.random() * effectivePool.length)];
       if (missingCatPool.length > 0 && Math.random() < 0.80) {
         targetSkill = missingCatPool[Math.floor(Math.random() * missingCatPool.length)];
       } else if (normalPool.length > 0 && (masteredList.length < 4 || Math.random() < 0.50)) {
@@ -5847,7 +5853,7 @@ ${targetW.desc}
         const allMetIds = new Set(player.bonds.map(b => b.id));
 
         const knownChars = DB.CHARACTERS.filter(c => c && metIds.has(c.id) && c.id !== player.heroId);
-        const unknownChars = (player.fakedDeath || player.inImmortalPhase)
+        const unknownChars = (player.fakedDeath || player.inImmortalPhase || (player.age || 0) > 55)
           ? []
           : DB.CHARACTERS.filter(c => c && !allMetIds.has(c.id) && c.id !== player.heroId);
 
@@ -7909,7 +7915,7 @@ ${targetW.desc}
         lingyue: "寒月宮清霜殿凝霜長老",
         jianwang: "萬劍閣洗劍堂奉劍長老",
         tiandao: "霸刀門萬仞窟刀尊",
-        taiyi: "玄真觀純陽觀青陽道長",
+        taiyi: "玄真觀青陽道長",
         canglang: "破軍營鐵血衛統領"
       };
 
@@ -11170,7 +11176,7 @@ ${targetW.desc}
       const prefix = player.name ? player.name.slice(0, 1) : "玄";
       const playerSectTitle = `${prefix}門 · ${customSectName}`;
 
-      const desc = `年近花甲，歲月華白駒過隙。回首半生江湖風霜，昔日鮮衣怒馬的少年，如今已是鬢染微霜的一代前輩。\n` +
+      const desc = `年近花甲，歲月如白駒過隙。回首半生江湖風霜，昔日鮮衣怒馬的少年，如今已是鬢染微霜的一代前輩。\n` +
         `夕陽西下，長街古道邊，你望著天邊晚霞，思索著自己餘生的武道歸宿——\n` +
         `是收幾名骨骼清奇的弟子薪火相傳？是自立門戶、在名山之巔開宗立派？還是採菊東籬、徹底洗盡鉛華歸隱山林？`;
 
@@ -12609,7 +12615,7 @@ ${targetW.desc}
             },
             qiao_feng: {
               young: "於朔風關外為止息兩國刀兵、護佑邊關億萬生靈，於萬軍陣前慷慨陳詞後震斷心脈，天地同悲",
-              old: "於塞外辽闊草原上與牧民痛飲三百碗馬奶酒，伴著長生天的蒼鷹長鳴，豪邁大笑著安然長眠"
+              old: "於塞外遼闊草原上與牧民痛飲三百碗馬奶酒，伴著長生天的蒼鷹長鳴，豪邁大笑著安然長眠"
             },
             tao_hua: {
               young: "於夜雨古廟中為護住一名素不相識的孤兒，獨抗幽冥殿十名黑衣死士，劍斷人亡，眉心寒梅印殷紅如血",
@@ -13432,7 +13438,7 @@ ${targetW.desc}
         {
           id: "ep8000_2",
           title: "時間長河源頭 · 垂釣萬古因果",
-          desc: "修行逾八千載，你已超脫凡間生老病死之束縛，獨自來到時間長河上游，見萬古歲月華浪花奔流不息。",
+          desc: "修行逾八千載，你已超脫凡間生老病死之束縛，獨自來到時間長河上游，見萬古歲月如浪花奔流不息。",
           choices: [
             { text: "【以道心為鉤 · 於時間長河垂釣太古奇珍】撈取湮滅於歲月中的無上仙源 (修為+165000、壽元+3500)", qiDelta: 165000, lifeGain: 3500, result: "你自歲月浪花中釣起一團太初神光，修為與壽元雙雙暴漲！" },
             { text: "【俯瞰人間八千載百代繁華 · 圓滿紅塵道果】了卻一切凡間遺憾 (情義+50、德行+50、修為+140000、壽元+4500)", qiDelta: 140000, lifeGain: 4500, stats: { qing: 50, de: 50 }, result: "八千載紅塵悲歡盡付一笑，你的道心圓融無暇，與天地同壽！" }
@@ -14391,7 +14397,10 @@ ${targetW.desc}
         rescuerTitle = "滄州小醫女【溫小滿】";
         narrative = `大限將至，你油盡燈枯臥於榻上。恍惚間聞到一陣熟悉的甘草清香——當年你在滄州鐵獅渡火海救下的小醫女【溫小滿】竟背著藥箱星夜兼程趕到！\n\n「少俠別睡！當年你在火海裡背我出來，今日換小滿用畢生所學的『逆天九針』與百年老參替你續命！」`;
       } else if (karmicList.length > 0) {
-        const seedDesc = karmicList[Math.floor(Math.random() * karmicList.length)];
+        const seedObj = karmicList[Math.floor(Math.random() * karmicList.length)];
+        const seedDesc = typeof seedObj === "string"
+          ? seedObj
+          : (seedObj?.who || seedObj?.label || seedObj?.text || "昔年受你搭救的江湖旅人");
         rescuerTitle = `昔日受恩者（${seedDesc}）`;
         narrative = `大限將至，你油盡燈枯、生機漸散。就在燈火將滅之際，一名風塵僕僕的訪客叩門而入——竟是【${seedDesc}】！\n\n對方跪在你的榻前熱淚盈眶，雙手奉上一枚溫潤生光的家傳千年靈丹：「恩公當年一念之仁救我性命，我尋訪名山十載方得此靈藥，只求為恩公再續人間歲月！」`;
       } else {
@@ -15537,7 +15546,62 @@ ${targetW.desc}
         );
       }
 
-      const picked = scenarios[Math.floor(Math.random() * scenarios.length)];
+  
+    // 【C】當僅有親傳弟子（無子女）時：專屬師徒互動與弟子下山歷練劇本！
+    if (!child && disc) {
+      scenarios.push(
+        {
+          id: "fam_disc_only_spar",
+          title: `🍵 演武堂傳功 · 指點親傳弟子【${disc.name}】(${discAge}歲)拆解招式`,
+          tag: "衣缽傳承 · 師徒拆招",
+          desc: `清晨演武場薄霧未散，你的${disc.title}【${disc.name}】（年方 ${discAge} 歲）已在場中演練《${disc.inheritedSkill || bestAtk}》百餘遍，汗透青衫卻氣息愈發沉穩。見你緩步走來，【${disc.name}】收招行禮，虛心請教招式收放間的最後一處滯澀。`,
+          choices: [
+            {
+              text: `⚔️ 【親自下場餵招 · 拆解三十餘合】以實戰氣機點破其破綻 (武力+3、情義+8、名望+4)`,
+              onSelect: () => {
+                const chg = modifyStats({ wu: 3, qing: 8, ming: 4 });
+                addLog(`⚔️【名師餵招 · 弟子精進】你親自與親傳弟子【${disc.name}】（${discAge}歲）拆解《${disc.inheritedSkill || bestAtk}》關竅，【${disc.name}】豁然貫通，功力大進！(${chg.join("、")})`, "milestone");
+                setPauseState(false);
+              }
+            },
+            {
+              text: `📘 【取出一卷前人註疏 · 勉勵先修德行再精武藝】教導俠義立身之道 (德行+8、情義+8)`,
+              onSelect: () => {
+                const chg = modifyStats({ de: 8, qing: 8 });
+                addLog(`📘【春風化雨 · 傳道授業】你於燈下為【${disc.name}】（${discAge}歲）細講武道與俠義本心，師徒情義更深！(${chg.join("、")})`, "good-log");
+                setPauseState(false);
+              }
+            }
+          ]
+        },
+        {
+          id: "fam_disc_only_errand",
+          title: `🐎 弟子揚威 · 【${disc.name}】(${discAge}歲)獨挑惡寨捷報傳回`,
+          tag: "衣缽傳承 · 門徒揚名",
+          desc: `半月前你命【${disc.name}】（${discAge}歲）獨自下山查探黑風嶺劫鏢案。今日【${disc.name}】風塵僕僕歸來，不僅奪回全數失鏢分文不少，更將山寨雙煞綁在門外石柱上請你發落，沿途州縣百姓紛紛誇讚你教徒有方！`,
+          choices: [
+            {
+              text: `🏆 【欣慰嘉許 · 賞賜佳釀與護身盤纏】讚許其初試啼聲便有大俠氣象 (名望+10、情義+8、武力+2)`,
+              onSelect: () => {
+                const chg = modifyStats({ ming: 10, qing: 8, wu: 2 });
+                addLog(`🏆【名師高徒 · 初試啼聲】你的${disc.title}【${disc.name}】（${discAge}歲）獨挑黑風寨奪回失鏢，江湖茶肆紛紛傳頌你教導有方！(${chg.join("、")})`, "milestone");
+                setPauseState(false);
+              }
+            },
+            {
+              text: `⚖️ 【命其將餘賊押交官府 · 再往災區施藥濟貧】磨練其心性不驕不躁 (德行+10、情義+6、名望+5)`,
+              onSelect: () => {
+                const chg = modifyStats({ de: 10, qing: 6, ming: 5 });
+                addLog(`⚖️【戒驕戒躁 · 仁俠傳承】你叮囑【${disc.name}】（${discAge}歲）勝不驕敗不餒，並令其將賞銀分濟災民，令眾人更敬服！(${chg.join("、")})`, "good-log");
+                setPauseState(false);
+              }
+            }
+          ]
+        }
+      );
+    }
+
+    const picked = scenarios[Math.floor(Math.random() * scenarios.length)];
       if (!picked) return false;
       player.lastFamilyEventAge = player.age;
       setPauseState(true);
@@ -17073,7 +17137,7 @@ ${targetW.desc}
 
 
 /* ============================================================================
- * 《江湖仙途 · 雙生天命》 v2026.11.13.0125 核心劇本與邏輯升級補丁
+ * 《江湖仙途 · 雙生天命》 v2026.11.19.0710 核心劇本與邏輯升級補丁
  * 涵蓋 10 項修正：
  * 1. 《雲澤畫舫 · 舊樓主的毒酒》等親密劇本加入武力門檻(68)、進階內功條件與「搶杯分飲」熱血險招
  * 2. 移除「你的選擇將直接決定誰能活下來！」贅句
@@ -17692,7 +17756,7 @@ ${targetW.desc}
     return true;
   };
 
-  console.log("✅ 已載入 v2026.11.13.0125 十大劇本與邏輯升級補丁！");
+  console.log("✅ 已載入 v2026.11.19.0710 十大劇本與邏輯升級補丁！");
 })();
 
     // 啟動初始化
