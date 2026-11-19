@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.19.0710</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.20.0710</span>
       </div>
 
       <div class="debug-row">
@@ -18497,7 +18497,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.19.0710";
+    const GAME_VERSION = "v2026.11.20.0710";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -19081,6 +19081,7 @@ addGameData({
         lightInjuries: 0,
         heavyInjuries: 0,
         maxLifespan: baseMaxLife,
+        lifespanEndModalShown: false,
         isImmortalUnlocked: false,
         inImmortalPhase: false,
         immortalStage: 0,
@@ -28961,7 +28962,7 @@ ${targetW.desc}
             triggerAge120AscensionCeremony();
             return;
           }
-          // 壽元結束的那一年：基礎 30% 機率（隨【情義】每點 +0.2%，最高可達 65%！）觸發「同伴來救」或「昔年因果救過的人來救」劇情（成功則壽元+3~5年，失敗則到此一遊）
+          // 壽元結束的那一年：優先檢定友人或昔年善緣來救（基礎 30%～65%，成功則壽元+3~5年）
           if (player.lastLifespanRescueAge !== player.age) {
             player.lastLifespanRescueAge = player.age;
             const qingRescueChance = Math.min(0.65, 0.30 + ((player.stats.qing || 0) * 0.002));
@@ -28971,11 +28972,10 @@ ${targetW.desc}
             }
           }
           const hasNoInjury = (player.lightInjuries || 0) === 0 && (player.heavyInjuries || 0) === 0 && (player.injuries || 0) === 0;
-          if (player.age >= 66 && player.age <= 120 && hasNoInjury) {
-            triggerDeathOrAscension(`歷盡紅塵歲月，身無半點舊傷暗疾，於睡夢中安詳壽終正寢，享壽 ${player.age} 歲。`);
-          } else {
-            triggerDeathOrAscension(`於睡夢中安詳坐化，享壽 ${player.age} 歲。`);
-          }
+          const baseReason = (player.age >= 66 && player.age <= 120 && hasNoInjury)
+            ? `歷盡紅塵歲月，身無半點舊傷暗疾，於睡夢中安詳壽終正寢，享壽 ${player.age} 歲。`
+            : `於睡夢中安詳坐化，享壽 ${player.age} 歲。`;
+          triggerLifespanEndStoryModal(baseReason);
           return;
         }
 
@@ -28983,7 +28983,7 @@ ${targetW.desc}
           if (player.isImmortalUnlocked) {
             triggerAge120AscensionCeremony();
           } else {
-            triggerDeathOrAscension(`歷盡百廿載紅塵滄桑，於人間極限壽終正寢，享壽 120 歲。`);
+            triggerLifespanEndStoryModal(`歷盡百廿載紅塵滄桑，於人間極限壽終正寢，享壽 120 歲。`);
           }
           return;
         }
@@ -30899,6 +30899,7 @@ ${targetW.desc}
         if (roll < baseSuccessRate) {
           const addYears = 3 + Math.floor(Math.random() * 3); // +3 ~ +5 年
           player.maxLifespan += addYears;
+          player.lifespanEndModalShown = false;
           const chg = modifyStats({ qing: 3, de: 2 });
           addLog(`🌟【逆天續命 · 故人相救】陽壽將盡之際，幸得${rescuerTitle}千里馳援（${methodLabel}），生生將你從鬼門關前拉了回來！枯竭的氣海重煥生機，你的壽元上限成功延展 +${addYears} 載！(${chg.join("、")}、壽元+${addYears}載)`, "good-log");
           updateAllUI();
@@ -30927,6 +30928,373 @@ ${targetW.desc}
       ];
 
       openEventModal("🕯️ 陽壽將盡 · 故人與善果逆天續命", "生死大限 · 因果馳援", narrative, choices);
+    }
+
+    // 壽元結束且未獲續命時，依玩家生平經歷從十套終章劇本抽選演出，玩家做出最後抉擇後才顯示「到此一遊」
+    function triggerLifespanEndStoryModal(baseReasonText, forceScenarioId = null) {
+      if (!player || player.isDead || player.lifespanEndModalShown) return;
+      player.lifespanEndModalShown = true;
+      setPauseState(true);
+
+      const spouse = (typeof getLivingSpouse === "function") ? getLivingSpouse() : null;
+      const livingLover = spouse || (player.bonds || []).find(b => b && !b.isDead && (b.relationTag === "紅塵伴侶" || b.relationTag === "神仙眷侶"));
+      const deadBonds = (player.bonds || []).filter(b => b && b.isDead);
+      const childrenList = Array.isArray(player.children) ? player.children : [];
+      const disciplesList = Array.isArray(player.disciples) ? player.disciples : [];
+      const activeMounts = (typeof getActiveMounts === "function") ? getActiveMounts() : (player.mounts || []).filter(m => m && !m.isDead);
+      const equippedWeaponObj = (player.equippedWeapon && typeof player.equippedWeapon === "object") ? player.equippedWeapon : null;
+      const equippedWeaponName = equippedWeaponObj ? (equippedWeaponObj.name || "") : String(player.equippedWeapon || "");
+      const bestAtk = getBestLearnedSkillName("招式", "家傳絕學").replace(/^[《「]+|[》」]+$/g, "");
+      const hasSectOrRole = (player.sect && player.sect !== "無門無派" && player.sect !== "江湖散修") || !!player.isAllianceLeader || player.title === "武林盟主" || player.title === "開山祖師";
+      const hasZhenpaiOrHighWu = ((player.stats && player.stats.wu) || 0) >= 90 || !!equippedWeaponName || (player.skills || []).some(s => getSkillTierPriority(s.tier) >= 4);
+      const hasNoCurrentInjury = (player.lightInjuries || 0) === 0 && (player.heavyInjuries || 0) === 0 && (player.injuries || 0) === 0;
+      const injHist = Array.isArray(player.injuryHistory) ? player.injuryHistory : [];
+      const hasInjuryRecord = !hasNoCurrentInjury || injHist.length > 0;
+
+      const finishEnding = (logText, logType = "milestone", fallbackReason = null) => {
+        addLog(logText, logType);
+        const finalReason = baseReasonText || fallbackReason || `於睡夢中安詳坐化，享壽 ${player.age} 歲。`;
+        triggerDeathOrAscension(finalReason);
+      };
+
+      const describePerformAction = (wName, atkName) => {
+        if (wName && /手套|拳套|護腕|指環|爪|掌套/.test(wName)) {
+          return {
+            title: "❄️ 雪落無聲 · 孤峰最後一演",
+            drawDesc: `你戴上伴隨半生的【${wName}】，活動十指關節，推門踏入靜謐的積雪庭院`,
+            performDesc: `雙手破空打出一整套《${atkName}》，勁氣如春雷震落枝頭霜雪`,
+            finishChoice: `卸下【${wName}】輕放青石之上，負手微笑收勢`
+          };
+        }
+        if (wName && /針|鏢|袖箭|暗器|飛蝗/.test(wName)) {
+          return {
+            title: "❄️ 寒星映雪 · 孤峰最後一演",
+            drawDesc: `你取出貼身暗藏半生的【${wName}】，指尖輕拂寒芒，推門踏入積雪庭院`,
+            performDesc: `隨手揮灑出平生最得意的《${atkName}》，寒星點點破開漫天飛雪`,
+            finishChoice: `將【${wName}】穩妥收入袖囊，雪落無聲間安然合眼`
+          };
+        }
+        if (wName && /琴|笛|簫|琵琶|扇|筆|傘|拂塵/.test(wName)) {
+          return {
+            title: "❄️ 雅意入雪 · 孤峰最後一演",
+            drawDesc: `你攜上常伴左右多年的【${wName}】，整好衣冠，推門踏入積雪庭院`,
+            performDesc: `從容施展出一整套《${atkName}》，氣韻綿長似與天地松風相合`,
+            finishChoice: `斂袖將【${wName}】輕放身側，含笑望向晴空`
+          };
+        }
+        if (wName && /刀|刃/.test(wName)) {
+          return {
+            title: "❄️ 舊刃歸鞘 · 孤峰最後一演",
+            drawDesc: `你取下壁間懸掛多年的【${wName}】，推門踏入萬籟俱寂的積雪庭院`,
+            performDesc: `刀光如匹練橫空，最後一次行雲流水般演完一整套《${atkName}》`,
+            finishChoice: `緩緩將【${wName}】收刀歸鞘，負手看漫天飛雪`
+          };
+        }
+        if (wName && /槍|矛|戟/.test(wName)) {
+          return {
+            title: "❄️ 寒槍點雪 · 孤峰最後一演",
+            drawDesc: `你握住伴隨半生的【${wName}】，挽了個穩妥槍花，踏入積雪庭院`,
+            performDesc: `寒星點雪，最後一次行雲流水般演完一整套《${atkName}》`,
+            finishChoice: `將【${wName}】輕頓於積雪之中，含笑收勢閉目`
+          };
+        }
+        if (wName && /棍|杖|棒/.test(wName)) {
+          return {
+            title: "❄️ 長兵映雪 · 孤峰最後一演",
+            drawDesc: `你扶起常伴左右的【${wName}】，神色清明地踏入積雪庭院`,
+            performDesc: `風聲獵獵，最後一次行雲流水般演完一整套《${atkName}》`,
+            finishChoice: `將【${wName}】頓地收勢，迎著晨光微笑坐化`
+          };
+        }
+        if (wName) {
+          return {
+            title: "❄️ 舊兵歸鞘 · 孤峰最後一演",
+            drawDesc: `你取下壁間陪伴半生的【${wName}】，推門踏入萬籟俱寂的積雪庭院`,
+            performDesc: `光影破雪，最後一次行雲流水般演完一整套《${atkName}》`,
+            finishChoice: `緩緩將【${wName}】歸鞘，迎著晴雪負手含笑坐化`
+          };
+        }
+        return {
+          title: "❄️ 孤峰踏雪 · 平生武意最後一演",
+          drawDesc: `你活動了一下輕快如昨的雙肩，推門踏入萬籟俱寂的積雪庭院`,
+          performDesc: `掌風破雪無聲，最後一次行雲流水般演完一整套《${atkName}》`,
+          finishChoice: `雙掌緩緩收於丹田，看一場白雪落滿肩頭`
+        };
+      };
+
+      const scenarios = [
+        {
+          id: "end_spouse_sunset",
+          exclusive: true,
+          eligible: () => !!livingLover,
+          weight: () => 22,
+          build: () => {
+            const partnerName = livingLover ? livingLover.name : "故人";
+            return {
+              title: "🌅 白首同歸 · 窗前並肩看晚霞",
+              tag: "壽元終章 · 紅塵摯愛",
+              desc: `夕陽將小院染成一片溫暖的橘紅，你只覺眼皮漸沉，氣海如退潮般緩緩平息。\n\n【${partnerName}】輕手替你披上厚實的狐裘大氅，捧來一盞還冒著熱氣的清茶，在窗畔矮凳坐下。你們像初識那年般輕聲聊著曾經一起走過的風雪、飲過的烈酒與江湖舊友；說著說著，你靠在【${partnerName}】溫熱的肩頭，聽見耳邊低柔的呢喃，這一生便再沒有半分遺憾。`,
+              choices: [
+                {
+                  text: `🤝 【緊握【${partnerName}】的手 · 輕許來生再會之約】微笑合眼，任憑餘生最後一抹暖意留在掌心`,
+                  onSelect: () => finishEnding(`🌅【白首同歸】殘陽斜照下，你緊握【${partnerName}】的手輕聲道了一句「下輩子還要早些遇見」，隨即含笑長眠。`)
+                },
+                {
+                  text: `🌸 【替【${partnerName}】理平鬢邊白髮】笑囑「莫哭，這趟人間我們沒白走」，安然沉睡`,
+                  onSelect: () => finishEnding(`🌅【紅塵相守】你替【${partnerName}】拭去眼角微淚，靠在熟悉肩頭靜靜睡去，滿室茶香猶溫。`)
+                }
+              ]
+            };
+          }
+        },
+        {
+          id: "end_heir_lamp",
+          exclusive: true,
+          eligible: () => childrenList.length > 0 || disciplesList.length > 0,
+          weight: () => 20,
+          build: () => {
+            const names = [
+              ...childrenList.map(c => `${c.orderLabel || "子女"}【${c.name}】`),
+              ...disciplesList.map(d => `${d.title || "親傳弟子"}【${d.name}】`)
+            ];
+            const heirLabel = names.length > 0 ? names.join("與") : "門下後輩";
+            return {
+              title: "🕯️ 薪火夜話 · 燈下最後一課",
+              tag: "壽元終章 · 薪火相傳",
+              desc: `冬夜寒爐火光融融，${heirLabel}輪流守在你的榻前煎藥照料，一刻也不曾合眼。\n\n你自知大限已在今夜，卻仍精神清明。望著年輕一輩眼中尚未被歲月磨滅的清亮鋒芒，你讓人點亮案頭最後一盞長明燈，將壓箱多年的武學手札與半生行走江湖的體悟輕聲道出。屋簷外雪落有聲，你知道自己的路走完了，而他們的江湖正要徹底展開。`,
+              choices: [
+                {
+                  text: `📖 【將《${bestAtk}》最後一重關竅口傳心授】叮囑「武功有窮時，俠義無盡日」`,
+                  onSelect: () => finishEnding(`🕯️【薪火相傳】你在孤燈下將《${bestAtk}》奧義盡數託付予${heirLabel}，見後輩領悟點頭，這才安然瞑目。`)
+                },
+                {
+                  text: `🪔 【合上秘笈 · 只留一句『守住本心比天下第一更難』】看他們跪拜領命後含笑辭世`,
+                  onSelect: () => finishEnding(`🕯️【家風長存】你沒有再講招式變化，只囑${heirLabel}「做人先守心」，在晚輩泣拜聲中安詳辭世。`)
+                }
+              ]
+            };
+          }
+        },
+        {
+          id: "end_ferry_reunion",
+          exclusive: true,
+          eligible: () => deadBonds.length > 0,
+          weight: () => 18,
+          build: () => {
+            const topDead = [...deadBonds].sort((a, b) => (b.intimacyIndex || 0) - (a.intimacyIndex || 0))[0];
+            const deadName = topDead ? topDead.name : "舊日知己";
+            return {
+              title: "🛶 故人入夢 · 黃泉渡口重逢",
+              tag: "壽元終章 · 陰陽相會",
+              desc: `彌留之際寒燈明滅，耳畔喧囂的人間聲息漸漸退去，窗外風雪忽地化作昔年煙雨迷濛的春風渡口。\n\n晨霧散開，早已先行離世多年的【${deadName}】竟提著一壺老酒立於烏篷舟頭，眉眼依舊是當年意氣風發的模樣，對著岸邊白髮蒼蒼的你爽朗大笑招手：\n「磨蹭了這許多載，總算捨得放下那些擔子，上船來陪我喝這頓欠了半輩子的酒了！」`,
+              choices: [
+                {
+                  text: `🍶 【朗聲大笑跨步登舟 · 再不回首紅塵是非】舉杯與【${deadName}】對飲，乘一葉扁舟消失於煙波`,
+                  onSelect: () => finishEnding(`🛶【渡口重逢】你在睡夢中嘴角忽然揚起少年般的笑意，似與故人【${deadName}】同舟遠去，從容辭世。`)
+                },
+                {
+                  text: `🙏 【先向身後人間拱手作別 · 再從容登舟赴約】了無牽掛地踏上久違故人的渡船`,
+                  onSelect: () => finishEnding(`🛶【此生無愧】你對著身後江山故土遠遠一揖，隨即與等候多時的【${deadName}】並肩乘舟離去。`)
+                }
+              ]
+            };
+          }
+        },
+        {
+          id: "end_sect_bell",
+          exclusive: true,
+          eligible: () => hasSectOrRole,
+          weight: () => 18,
+          build: () => {
+            const placeName = (player.sect && player.sect !== "無門無派" && player.sect !== "江湖散修")
+              ? `【${player.sect}】`
+              : (player.isAllianceLeader || player.title === "武林盟主" ? "【武林盟總壇】" : "【山門大殿】");
+            return {
+              title: "⛩️ 宗門鐘鳴 · 山門最後一望",
+              tag: "壽元終章 · 道統長青",
+              desc: `破曉時分，九聲沉渾的鐘鳴迴盪在${placeName}的雲海松林之間。年輕弟子與門人已在廣場排開陣勢晨練，整齊劃一的喝聲一如當年初入江湖的你。\n\n你扶著硃紅欄杆，靜靜俯瞰這方替天下正道撐起半壁江山的山門與旗幟，鼻尖嗅到熟悉的松香與檀煙——就算沒有自己在前頭頂著，這份道統也能迎風屹立千百年了。`,
+              choices: [
+                {
+                  text: `🔔 【親手敲響最後一記暮鐘 · 將信物鄭重交託】令諸弟子各自歸位修行，從容坐化於大殿前廊`,
+                  onSelect: () => finishEnding(`⛩️【道統長青】你在${placeName}鐘聲餘韻中交託信物，見門下棟樑已成，負手含笑坐化於雲海前庭。`)
+                },
+                {
+                  text: `🧘 【不驚動門下弟子 · 獨自退回靜室盤膝合眼】留下一片朗朗晨課聲作為最後的送行`,
+                  onSelect: () => finishEnding(`⛩️【功成身退】你聽著${placeName}山門外年輕弟子的晨練喝聲，獨自在靜室盤膝微笑坐化。`)
+                }
+              ]
+            };
+          }
+        },
+        {
+          id: "end_weapon_snow",
+          exclusive: true,
+          eligible: () => hasZhenpaiOrHighWu,
+          weight: () => 18,
+          build: () => {
+            const wp = describePerformAction(equippedWeaponName, bestAtk);
+            return {
+              title: wp.title,
+              tag: "壽元終章 · 武道絕響",
+              desc: `大雪初霽的清晨，本該沉重僵硬的四肢竟奇蹟般輕快得像回到二十歲那年。${wp.drawDesc}。\n\n庭前寂無人聲，唯有一樹寒梅落花。你氣定神閒，${wp.performDesc}——沒有半分滯澀，反倒比壯年天下第一時更多了幾分渾然天成的圓融。收勢之際，雪花靜靜落在你眉梢，平生所悟盡化天地雲煙。`,
+              choices: [
+                {
+                  text: `🗿 【將最後一式武意刻於庭前青石】留待有緣的後來少年一窺堂奧，隨後安然閉目`,
+                  onSelect: () => finishEnding(`❄️【武道絕響】你於大雪清晨演畢平生絕學《${bestAtk}》，將末式餘韻刻留青石之上，負手含笑而逝。`)
+                },
+                {
+                  text: `🌬️ 【${wp.finishChoice}】任這一身絕藝隨歲月歸於天地`,
+                  onSelect: () => finishEnding(`❄️【雪落歸真】你在大雪庭院最後演完一次《${bestAtk}》，收勢之時雪落無聲，整個人如松竹般安然長逝。`)
+                }
+              ]
+            };
+          }
+        },
+        {
+          id: "end_mount_vigil",
+          exclusive: true,
+          eligible: () => activeMounts.length > 0,
+          weight: () => 17,
+          build: () => {
+            const leadMount = activeMounts[0] || { name: "老馬" };
+            return {
+              title: "🐎 萬靈伏首 · 靈獸的最後守候",
+              tag: "壽元終章 · 萬靈有情",
+              desc: `大限降臨的那一夜，平日靈性通玄的【${leadMount.name}】說什麼也不肯回廄安歇，默默伏在你臥房窗台外。\n\n微涼夜風穿過窗紗，【${leadMount.name}】低垂著頭顱，用溫熱的鼻息一遍遍輕蹭你垂在榻邊的手背，喉間發出低沉而克制的哀鳴——這個曾馱著你闖過北冥荒漠、踏遍江南煙雨的老夥伴，早就看出了今夜與過去不同。`,
+              choices: [
+                {
+                  text: `🌿 【輕撫【${leadMount.name}】額頭 · 解開相伴多年的羈絆】溫聲道「去吧，往後山林海闊都歸你了」`,
+                  onSelect: () => finishEnding(`🐎【萬靈別主】你笑著替【${leadMount.name}】解去羈絆放歸山林，牠對著你的窗櫺三步一回頭，終成江湖一段奇談。`)
+                },
+                {
+                  text: `🐾 【隔著窗紗靠在【${leadMount.name}】溫暖身側】如當年露宿荒野般聽著彼此呼吸安然長眠`,
+                  onSelect: () => finishEnding(`🐎【生死相伴】最後一夜，【${leadMount.name}】靜靜伏在窗邊守著你的掌心，直至天明再也未曾喚醒主人。`)
+                }
+              ]
+            };
+          }
+        },
+        {
+          id: "end_old_scars",
+          exclusive: true,
+          eligible: () => hasInjuryRecord,
+          weight: () => (!hasNoCurrentInjury ? 22 : 14),
+          build: () => {
+            const latestInj = injHist.length > 0 ? injHist[injHist.length - 1] : null;
+            const pastContext = !hasNoCurrentInjury
+              ? (latestInj
+                ? `當年於「${latestInj.age}歲 · ${latestInj.source}」留下的舊患，今夜如約徹底湧上心脈`
+                : `昔年闖蕩留下的傷痕與暗疾於今夜一齊湧來，四肢漸如寒冰`)
+              : (latestInj
+                ? `當年於「${latestInj.age}歲 · ${latestInj.source}」落下的傷口早已隨歲月平復，今夜油盡燈枯之際，那段記憶卻格外清晰`
+                : `你低頭看著身上那些早就癒合的淺白舊疤，想起它們曾為誰擋下刀兵`);
+            return {
+              title: "🌇 暗傷化劫 · 夕陽下的老俠餘暉",
+              tag: "壽元終章 · 俠骨錚錚",
+              desc: `${pastContext}。\n\n你沒有再讓人去請大夫煎藥，只披衣推開木窗望向天邊最後一抹如血殘陽。想起那年替百姓擋下的那一刀、替同伴扛下的那一掌，若重新來過一次，你大概還是會毫不猶豫地站到前頭去——這身傷疤，原來每一道都值了。`,
+              choices: [
+                {
+                  text: `🪨 【挺直脊樑端坐木椅 · 以武人最體面的姿態迎向終點】面對殘陽合上雙眼，至死不曾彎下腰骨`,
+                  onSelect: () => finishEnding(`🌇【鐵骨錚錚】你在殘陽餘暉中整衣端坐，想起生平擋過的風雨與護下的人，至終不失江湖豪情而逝。`)
+                },
+                {
+                  text: `🛌 【緩緩躺回榻上 · 卸下守了半輩子的重擔安眠】輕聲道「剩下的路，留給年輕人走吧」`,
+                  onSelect: () => finishEnding(`🌇【餘暉落幕】你望完最後一抹晚霞後安然躺臥，終於徹底卸下一肩重負，含笑長眠。`)
+                }
+              ]
+            };
+          }
+        },
+        {
+          id: "end_pavilion_wine",
+          exclusive: false,
+          eligible: () => true,
+          weight: () => 14,
+          build: () => ({
+            title: "🍶 歸雁長亭 · 最後一壺濁酒",
+            tag: "壽元終章 · 醉臥長亭",
+            desc: `暮秋斜陽斜斜切過十里長亭，你不知不覺又走回這個年輕時剛出遠門常來歇腳的老地方，要了一壺最尋常的村釀暖胃。\n\n鄰桌幾名剛入江湖的少年劍客正唾沫橫飛地說著你當年的那些傳說，講到緊要處還拍桌喝彩，卻誰也沒認出亭角這位裹著青衫、安靜抿酒的白髮老人。`,
+            choices: [
+              {
+                text: `💰 【笑而不語 · 留下一錠碎銀悄然合眼】這場熱鬧本就是替年輕人準備的`,
+                onSelect: () => finishEnding(`🍶【深藏功與名】你在十里長亭聽著少年俠客高談自己當年的舊事，留下一錠碎銀後靠柱含笑長眠。`)
+              },
+              {
+                text: `🖌️ 【蘸酒於亭柱寫下最後一句江湖詩】擱筆負手望向南飛孤雁，於暮色中安詳離世`,
+                onSelect: () => finishEnding(`🍶【長亭詩魂】你在十里長亭木柱留下絕筆江湖行吟，隨即迎著晚風安詳合眼，徒留後人憑欄傳誦。`)
+              }
+            ]
+          })
+        },
+        {
+          id: "end_memoir_ink",
+          exclusive: false,
+          eligible: () => true,
+          weight: () => (((player.stats && player.stats.de) || 0) >= 70 || ((player.stats && player.stats.ming) || 0) >= 70) ? 20 : 12,
+          build: () => {
+            const heroSeal = player.title || "江湖歸人";
+            return {
+              title: "📜 殘卷遺墨 · 燈下寫就平生志",
+              tag: "壽元終章 · 筆墨千秋",
+              desc: `秋雨輕敲窗外芭蕉，你點起一盞小油燈，緩緩在紅木案上鋪開最後一疊宣紙。\n\n你將這輩子看過的荒漠大雪、喝過的江湖烈酒、遇過卻走散的故人，連同對不起誰、救過誰，一筆一劃寫在紙上。寫完最末那句「此生無悔」時，墨跡猶帶微光，燈芯恰好輕爆了一聲燈花。`,
+              choices: [
+                {
+                  text: `🧧 【於卷末蓋下【${heroSeal}】印信留予後世評說】是功是過，皆交給這座江湖自己評斷`,
+                  onSelect: () => finishEnding(`📜【一紙生平】你於油燈燃盡前蓋下「${heroSeal}」朱印，將半生回憶與江湖見聞封卷留世，含笑坐化。`)
+                },
+                {
+                  text: `🔥 【輕笑將手稿投入暖爐化作飛灰】『這輩子的故事，自己記得便夠了』`,
+                  onSelect: () => finishEnding(`📜【身事如煙】你看著寫滿半生波瀾的墨跡在暖爐中化作輕煙，心境空明如鏡，安詳合眼。`)
+                }
+              ]
+            };
+          }
+        },
+        {
+          id: "end_pine_snow",
+          exclusive: false,
+          eligible: () => true,
+          weight: () => (hasNoCurrentInjury || player.sect === "無門無派" || player.sect === "江湖散修") ? 20 : 12,
+          build: () => ({
+            title: "🌲 青山踏雪 · 無牽無掛歸塵土",
+            tag: "壽元終章 · 乘風歸去",
+            desc: `臨行前的幾日，你早已悄然將用不著的銀兩託付給鎮上慈幼局與孤老，今日換上一身最輕便乾淨的青衫，像少年初行時那樣空手登上了城外無名青山。\n\n山頂雲開霧散，長風捲起萬頃松濤。你倚著一株歷經百劫的古松席地坐下，看遠處炊煙裊裊升起，只覺這輩子赤條條地來，走過這麼一遭波瀾壯闊，實在痛快極了。`,
+            choices: [
+              {
+                text: `🍃 【閉目聽一曲松風 · 隨清風明月安然歸去】無牽無掛，不驚動塵世一人`,
+                onSelect: () => finishEnding(`🌲【青山為伴】你倚坐無名青山古松之下，在清風明月與松濤聲中安詳辭世，塵歸塵，土歸土。`)
+              },
+              {
+                text: `☁️ 【仰望長天輕嘆一聲『好一個紅塵江湖』】大笑之後緩緩合眼，神態安詳如睡`,
+                onSelect: () => finishEnding(`🌲【不負人間】你於山頂長歎一聲「好一個紅塵江湖」，帶著滿足的笑意安然長眠於松陰之下。`)
+              }
+            ]
+          })
+        }
+      ];
+
+      const weightedPick = (pool) => {
+        const total = pool.reduce((sum, item) => sum + Math.max(1, Number(item.weight()) || 1), 0);
+        let roll = Math.random() * total;
+        for (const item of pool) {
+          roll -= Math.max(1, Number(item.weight()) || 1);
+          if (roll <= 0) return item;
+        }
+        return pool[pool.length - 1];
+      };
+
+      let chosen = null;
+      if (forceScenarioId) {
+        chosen = scenarios.find(s => s.id === forceScenarioId) || scenarios[0];
+      } else {
+        const eligible = scenarios.filter(s => s.eligible());
+        const exclusives = eligible.filter(s => s.exclusive);
+        chosen = (exclusives.length > 0 && Math.random() < 0.75)
+          ? weightedPick(exclusives)
+          : weightedPick(eligible.length > 0 ? eligible : scenarios);
+      }
+      const built = chosen.build();
+      openEventModal(built.title, built.tag, built.desc, built.choices);
     }
 
     function triggerDeathOrAscension(reasonText) {
