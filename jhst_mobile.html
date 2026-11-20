@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.20.0710</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.20.1434</span>
       </div>
 
       <div class="debug-row">
@@ -10625,7 +10625,7 @@
       { minAge: 51, maxAge: 90, text: "寒冬朔風起時，經脈深處早年與強敵對決殘留的真氣舊痕便隨之震顫，你不得不購置靈丹壓制翻湧氣血。", stats: { wu: -2, cai: -1 }, lightInjury: 1 },
       { minAge: 51, maxAge: 90, text: "秋深霜重，步入中晚年的你偶感塞外寒毒侵體，晨起練拳時發覺氣血運轉不暢，一套拳法打完竟雙臂微顫。", stats: { wu: -2 } },
       { minAge: 51, maxAge: 90, text: "年過半百重遊少年時曾避雨的破敗山神廟，廟中神像早已斑駁傾頹，你撫摸著柱上當年的刻痕，恍如隔世。", stats: { qing: 3, de: 2 } },
-      { minAge: 51, maxAge: 90, text: "你在江南茶樓獨酌，聽鄰桌幾名初出茅廬的少俠滿臉憧憬地談論你三十年前的成名一戰，不由得拈鬚莞爾。", stats: { ming: 3, qing: 2 } },
+      { minAge: 51, maxAge: 90, text: "你在江南茶樓獨酌，聽鄰桌幾名初出茅廬的少俠滿臉憧憬地談論你三十年前的成名一戰，不由得含笑莞爾。", stats: { ming: 3, qing: 2 } },
       { minAge: 51, maxAge: 90, text: "山道上偶遇一名苦練劍法卻不得其門而入的寒門少年，你見其頗有自己當年的影子，隨手以竹枝指點三招便飄然離去。", stats: { de: 3, ming: 2 }, plantKarmicSeed: "昔年你在山道以竹枝指點過三招劍法的那名寒門少年" },
       { minAge: 51, maxAge: 90, text: "清明細雨紛紛，你提著兩壺陳年女兒紅前往故友墓前祭奠，將一壺灑入青塚、一壺飲盡，醉臥松下聽風。", stats: { qing: 4, de: 1 } },
       { minAge: 51, maxAge: 90, text: "鬢角漸染霜華，你不再執著於招式的剛猛凌厲，於錢塘江畔靜觀大潮起落三日，體悟出「重劍無鋒、大巧不工」的收放化境。", stats: { wu: 2, de: 3 } },
@@ -11820,7 +11820,7 @@ addGameData({
               },
               "intimacyDelta": 1,
               "tacitDelta": 1,
-              "reply": "洛凝霜渾身一僵，卻沒有甩開你的手，任由你拉著買了一盞洛凝霜河燈，冰霜般的嘴角第一次彎起弧度。"
+              "reply": "洛凝霜渾身一僵，卻沒有甩開你的手，任由你拉著買了一盞蓮花河燈，冰霜般的嘴角第一次彎起弧度。"
             },
             {
               "text": "買下一盞蓮花燈遞給她，教她寫下心願放入洛水祈福",
@@ -11987,7 +11987,7 @@ addGameData({
               },
               "intimacyDelta": 0,
               "tacitDelta": 1,
-              "reply": "劍光如血色洛凝霜漫天綻放！你們背靠背斬殺三大判官，洛凝霜緊緊握住你染血的手：『從今往後，人間黃泉，我只隨你一人！』"
+              "reply": "劍光如血色寒梅漫天綻放！你們背靠背斬殺三大判官，洛凝霜緊緊握住你染血的手：『從今往後，人間黃泉，我只隨你一人！』"
             },
             {
               "text": "以自身後背替她硬擋判官暗器，助她施展絕命一劍反殺首領",
@@ -18497,7 +18497,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.20.0710";
+    const GAME_VERSION = "v2026.11.20.1434";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -22895,7 +22895,15 @@ ${targetW.desc}
       }
 
       if (charData.ascension?.sworn || conf) {
-        const swornReply = charData.ascension?.sworn || `你與${charData.name}對天歃血為盟，結為異姓生死手足！`;
+        let swornReply = charData.ascension?.sworn || `你與${charData.name}對天歃血為盟，結為異姓生死手足！`;
+        if (player && player.gender === "女") {
+          swornReply = swornReply
+            .replace(/義兄/g, "義姊")
+            .replace(/生死兄弟/g, "生死姊妹")
+            .replace(/我兄弟/g, "我姊妹")
+            .replace(/兄弟你/g, "姊妹你")
+            .replace(/這個兄弟/g, "這個姊妹");
+        }
         choices.push({
           text: `🔥 【歃血為盟 · 義結金蘭】與【${charData.name}】撮土為香，結為異姓生死手足 (情義+10、名望+5)`,
           onSelect: () => {
@@ -23398,6 +23406,7 @@ ${targetW.desc}
 
       if (chooseHeavy) {
         const sc = HEAVY_INJURY_CURE_SCENARIOS[Math.floor(Math.random() * HEAVY_INJURY_CURE_SCENARIOS.length)];
+        const cleanTitle = String(sc.title || "").replace(/^[🩸🩹]\s*/, "");
         const effRiskRate = Math.min(92, sc.riskRate + docBonus);
         const effPillRate = Math.min(85, sc.pillRate + docBonus);
         const effPaidRate = Math.min(100, (sc.paidRate || 95) + docBonus);
@@ -23411,12 +23420,12 @@ ${targetW.desc}
                 player.heavyInjuries = Math.max(0, player.heavyInjuries - 1);
                 syncPlayerInjuries();
                 const chg = sc.riskSuccessStats ? modifyStats(sc.riskSuccessStats) : [];
-                addLog(`🩸【${sc.title}】${sc.riskSuccessLog} ${chg.length ? "(" + chg.join("、") + ")" : ""}`, "milestone");
+                addLog(`🩸【${cleanTitle}】${sc.riskSuccessLog} ${chg.length ? "(" + chg.join("、") + ")" : ""}`, "milestone");
               } else if (d.roll < (sc.riskWorsenThreshold || 85)) {
                 const chg = modifyStats({ de: 1 });
-                addLog(`🩸【${sc.title} · 傷勢持平】${sc.riskNeutralLog}（未增加重傷，${chg.join("、")}）`, "good-log");
+                addLog(`🩸【${cleanTitle} · 傷勢持平】${sc.riskNeutralLog}（未增加重傷，${chg.join("、")}）`, "good-log");
               } else {
-                addLog(`🩸【${sc.title}】${sc.riskFailLog}`, "danger-log");
+                addLog(`🩸【${cleanTitle}】${sc.riskFailLog}`, "danger-log");
                 addHeavyInjury(1);
                 if (player.isDead) return;
               }
@@ -23431,7 +23440,7 @@ ${targetW.desc}
               if (d.isSuccess) {
                 player.heavyInjuries = Math.max(0, player.heavyInjuries - 1);
                 syncPlayerInjuries();
-                addLog(`🩸【${sc.title} · 服藥奏效】${sc.pillSuccessLog}`, "milestone");
+                addLog(`🩸【${cleanTitle} · 服藥奏效】${sc.pillSuccessLog}`, "milestone");
               } else {
                 let extraNote = "傷勢未惡化";
                 if (player.lightInjuries > 0) {
@@ -23439,7 +23448,7 @@ ${targetW.desc}
                   syncPlayerInjuries();
                   extraNote = "重傷未惡化，且順勢消去 1 處輕傷";
                 }
-                addLog(`🩸【${sc.title} · 溫和調養】${sc.pillFailLog}（${extraNote}）`, "good-log");
+                addLog(`🩸【${cleanTitle} · 溫和調養】${sc.pillFailLog}（${extraNote}）`, "good-log");
               }
               updateAllUI();
               setPauseState(false);
@@ -23455,19 +23464,19 @@ ${targetW.desc}
                 if (sc.paidExtraLife) player.maxLifespan += sc.paidExtraLife;
                 syncPlayerInjuries();
                 const chg = modifyStats({ de: 2 });
-                addLog(`🩸【${sc.title} · 千金買命】你花費 ${sc.paidCost} 兩紋銀購得傳世奇藥，${sc.paidSuccessLog} (${chg.join("、")})`, "milestone");
+                addLog(`🩸【${cleanTitle} · 千金買命】你花費 ${sc.paidCost} 兩紋銀購得傳世奇藥，${sc.paidSuccessLog} (${chg.join("、")})`, "milestone");
               } else {
                 const d = rollDice0To99(effPaidRate);
                 if (d.isSuccess) {
                   player.heavyInjuries = Math.max(0, player.heavyInjuries - 1);
                   syncPlayerInjuries();
-                  addLog(`🩸【${sc.title} · 重金求醫】${sc.paidSuccessLog}`, "milestone");
+                  addLog(`🩸【${cleanTitle} · 重金求醫】${sc.paidSuccessLog}`, "milestone");
                 } else {
                   if (player.lightInjuries > 0) {
                     player.lightInjuries = Math.max(0, player.lightInjuries - 1);
                     syncPlayerInjuries();
                   }
-                  addLog(`🩸【${sc.title} · 靈藥護脈】${sc.paidFailLog}（絕不加重傷勢）`, "good-log");
+                  addLog(`🩸【${cleanTitle} · 靈藥護脈】${sc.paidFailLog}（絕不加重傷勢）`, "good-log");
                 }
               }
               updateAllUI();
@@ -23495,6 +23504,7 @@ ${targetW.desc}
 
       // 輕傷專屬求醫劇本（8 則多樣化劇本）
       const sc = LIGHT_INJURY_CURE_SCENARIOS[Math.floor(Math.random() * LIGHT_INJURY_CURE_SCENARIOS.length)];
+      const cleanTitle = String(sc.title || "").replace(/^[🩸🩹]\s*/, "");
       const effRiskRate = Math.min(95, sc.riskRate + docBonus);
       const effPillRate = Math.min(88, sc.pillRate + docBonus);
 
@@ -23507,11 +23517,11 @@ ${targetW.desc}
               player.lightInjuries = Math.max(0, player.lightInjuries - 1);
               syncPlayerInjuries();
               const chg = sc.riskSuccessStats ? modifyStats(sc.riskSuccessStats) : [];
-              addLog(`🩹【${sc.title}】${sc.riskSuccessLog} ${chg.length ? "(" + chg.join("、") + ")" : ""}`, "milestone");
+              addLog(`🩹【${cleanTitle}】${sc.riskSuccessLog} ${chg.length ? "(" + chg.join("、") + ")" : ""}`, "milestone");
             } else if (!sc.riskWorsenOnFail || d.roll < 82) {
-              addLog(`🩹【${sc.title} · 調理未果】雖未能一次拔除這處輕傷，但你收斂及時，傷勢並未惡化。`, "good-log");
+              addLog(`🩹【${cleanTitle} · 調理未果】雖未能一次拔除這處輕傷，但你收斂及時，傷勢並未惡化。`, "good-log");
             } else {
-              addLog(`🩹【${sc.title}】${sc.riskFailLog}`, "danger-log");
+              addLog(`🩹【${cleanTitle}】${sc.riskFailLog}`, "danger-log");
               addLightInjury(1);
               if (player.isDead) return;
             }
@@ -23526,9 +23536,9 @@ ${targetW.desc}
             if (d.isSuccess) {
               player.lightInjuries = Math.max(0, player.lightInjuries - 1);
               syncPlayerInjuries();
-              addLog(`🩹【${sc.title} · 服藥奏效】${sc.pillSuccessLog}`, "milestone");
+              addLog(`🩹【${cleanTitle} · 服藥奏效】${sc.pillSuccessLog}`, "milestone");
             } else {
-              addLog(`🩹【${sc.title} · 溫和服藥】${sc.pillFailLog}`, "good-log");
+              addLog(`🩹【${cleanTitle} · 溫和服藥】${sc.pillFailLog}`, "good-log");
             }
             updateAllUI();
             setPauseState(false);
@@ -23545,7 +23555,7 @@ ${targetW.desc}
             }
             player.lightInjuries = Math.max(0, player.lightInjuries - curedCount);
             syncPlayerInjuries();
-            addLog(`🩹【${sc.title} · 銀兩消災】${sc.paidLog}（成功治癒 ${curedCount} 處輕傷）`, "milestone");
+            addLog(`🩹【${cleanTitle} · 銀兩消災】${sc.paidLog}（成功治癒 ${curedCount} 處輕傷）`, "milestone");
             updateAllUI();
             setPauseState(false);
           }
@@ -26714,8 +26724,8 @@ ${targetW.desc}
             const fWu = rollFloatingPlayerWu(rawWu, aidedBond);
             const effWu = fWu.finalWu;
             const aidNote = aidedBond
-              ? `（有【${aidedBond.name}】助陣×1.2，臨陣戰力 ${effWu} [基準 ${rawWu}${fWu.stateTag}] vs 浮動門檻 ${reqWu}）`
-              : `（臨陣戰力 ${effWu} [基準 ${rawWu}${fWu.stateTag}] vs 浮動門檻 ${reqWu}）`;
+              ? `（【${aidedBond.name}】並肩助陣）`
+              : "";
             const baseChoiceStats = Object.keys(c.stats || {}).length > 0 ? c.stats : { wu: 4, ming: 4 };
 
             const isFinalBossFight = (
@@ -28924,7 +28934,12 @@ ${targetW.desc}
             if (c.qiDelta) addCultivationQi(c.qiDelta);
             if (c.lifeGain) player.maxLifespan += c.lifeGain;
             if (c.stats) modifyStats(c.stats);
-            addLog(`🌟【${centuryAge}歲百年大事件】${c.result}`, "immortal-log");
+            const actualBodyName = (typeof BODY_TIERS !== "undefined" && BODY_TIERS[player.bodyTierIndex || 0]?.name) || "凡胎肉身";
+            const actualRootName = (typeof ROOT_TIERS !== "undefined" && ROOT_TIERS[player.rootTierIndex || 0]?.name) || "下品真靈根";
+            const resultText = String(c.result || "")
+              .replace(/(你的|憑藉|與你的)【(?:凡胎肉身|銅皮鐵骨|百脈通玄|金剛琉璃體|太虛不滅軀|荒古聖體)】(?:以上)?/g, (_, pfx) => `${pfx}【${actualBodyName}】`)
+              .replace(/(你的|憑藉|與你的)【(?:凡品雜靈根|下品真靈根|中品地靈根|上品天靈根|無垢仙靈根|混沌道胎靈根)】(?:以上)?/g, (_, pfx) => `${pfx}【${actualRootName}】`);
+            addLog(`🌟【${centuryAge}歲百年大事件】${resultText}`, "immortal-log");
             updateAllUI();
             setPauseState(false);
           }
@@ -28951,6 +28966,7 @@ ${targetW.desc}
         player.month = 1;
         player.age++;
         player.ganzhiIndex = (player.ganzhiIndex + 1) % 60;
+        if (typeof updateFamilyMemberLifespans === "function") updateFamilyMemberLifespans();
         recordYearlyWorldNews(getCurrentGanzhi());
 
         if (player.age >= 80) {
@@ -29109,7 +29125,7 @@ ${targetW.desc}
             },
             bai_nina: {
               young: "於冥山西麓為鎮壓失控的聖火地脈，高舉金鈴吟唱古老祝禱直至元神燃盡，化作一縷純白聖焰",
-              old: "於明教光明頂聖火壇前安詳辭世，西域萬民徹夜點亮火把，送別這位一生仁善的聖女"
+              old: "於西域冥山聖火總壇前安詳辭世，西域萬民徹夜點亮火把，送別這位一生仁善的聖女"
             },
             tuoba_jun: {
               young: "於黑風暴肆虐的瀚海大漠中率領狼騎馳援受困商隊，身中數十箭仍高舉王旗開路，血盡墮馬而亡",
@@ -29620,8 +29636,10 @@ ${targetW.desc}
         return;
       }
 
-      // 【生平自發墓前祭奠】：若有已故同伴，低機率（每月約 1.2%）於生平卷自動前往故人墓前探望祭奠
-      const deadCompanions = (player.bonds || []).filter(b => b && (b.isDead || (b.status && b.status.includes("長眠"))));
+      // 【生平自發墓前祭奠】：若有好感達標之已故同伴，低機率（每月約 1.2%）於生平卷自動前往故人墓前探望祭奠（排除仇視／芥蒂者）
+      const deadCompanions = (player.bonds || []).filter(b =>
+        b && (b.isDead || (b.status && b.status.includes("長眠"))) && ((b.intimacyIndex || 0) >= 2 || !!b.relationTag)
+      );
       if (deadCompanions.length > 0 && Math.random() < 0.012) {
         // 優先探望伴侶/金蘭或探望次數較少的故人
         const sortedDead = [...deadCompanions].sort((a, b) => {
@@ -29634,10 +29652,11 @@ ${targetW.desc}
         targetDead.visitedGraveCount = (targetDead.visitedGraveCount || 0) + 1;
         unlockBaixiao(`故人墓前：${targetDead.name}`);
         const chg = modifyStats({ qing: 2, de: 1 });
-        const relStr = targetDead.relationTag || INTIMACY_LEVELS[targetDead.intimacyIndex] || "摯友";
+        const rawRel = targetDead.relationTag || INTIMACY_LEVELS[targetDead.intimacyIndex] || "故人";
+        const relStr = /仇視|芥蒂/.test(rawRel) ? "舊識" : rawRel;
         const autoGraveLines = [
           `行經【${targetDead.restingPlace || "青山之側"}】，你特意停下腳步，買了一壺好酒獨自走到已故${relStr}【${targetDead.name}】墓前。你拂去碑上落葉，將清酒灑在青石前，靜靜坐了半日。`,
-          `秋風起時，你忽憶起昔年與【${targetDead.name}】並肩闖蕩的點滴，遂專程趕赴【${targetDead.restingPlace || "故人塚前"}】祭掃。碑前芳草萋萋，你低聲訴說著近來的江湖見聞，恍惚間似見故人含笑如昨。`,
+          `秋風起時，你忽憶起昔年與【${targetDead.name}】相識的種種點滴，遂專程趕赴【${targetDead.restingPlace || "故人塚前"}】祭掃。碑前芳草萋萋，你低聲訴說著近來的江湖見聞，恍惚間似見故人含笑如昨。`,
           `細雨微濛，你撐傘立於已故${relStr}【${targetDead.name}】的墓碑前（${targetDead.restingPlace || "青山綠水之側"}），替故人拭去碑上苔痕，將一束山花輕放於碑前。`
         ];
         const pickedGraveLine = autoGraveLines[Math.floor(Math.random() * autoGraveLines.length)];
@@ -29989,9 +30008,16 @@ ${targetW.desc}
         stepYears = 1600;
       }
 
-      player.age = Math.min(99999, player.age + stepYears);
-      player.ganzhiIndex = (player.ganzhiIndex + stepYears) % 60;
-      addCultivationQi(35 * stepYears);
+      const rawNextAge = Math.min(99999, player.age + stepYears);
+      if (rawNextAge < 99999 && rawNextAge >= player.maxLifespan) {
+        player.age = Math.max(prevAge, Math.min(99999, player.maxLifespan));
+      } else {
+        player.age = rawNextAge;
+      }
+      const actualStep = Math.max(1, player.age - prevAge);
+      player.ganzhiIndex = (player.ganzhiIndex + actualStep) % 60;
+      addCultivationQi(35 * actualStep);
+      if (typeof updateFamilyMemberLifespans === "function") updateFamilyMemberLifespans();
 
       // 共修仙途的同伴（b.isImmortal）隨主角一同增長歲數；若未透過洞天共修延壽，約於 600 歲左右遭遇仙途天劫或壽元大限坐化，確保享年顯示為 ~600 歲而非 77 歲！
       if (Array.isArray(player.bonds)) {
@@ -30000,7 +30026,7 @@ ${targetW.desc}
             if (!b.maxLifespan || b.maxLifespan > 9000 || b.maxLifespan < 500) {
               b.maxLifespan = 580 + Math.floor(Math.random() * 60); // 預設約 580~640 歲大限，可透過洞天共修延壽
             }
-            b.age = (b.age || prevAge) + stepYears;
+            b.age = (b.age || prevAge) + actualStep;
             if (b.age >= b.maxLifespan) {
               b.isDead = true;
               b.deathAge = b.age;
@@ -30016,11 +30042,11 @@ ${targetW.desc}
       // 每次推進可獲得隨機參悟次數（高齡跨度大時按比例微幅加成）
       const hasUnlockedScripture = (player.skills || []).some(s => s && s.isScripture && !s.isLockedScripture);
       if (hasUnlockedScripture) {
-        const scriptureBonusMult = stepYears >= 400 ? 3 : (stepYears >= 100 ? 2 : 1);
+        const scriptureBonusMult = actualStep >= 400 ? 3 : (actualStep >= 100 ? 2 : 1);
         const scriptureGain = Math.floor(Math.random() * 13) * scriptureBonusMult;
         player.scriptureUses = (player.scriptureUses || 0) + scriptureGain;
         if (scriptureGain > 0) {
-          addLog(`📜【洞天道韻】閉關歲月流轉（+${stepYears}載），你感應大道獲得 ${scriptureGain} 次【參悟經典】契機（當前可用 ${player.scriptureUses} 次）。`, "immortal-log");
+          addLog(`📜【洞天道韻】閉關歲月流轉（+${actualStep}載），你感應大道獲得 ${scriptureGain} 次【參悟經典】契機（當前可用 ${player.scriptureUses} 次）。`, "immortal-log");
         }
       }
 
@@ -30031,7 +30057,7 @@ ${targetW.desc}
       }
 
       if (player.age >= player.maxLifespan) {
-        triggerDeathOrAscension(`壽元耗盡，於洞天福地坐化兵解，享壽 ${player.age} 歲。`);
+        triggerLifespanEndStoryModal(`壽元耗盡，於洞天福地坐化兵解，享壽 ${player.age} 歲。`);
         return;
       }
 
@@ -30939,8 +30965,8 @@ ${targetW.desc}
       const spouse = (typeof getLivingSpouse === "function") ? getLivingSpouse() : null;
       const livingLover = spouse || (player.bonds || []).find(b => b && !b.isDead && (b.relationTag === "紅塵伴侶" || b.relationTag === "神仙眷侶"));
       const deadBonds = (player.bonds || []).filter(b => b && b.isDead);
-      const childrenList = Array.isArray(player.children) ? player.children : [];
-      const disciplesList = Array.isArray(player.disciples) ? player.disciples : [];
+      const childrenList = Array.isArray(player.children) ? player.children.filter(c => c && !c.isDead) : [];
+      const disciplesList = Array.isArray(player.disciples) ? player.disciples.filter(d => d && !d.isDead) : [];
       const activeMounts = (typeof getActiveMounts === "function") ? getActiveMounts() : (player.mounts || []).filter(m => m && !m.isDead);
       const equippedWeaponObj = (player.equippedWeapon && typeof player.equippedWeapon === "object") ? player.equippedWeapon : null;
       const equippedWeaponName = equippedWeaponObj ? (equippedWeaponObj.name || "") : String(player.equippedWeapon || "");
@@ -31273,6 +31299,103 @@ ${targetW.desc}
         }
       ];
 
+      const immortalScenarios = [
+        {
+          id: "imm_end_grotto_dissolve",
+          exclusive: false,
+          eligible: () => true,
+          weight: () => 18,
+          build: () => {
+            const rName = player.immortalRealm || "修行境界";
+            return {
+              title: "🌌 洞天道散 · 千年仙火歸太虛",
+              tag: "修真終章 · 兵解坐化",
+              desc: `紫府洞天之中，昔年汲取天地靈脈凝聚的仙氣正一點點化作漫天微光散入群山。\n\n你盤膝坐於萬載玄玉蒲團之上，以【${rName}】之尊靜觀體內靈海歸寂。千年也好，數萬載也罷，原來長生路走到頭，也不過是與天地借來的一段清靜光陰。如今債清身輕，洞府外雲海翻湧，恰似你初入江湖那年的晴天。`,
+              choices: [
+                {
+                  text: `✨ 【散去洞天靈霧 · 回饋九州山河】讓最後一縷仙元化作甘霖普降人間，安詳兵解`,
+                  onSelect: () => finishEnding(`🌌【道散歸元】你微笑散去千年洞天仙氣，化作漫山靈雨滋養九州萬民，隨即安然兵解坐化。`, "immortal-log")
+                },
+                {
+                  text: `🪷 【收束元神一縷 · 靜坐聽星輝長眠】不驚天地鬼神，於洞府靈松之下含笑閉目`,
+                  onSelect: () => finishEnding(`🌌【太虛歸真】你盤膝坐於紫府洞天古松之下，周身道韻化作漫天星輝散盡，從容兵解。`, "immortal-log")
+                }
+              ]
+            };
+          }
+        },
+        {
+          id: "imm_end_echo_mortals",
+          exclusive: false,
+          eligible: () => true,
+          weight: () => 16,
+          build: () => ({
+            title: "🏮 雲端一瞥 · 紅塵萬丈早已非當年",
+            tag: "修真終章 · 滄海桑田",
+            desc: `感應壽數將盡之刻，你最後一次駕雲俯瞰曾經走遍的九州山河。\n\n當年馳馬踏過的古城早已幾度易主，說書人口中的傳奇也添了幾百層神話色彩，唯獨山腳下小鎮萬家燈火仍一盞盞在暮色裡亮起。你忽然覺得心頭某處徹底鬆快下來——這趟從凡胎一路走到【${player.age} 歲】的長路，值得了。`,
+            choices: [
+              {
+                text: `☁️ 【於雲巔對人間長揖作別】願山河常青、俠風長存，微笑迎向大限`,
+                onSelect: () => finishEnding(`🏮【雲端別塵】你在漫天晚霞中最後看了一眼人間煙火，隨即化道長眠於九霄雲海之間。`, "immortal-log")
+              },
+              {
+                text: `📜 【降下一枚道韻玉簡於凡間荒山】留給數百年後與你有緣的寒門少年`,
+                onSelect: () => finishEnding(`📜【仙緣留世】你臨行前留下一縷道韻於凡間青崖，隨即無牽無掛地合眼坐化。`, "immortal-log")
+              }
+            ]
+          })
+        },
+        {
+          id: "imm_end_weapon_monument",
+          exclusive: true,
+          eligible: () => !!equippedWeaponName,
+          weight: () => 20,
+          build: () => {
+            const wp = describePerformAction(equippedWeaponName, bestAtk);
+            return {
+              title: `🏔️ 星崖封器 · 與【${equippedWeaponName}】的最終告別`,
+              tag: "修真終章 · 仙兵同寂",
+              desc: `陪伴你跨越凡塵、渡過無數雷劫的【${equippedWeaponName}】，今夜似有所感般在紫府中發出低沉輕鳴。\n\n你笑著起身踏出洞府，在仙崖雪月之下，最後一次以大乘元神催動【${equippedWeaponName}】與《${bestAtk}》，漫天星光皆隨你的起落微微晃動。一式既終，風靜雪停。`,
+              choices: [
+                {
+                  text: `🪨 【${wp.finishChoice}】與半生老友一同長眠仙山`,
+                  onSelect: () => finishEnding(`🏔️【仙兵同寂】你在仙崖雪月下收攏平生最後一道神華，將【${equippedWeaponName}】安放身側，含笑坐化。`, "immortal-log")
+                },
+                {
+                  text: `🌠 【任【${equippedWeaponName}】散盡靈光化作流星破空而去】己身亦隨清風歸於太虛`,
+                  onSelect: () => finishEnding(`🌠【人器歸空】你微笑目送【${equippedWeaponName}】靈光散入星海，隨即安詳兵解，成就一段仙途絕響。`, "immortal-log")
+                }
+              ]
+            };
+          }
+        },
+        {
+          id: "imm_end_star_ferry",
+          exclusive: true,
+          eligible: () => deadBonds.length > 0,
+          weight: () => 22,
+          build: () => {
+            const topDead = [...deadBonds].sort((a, b) => (b.intimacyIndex || 0) - (a.intimacyIndex || 0))[0];
+            const deadName = topDead ? topDead.name : "昔年故人";
+            return {
+              title: "🛶 星海孤舟 · 跨越千載的故人相迎",
+              tag: "修真終章 · 萬古重逢",
+              desc: `洞府之外本該是萬古寂寥的九天星河，這夜卻忽有一點溫柔如凡塵燭火的微光順著星瀾飄近。\n\n船頭站著的那道身影沒有仙家威儀，眉眼間卻依舊是你記憶深處【${deadName}】當年的模樣。對方隔著漫天星辰對你輕輕招手：\n「等了你這許多個甲子，終於肯放下這身修為，來跟我聊聊凡間的熱鬧了？」`,
+              choices: [
+                {
+                  text: `🤝 【笑著散去長生道果 · 踏上星舟赴約】『久等了，這一次再也不分開了』`,
+                  onSelect: () => finishEnding(`🛶【萬古重逢】你在洞天星輝中微笑散去一身修為，似見久違的【${deadName}】立於光影盡頭相迎，從容坐化。`, "immortal-log")
+                },
+                {
+                  text: `🌸 【在洞府門前摘一枝靈花帶上船頭】輕聲應約「這就來」，於睡夢般寧靜中離世`,
+                  onSelect: () => finishEnding(`🛶【星海同歸】你手執一枝仙山寒花安詳閉目，跨越千載光陰與故人【${deadName}】重逢於雲海彼端。`, "immortal-log")
+                }
+              ]
+            };
+          }
+        }
+      ];
+
       const weightedPick = (pool) => {
         const total = pool.reduce((sum, item) => sum + Math.max(1, Number(item.weight()) || 1), 0);
         let roll = Math.random() * total;
@@ -31283,9 +31406,13 @@ ${targetW.desc}
         return pool[pool.length - 1];
       };
 
+      const allScenarios = [...scenarios, ...immortalScenarios];
       let chosen = null;
       if (forceScenarioId) {
-        chosen = scenarios.find(s => s.id === forceScenarioId) || scenarios[0];
+        chosen = allScenarios.find(s => s.id === forceScenarioId) || scenarios[0];
+      } else if (player.inImmortalPhase) {
+        const immEligible = immortalScenarios.filter(s => s.eligible());
+        chosen = weightedPick(immEligible.length > 0 ? immEligible : immortalScenarios);
       } else {
         const eligible = scenarios.filter(s => s.eligible());
         const exclusives = eligible.filter(s => s.exclusive);
@@ -32151,12 +32278,14 @@ ${targetW.desc}
         }
       }
 
-      if (player.children.length === 0 && player.disciples.length === 0) return false;
+      const livingChildren = player.children.filter(c => c && !c.isDead);
+      const livingDisciples = player.disciples.filter(d => d && !d.isDead);
+      if (livingChildren.length === 0 && livingDisciples.length === 0) return false;
 
       const spouse = getLivingSpouse();
-      const spouseName = spouse ? spouse.name : (player.children[0]?.parentName || "伴侶");
-      const child = player.children[Math.floor(Math.random() * player.children.length)];
-      const disc = player.disciples[Math.floor(Math.random() * player.disciples.length)];
+      const spouseName = spouse ? spouse.name : (livingChildren[0]?.parentName || "伴侶");
+      const child = livingChildren.length > 0 ? livingChildren[Math.floor(Math.random() * livingChildren.length)] : null;
+      const disc = livingDisciples.length > 0 ? livingDisciples[Math.floor(Math.random() * livingDisciples.length)] : null;
       const bestAtk = getBestLearnedSkillName("招式", "家傳絕學").replace(/^[《「]+|[》」]+$/g, "");
       const bestQg = getBestLearnedSkillName("輕功", "獨門身法").replace(/^[《「]+|[》」]+$/g, "");
 
@@ -32463,16 +32592,62 @@ ${targetW.desc}
       return true;
     }
 
+    function updateFamilyMemberLifespans() {
+      if (!player) return false;
+      let changed = false;
+      if (Array.isArray(player.children)) {
+        player.children.forEach(c => {
+          if (!c || c.isDead) return;
+          if (!c.maxLifespan) c.maxLifespan = 78 + Math.floor(Math.random() * 18);
+          const curAge = Math.max(1, player.age - (c.bornAtPlayerAge || player.age) + 1);
+          if (curAge >= c.maxLifespan) {
+            c.isDead = true;
+            c.deathAge = c.maxLifespan;
+            changed = true;
+            addLog(`🕯️【血脈長眠 · 香火不絕】你的${c.orderLabel || "骨肉"}【${c.name}】歷盡紅塵歲月，於 ${c.deathAge} 歲高齡安詳辭世，留下滿門佳話與後輩繼承家風。`, "milestone");
+          }
+        });
+      }
+      if (Array.isArray(player.disciples)) {
+        player.disciples.forEach(d => {
+          if (!d || d.isDead) return;
+          if (!d.maxLifespan) d.maxLifespan = 76 + Math.floor(Math.random() * 20);
+          const curAge = Math.max(14, (d.age || 15) + Math.max(0, player.age - (d.recruitedAtPlayerAge || player.age)));
+          if (curAge >= d.maxLifespan) {
+            d.isDead = true;
+            d.deathAge = d.maxLifespan;
+            changed = true;
+            addLog(`🕯️【衣缽長存 · 佳徒辭世】你的${d.title || "親傳弟子"}【${d.name}】一生發揚你傳授的《${d.inheritedSkill || "本門絕學"}》，於 ${d.deathAge} 歲高齡含笑長眠，門下後輩仍年年供奉你的祖師牌位。`, "milestone");
+          }
+        });
+      }
+      if (changed && typeof renderBondsTab === "function") {
+        renderBondsTab();
+      }
+      return changed;
+    }
+
     function interactWithFamilyMember(kind, idx) {
       if (!player || player.isDead) return;
       const list = kind === "child" ? (player.children || []) : (player.disciples || []);
       const target = list[idx];
       if (!target) return;
       if (target.lastInteractAge === player.age) {
-        addLog(`🏡【家門日常】你今年已親自考校並陪伴過【${target.name}】了。`);
+        addLog(`🏡【家門日常】你今年已親自${target.isDead ? "緬懷追思" : "考校並陪伴"}過【${target.name}】了。`);
         return;
       }
       target.lastInteractAge = player.age;
+      if (target.isDead) {
+        const chg = modifyStats({ qing: 3, de: 2 });
+        if (kind === "child") {
+          addLog(`🕯️【追思骨肉 · 庇護後裔】你在昔日${target.orderLabel || "子女"}【${target.name}】墓前焚香祭酒，並暗中拂照其膝下子孫安康。(${chg.join("、")})`, "good-log");
+        } else {
+          addLog(`🕯️【緬懷佳徒 · 庇護傳人】你遠望已故${target.title || "弟子"}【${target.name}】一脈重孫輩於山門練武，輕拂袖風暗中替後學穩固根基。(${chg.join("、")})`, "good-log");
+        }
+        renderBondsTab();
+        updateAllUI();
+        return;
+      }
       const bestSk = getBestLearnedSkillName("招式", "家傳絕學").replace(/^[《「]+|[》」]+$/g, "");
       const chg = modifyStats({ qing: 4, wu: 2, ming: 2 });
       if (kind === "child") {
@@ -32573,45 +32748,49 @@ ${targetW.desc}
       if (childrenList.length > 0 || disciplesList.length > 0) {
         const famCards = [
           ...childrenList.map((c, idx) => {
-            const curAge = Math.max(1, player.age - (c.bornAtPlayerAge || player.age) + 1);
+            const curAge = c.isDead
+              ? (c.deathAge || c.maxLifespan || 82)
+              : Math.max(1, player.age - (c.bornAtPlayerAge || player.age) + 1);
             const acted = c.lastInteractAge === player.age;
             return `
-              <div class="card-item" style="border-color:#e3b341;background:rgba(212,175,55,0.08);margin-bottom:8px;padding:9px 12px;">
+              <div class="card-item" style="border-color:${c.isDead ? "#666" : "#e3b341"};background:${c.isDead ? "rgba(80,80,80,0.12)" : "rgba(212,175,55,0.08)"};margin-bottom:8px;padding:9px 12px;">
                 <div class="card-header" style="margin-bottom:4px;">
                   <div>
-                    <strong style="color:var(--gold-bright);font-size:0.95rem;">👶 ${c.name}</strong>
-                    <span class="status-badge" style="margin-left:5px;font-size:0.72rem;color:#ffdfb6;border-color:#d4af37;">${c.orderLabel} · ${curAge}歲</span>
+                    <strong style="color:${c.isDead ? "#c2bdb4" : "var(--gold-bright)"};font-size:0.95rem;">${c.isDead ? "🪦" : "👶"} ${c.name}</strong>
+                    <span class="status-badge" style="margin-left:5px;font-size:0.72rem;color:${c.isDead ? "#b0aba2" : "#ffdfb6"};border-color:${c.isDead ? "#666" : "#d4af37"};">${c.orderLabel} · ${c.isDead ? `🪦 已故 · 享壽 ${curAge} 歲` : `${curAge}歲`}</span>
                   </div>
-                  <span class="status-badge" style="color:#56d364;border-color:#2ea043;font-size:0.72rem;">血脈傳承</span>
+                  <span class="status-badge" style="color:${c.isDead ? "#b8b3aa" : "#56d364"};border-color:${c.isDead ? "#666" : "#2ea043"};font-size:0.72rem;">${c.isDead ? "香火長存" : "血脈傳承"}</span>
                 </div>
                 <div style="font-size:0.8rem;color:#dedad0;line-height:1.5;">
                   <div>💖 生母/生父：<span style="color:var(--gold);">${c.parentName}</span> ｜ 根骨：${c.aptitude || "將門虎子"}</div>
                   <div>⚔️ 家傳絕學：《${c.inheritedSkill || "家傳武學"}》</div>
                 </div>
-                <button class="ctrl-btn" onclick="window.interactWithFamilyMember('child', ${idx})" ${acted ? "disabled" : ""} style="margin-top:6px;width:100%;padding:4px 8px;font-size:0.78rem;border-color:${acted ? "#555" : "var(--gold)"};color:${acted ? "#888" : "var(--gold-bright)"};">
-                  ${acted ? "✓ 今年已指點陪伴過" : "🏡 考校家傳武學 · 共享天倫 (情義+4、武力+2)"}
+                <button class="ctrl-btn" onclick="window.interactWithFamilyMember('child', ${idx})" ${acted ? "disabled" : ""} style="margin-top:6px;width:100%;padding:4px 8px;font-size:0.78rem;border-color:${acted ? "#555" : (c.isDead ? "#8b8378" : "var(--gold)")};color:${acted ? "#888" : (c.isDead ? "#dfd9d0" : "var(--gold-bright)")};">
+                  ${acted ? (c.isDead ? "✓ 今年已緬懷追思過" : "✓ 今年已指點陪伴過") : (c.isDead ? "🕯️ 緬懷追思 · 庇護後裔 (情義+3、德行+2)" : "🏡 考校家傳武學 · 共享天倫 (情義+4、武力+2)")}
                 </button>
               </div>
             `;
           }),
           ...disciplesList.map((d, idx) => {
-            const curAge = Math.max(14, (d.age || 15) + Math.max(0, player.age - (d.recruitedAtPlayerAge || player.age)));
+            const curAge = d.isDead
+              ? (d.deathAge || d.maxLifespan || 82)
+              : Math.max(14, (d.age || 15) + Math.max(0, player.age - (d.recruitedAtPlayerAge || player.age)));
             const acted = d.lastInteractAge === player.age;
             return `
-              <div class="card-item" style="border-color:var(--jade);background:rgba(59,156,133,0.08);margin-bottom:8px;padding:9px 12px;">
+              <div class="card-item" style="border-color:${d.isDead ? "#666" : "var(--jade)"};background:${d.isDead ? "rgba(80,80,80,0.12)" : "rgba(59,156,133,0.08)"};margin-bottom:8px;padding:9px 12px;">
                 <div class="card-header" style="margin-bottom:4px;">
                   <div>
-                    <strong style="color:var(--jade-bright);font-size:0.95rem;">🍵 ${d.name}</strong>
-                    <span class="status-badge" style="margin-left:5px;font-size:0.72rem;color:#a5f3fc;border-color:var(--jade);">${d.title} · ${curAge}歲</span>
+                    <strong style="color:${d.isDead ? "#c2bdb4" : "var(--jade-bright)"};font-size:0.95rem;">${d.isDead ? "🪦" : "🍵"} ${d.name}</strong>
+                    <span class="status-badge" style="margin-left:5px;font-size:0.72rem;color:${d.isDead ? "#b0aba2" : "#a5f3fc"};border-color:${d.isDead ? "#666" : "var(--jade)"};">${d.title} · ${d.isDead ? `🪦 已故 · 享壽 ${curAge} 歲` : `${curAge}歲`}</span>
                   </div>
-                  <span class="status-badge" style="color:var(--jade-bright);border-color:var(--jade);font-size:0.72rem;">衣缽傳人</span>
+                  <span class="status-badge" style="color:${d.isDead ? "#b8b3aa" : "var(--jade-bright)"};border-color:${d.isDead ? "#666" : "var(--jade)"};font-size:0.72rem;">${d.isDead ? "衣缽長存" : "衣缽傳人"}</span>
                 </div>
                 <div style="font-size:0.8rem;color:#dedad0;line-height:1.5;">
                   <div>🌱 出身：${d.originTitle || "寒門少俠"}（${d.trait || "天資聰穎"}）</div>
                   <div>📘 親傳絕學：《${d.inheritedSkill || "本門絕學"}》</div>
                 </div>
-                <button class="ctrl-btn" onclick="window.interactWithFamilyMember('disciple', ${idx})" ${acted ? "disabled" : ""} style="margin-top:6px;width:100%;padding:4px 8px;font-size:0.78rem;border-color:${acted ? "#555" : "var(--jade)"};color:${acted ? "#888" : "var(--jade-bright)"};">
-                  ${acted ? "✓ 今年已考校傳功過" : "⚔️ 考校親傳武學 · 師徒拆招 (情義+4、武力+2)"}
+                <button class="ctrl-btn" onclick="window.interactWithFamilyMember('disciple', ${idx})" ${acted ? "disabled" : ""} style="margin-top:6px;width:100%;padding:4px 8px;font-size:0.78rem;border-color:${acted ? "#555" : (d.isDead ? "#8b8378" : "var(--jade)")};color:${acted ? "#888" : (d.isDead ? "#dfd9d0" : "var(--jade-bright)")};">
+                  ${acted ? (d.isDead ? "✓ 今年已緬懷追思過" : "✓ 今年已考校傳功過") : (d.isDead ? "🕯️ 緬懷佳徒 · 庇護再傳弟子 (情義+3、德行+2)" : "⚔️ 考校親傳武學 · 師徒拆招 (情義+4、武力+2)")}
                 </button>
               </div>
             `;
