@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.20.1434</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.20.1512</span>
       </div>
 
       <div class="debug-row">
@@ -18497,7 +18497,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.20.1434";
+    const GAME_VERSION = "v2026.11.20.1512";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -22174,6 +22174,204 @@ ${targetW.desc}
       return true;
     }
 
+    // 高情義（情義 >= 100）專屬同伴敘舊、喝酒、論武、談人生劇本池（共 5 套）
+    function buildHighQingHangoutScenarios(targetChar, bond) {
+      const name = targetChar.name;
+      const isFemale = targetChar.gender === "女";
+      const bestAtk = getBestLearnedSkillName("招式", "看家絕學").replace(/^[《「]+|[》」]+$/g, "");
+      const callSelf = isFemale ? "咱們姊妹" : "你我";
+      return [
+        {
+          id: "hq_old_alley_wine",
+          minQing: 100,
+          title: `🍶 舊巷溫酒 · 與【${name}】細數半生風雪`,
+          desc: `傍晚細雨微涼，【${name}】沒去氣派酒樓，反而熟門熟路把你拖進鎮口老巷一間只擺三張舊木桌的無名小酒肆，點了兩盤滷味與一壺陳年花雕。\n\n熱酒下肚，【${name}】晃著酒杯笑得開懷：「江湖越走越大，能這樣坐下來連姓名都不用報、只管埋頭喝兩盅的人，卻反而沒幾個了。」`,
+          opts: [
+            {
+              text: `🥂 【滿斟一杯 · 細數當年荒唐舊事】與【${name}】從初相識那天聊起，笑得差點把茶碗震翻`,
+              stats: { qing: 8, de: 2 },
+              reply: `舊酒雖濁，人心卻熱。你們把那些差點喪命的險局當下酒菜笑談到三更，只覺滿身風塵都被這場重逢洗淨。`
+            },
+            {
+              text: `💰 【暗中替老酒肆結了全年酒錢】笑說往後不論誰先路過這條巷子，都給對方存一壺溫酒（花費 2 兩）`,
+              cost: { cai: 2 },
+              stats: { qing: 10, ming: 2 },
+              reply: `【${name}】看著掌櫃喜笑顏開收下銀兩，眼底閃過一抹暖意：「好啊！那咱們就說定了，誰先路過誰就欠對方一頓酒！」`
+            },
+            {
+              text: `🕊️ 【舉杯敬遠方故人】想起仍在天南海北奔波的江湖舊友，兩人默默並肩把杯中酒飲盡`,
+              stats: { qing: 7, de: 4 },
+              reply: `夜雨敲窗，【${name}】輕嘆一聲：「人這輩子有你這樣一個知己記掛，便是死在荒郊野外也不算孤單。」`
+            }
+          ]
+        },
+        {
+          id: "hq_peak_martial_talk",
+          minQing: 120,
+          title: `⚔️ 孤峰論武 · 與【${name}】毫無保留拆解破綻`,
+          desc: `你們同遊名山古道時停在一處平坦青岩之上。【${name}】忽然停步解下兵刃護具，神色認真地看向你：\n\n「外人切磋總愛藏著三分壓箱絕活。可${callSelf}之間還有什麼好留手的？來，我新近摸到一點瓶頸，你替我瞧瞧破綻何在——我也把自己的心得全攤開給你看！」`,
+          opts: [
+            {
+              text: `🔥 【拆解《${bestAtk}》換招關竅】毫無藏私地演練平生得意之學，與【${name}】互相餵招印證`,
+              stats: { wu: 4, qing: 8, ming: 2 },
+              reply: `兩道截然不同的武學脈絡在青岩上猛烈撞擊又忽然相融！一場論武下來，你對自身《${bestAtk}》竟多了一分舉重若輕的圓融！`
+            },
+            {
+              text: `🛡️ 【點破【${name}】招式間一處容易傷己的暗患】寧可放慢節奏，也不讓對方強催險招損耗心脈`,
+              stats: { de: 4, qing: 9, wu: 2 },
+              reply: `【${name}】收招愣神片刻，旋即鄭重拱手一揖：「若非你真把我的安危放在心上，誰會苦口婆心替我點破這處多年陋習！」`
+            },
+            {
+              text: `🪨 【於青岩共刻一局雙人武意棋】兩人不真正動手，只以指風劃石推演天下百派招法`,
+              stats: { wu: 3, qing: 7, de: 3 },
+              reply: `日落西山之際，青岩上已刻滿精妙走勢圖。兩人拍去手塵相視一笑，武道與情義雙雙進了一步。`
+            }
+          ]
+        },
+        {
+          id: "hq_riverside_life_talk",
+          minQing: 140,
+          title: `🌙 江畔夜談 · 與【${name}】問道紅塵與平生所求`,
+          desc: `月色鋪滿大江水面，你們把舟繫在蘆葦叢邊，坐在船頭看江水流逝。夜風吹散了白日裡的喧囂，【${name}】忽然收起平日笑鬧的神氣，輕聲問你：\n\n「說起來，我們練這麼多年武、闖過那麼多生死關，最後到底想圖個什麼？是名動九州四海，還是有朝一日真的能安心過上幾年清靜日子？」`,
+          opts: [
+            {
+              text: `🌊 【坦言『護住想護的人，便足矣』】望著江水微笑，說名利只是過眼雲煙，唯獨身邊人平安最難得`,
+              stats: { qing: 10, de: 5 },
+              lifeGain: 1,
+              reply: `【${name}】聽罷久久不語，只是靜靜陪你看著江面碎銀般的月光。那夜你胸中鬱結全散，連帶著氣海生機都沉穩了一分。（壽元+1）`
+            },
+            {
+              text: `⚔️ 【笑答『但求俯仰無愧，敢向不平處拔刃』】既然生在這片江湖，便要把自己那份俠骨走到頭`,
+              stats: { wu: 3, ming: 5, qing: 8 },
+              reply: `【${name}】雙眼一亮長身而起：「說得好！既有你這樣的老友同行，那前頭就算還有千重山，咱們也一塊翻過去！」`
+            },
+            {
+              text: `🍵 【煮一壺江水月光茶 · 相約晚年同隱青山】不談宏圖大業，只細細規劃將來去哪座山坡開一片茶園`,
+              stats: { qing: 9, de: 4 },
+              lifeGain: 1,
+              reply: `兩人在江畔認真爭論起青山茶園該種幾株梅花、養幾隻白鶴，彷彿明朝就能徹底退出這場刀光劍影。（壽元+1）`
+            }
+          ]
+        },
+        {
+          id: "hq_snow_hearth_trust",
+          minQing: 160,
+          title: `🍵 寒夜圍爐 · 與【${name}】推心置腹話舊物`,
+          desc: `歲暮大雪封山，你們借宿在山腰草堂裡烤火。火炭劈啪作響間，【${name}】從貼身行囊深處摸出一件保存極妥帖的陳年舊物與一瓶靈藥放到你膝頭——那是對方連師門和親眷都沒透露過的秘密家珍與救命秘藥。\n\n「這東西我帶在身上十幾年了。若有一天我先走一步、或真栽在什麼風波裡，旁人我誰也信不過，唯獨交給你才放心。」`,
+          opts: [
+            {
+              text: `🔥 【笑罵不許說這等喪氣話 · 卻也取出隨身信物互換為憑】許諾無論何時何地，兩人都不准先丟下對方`,
+              stats: { qing: 12, de: 4 },
+              reply: `火光照亮兩張不再年輕卻依然赤誠的臉龐。【${name}】把你的信物收進心口最裡層：「好！這句話我記這輩子！」`
+            },
+            {
+              text: `🩹 【接過對方的靈藥當場調息護脈】不辜負對方一片牽掛，在暖爐邊順手理順積年勞損（若有輕傷可癒 1 處）`,
+              stats: { qing: 9, de: 3 },
+              healLightInjury: 1,
+              reply: `溫暖藥力順著火氣化開周身百骸，你只覺連冬夜舊創都輕快了不少，心頭更是滾燙。（輕傷-1／無傷則精氣神倍增）`
+            },
+            {
+              text: `📜 【替對方重擬一份後事託付字據後笑著燒進火盆】道是「活著一起走，用不著寫這種紙」`,
+              stats: { qing: 10, ming: 3, wu: 2 },
+              reply: `看著火舌吞沒紙頁，【${name}】先是一愣，隨即拍案哈哈大笑起來，整夜風雪都顯得不冷了。`
+            }
+          ]
+        },
+        {
+          id: "hq_lantern_street_elders",
+          minQing: 200,
+          title: `🏮 燈火長街 · 與【${name}】並肩看人間煙火`,
+          desc: `久歷大風大浪之後，你與【${name}】褪去名號與兵器，只像兩名尋常走親訪友的路人般，趁著集鎮夜市燈火初上並肩逛在長街人潮裡。\n\n前頭糖人攤前擠滿嘰嘰喳喳的小娃娃，街角還有少年正高聲爭論你們昔年在江湖留下的傳聞。【${name}】轉頭看你一眼，眼神溫潤得像三月春水：「你看這滿街熱鬧平安的模樣——咱們當年拿命護下來的，就是這些吧。」`,
+          opts: [
+            {
+              text: `🍡 【買兩串冰糖葫蘆跟【${name}】邊走邊吃】什麼天下大勢都暫放一邊，單純把這一晚當成凡人過節`,
+              stats: { qing: 12, de: 4 },
+              lifeGain: 1,
+              reply: `人間煙火最撫平生風霜。你們像無憂無慮的普通老友般逛完整條長街，心境豁達通透。（壽元+1）`
+            },
+            {
+              text: `🪙 【悄悄在幾家寒門小攤多留些銅錢】既見百姓安居，便順手替這夜的煙火添一點微光（花費 2 兩）`,
+              cost: { cai: 2 },
+              stats: { de: 8, qing: 10, ming: 3 },
+              reply: `攤販千恩萬謝的笑容映在燈光下，【${name}】笑著搖頭：「走到哪兒都是這副熱心腸——不過，我就是敬佩你這一點。」`
+            },
+            {
+              text: `🌙 【立於拱橋之上聽少年們高談傳奇】不露真容，只相視一笑揮袖走入夜色`,
+              stats: { ming: 5, qing: 9, de: 3 },
+              reply: `橋下流水潺潺，你們的名字留在橋頭少年口中，而你們的人早已並肩融進了安寧的夜色。`
+            }
+          ]
+        }
+      ];
+    }
+
+    // 主動觸發高情義專屬「同伴敘舊／喝酒／論武／談人生」事件（也可由測試或偶遇呼叫）
+    function triggerHighQingCompanionHangout(forcedCharId = null, forceSceneId = null) {
+      if (!player || player.isDead || player.inImmortalPhase) return false;
+      const curQing = player.stats.qing || 0;
+      if (curQing < 100 && !forceSceneId) return false;
+
+      const livingFriends = (player.bonds || []).filter(b => b && !b.isDead && ((b.intimacyIndex || 0) >= 3 || !!b.relationTag));
+      if (livingFriends.length === 0) return false;
+
+      let chosenBond = null;
+      if (forcedCharId) {
+        chosenBond = livingFriends.find(b => b.id === forcedCharId) || livingFriends[0];
+      } else {
+        const sorted = [...livingFriends].sort((a, b) => (b.intimacyIndex || 0) - (a.intimacyIndex || 0));
+        const poolTop = sorted.slice(0, Math.min(3, sorted.length));
+        chosenBond = poolTop[Math.floor(Math.random() * poolTop.length)];
+      }
+      const targetChar = DB.CHARACTERS.find(c => c.id === chosenBond.id) || { id: chosenBond.id, name: chosenBond.name, gender: chosenBond.gender || "男" };
+      const allHangouts = buildHighQingHangoutScenarios(targetChar, chosenBond);
+
+      let picked = null;
+      if (forceSceneId) {
+        picked = allHangouts.find(s => s.id === forceSceneId) || allHangouts[0];
+      } else {
+        const unlocked = allHangouts.filter(s => curQing >= s.minQing);
+        if (unlocked.length === 0) return false;
+        player.usedHighQingHangouts = Array.isArray(player.usedHighQingHangouts) ? player.usedHighQingHangouts : [];
+        let avail = unlocked.filter(s => !player.usedHighQingHangouts.includes(s.id));
+        if (avail.length === 0) {
+          player.usedHighQingHangouts = [];
+          avail = unlocked;
+        }
+        picked = avail[Math.floor(Math.random() * avail.length)];
+        player.usedHighQingHangouts.push(picked.id);
+      }
+
+      player.lastHighQingHangoutAge = player.age;
+      setPauseState(true);
+
+      const modalChoices = picked.opts.map(o => ({
+        text: o.text,
+        cost: o.cost,
+        onSelect: () => {
+          const normStats = Object.assign({}, o.stats || {});
+          if (o.cost && o.cost.cai && normStats.cai === undefined) {
+            normStats.cai = -Math.abs(o.cost.cai);
+          }
+          const chg = modifyStats(normStats);
+          if (o.lifeGain && o.lifeGain > 0) {
+            player.maxLifespan = (player.maxLifespan || 80) + o.lifeGain;
+          }
+          if (o.healLightInjury && (player.lightInjuries || 0) > 0) {
+            player.lightInjuries = Math.max(0, (player.lightInjuries || 0) - o.healLightInjury);
+            if (typeof syncPlayerInjuries === "function") syncPlayerInjuries();
+          }
+          chosenBond.tacit = Math.min(3, (chosenBond.tacit || 0) + 1);
+          addLog(`💖【${picked.title}】${o.reply}（${chg.join("、")}）`, "milestone");
+          renderBondsTab();
+          updateAllUI();
+          setPauseState(false);
+        }
+      }));
+
+      openEventModal(picked.title, "💖 高情義專屬 · 故人敘舊", picked.desc, modalChoices);
+      return true;
+    }
+
     // 針對已經【紅塵伴侶/神仙眷侶】或【義結金蘭/生死至交】的同伴，分流生成富有煙火氣與角色代入感的日常劇本
     function buildSwornOrCloseReunionScenario(targetChar, bond) {
       const name = targetChar.name;
@@ -22287,12 +22485,20 @@ ${targetW.desc}
         }
       ];
 
-      const chosenPool = isPartner ? partnerScenes : swornScenes;
+      const chosenPool = isPartner ? [...partnerScenes] : [...swornScenes];
+      const curQing = (player && player.stats) ? (player.stats.qing || 0) : 0;
+      if (curQing >= 100 && typeof buildHighQingHangoutScenarios === "function") {
+        const unlockedHangouts = buildHighQingHangoutScenarios(targetChar, bond).filter(s => curQing >= s.minQing);
+        unlockedHangouts.forEach(s => chosenPool.push(s));
+      }
       const pickedScene = chosenPool[Math.floor(Math.random() * chosenPool.length)];
       const options = pickedScene.opts.map(o => ({
         text: o.text,
         cost: o.cost,
         stats: o.stats,
+        lifeGain: o.lifeGain,
+        healLightInjury: o.healLightInjury,
+        healLight: o.healLight,
         intimacyDelta: 1,
         tacitDelta: 1,
         reply: o.reply
@@ -22636,6 +22842,15 @@ ${targetW.desc}
                 unlockBaixiao(`名駒：${mountObj.name}`);
                 addLog(`🐎【神駒認主 · 配給坐騎】赫連錚感佩你的慧眼與豪情，將這匹洗盡鉛華的西域神駒【${mountObj.name}】（${mountObj.age}歲，壽元上限 ${mountObj.maxLifespan}歲）正式配給你作為隨行坐騎！（當前隨行 ${getActiveMounts().length}/3）`, "milestone");
               }
+            }
+
+            if (opt.lifeGain && opt.lifeGain > 0) {
+              player.maxLifespan = (player.maxLifespan || 80) + opt.lifeGain;
+            }
+            if ((opt.healLightInjury || opt.healLight) && (player.lightInjuries || 0) > 0) {
+              const healAmt = Number(opt.healLightInjury || opt.healLight) || 1;
+              player.lightInjuries = Math.max(0, (player.lightInjuries || 0) - healAmt);
+              if (typeof syncPlayerInjuries === "function") syncPlayerInjuries();
             }
 
             if (opt.grantCompanionImmortal) {
@@ -24541,7 +24756,8 @@ ${targetW.desc}
         b && !b.isDead && (!player.fakedDeath || b.isImmortal) &&
         (b.intimacyIndex >= 3 || b.relationTag === "紅塵伴侶" || b.relationTag === "義結金蘭" || b.relationTag === "神仙眷侶")
       );
-      if (aliveFriends.length > 0 && Math.random() < 0.55) {
+      const qingRescueProb = Math.min(0.80, 0.40 + Math.floor((player.stats.qing || 0) / 15) * 0.03);
+      if (aliveFriends.length > 0 && Math.random() < qingRescueProb) {
         const savior = aliveFriends.sort((a, b) => (b.intimacyIndex || 0) - (a.intimacyIndex || 0))[0];
         addLightInjury(1);
         savior.tacit = Math.min(3, (savior.tacit || 0) + 1);
@@ -27024,6 +27240,45 @@ ${targetW.desc}
         });
       }
 
+      // 2.2 高情義（重情重義 · 江湖人脈）專屬破局選項：靠平生交情與雪中送炭的恩義化解人禍、洗冤或求得對症解藥
+      const hasQingOption = mappedChoices.some(c => c.reqStat && c.reqStat.qing);
+      if (!hasQingOption && !isSoloTrapOrMaze) {
+        if (isIntrigueOrFraming) {
+          mappedChoices.push({
+            reqStat: { qing: 90 },
+            text: `【八方作保 · 情義洗冤】聯絡昔日受你恩惠的鏢頭、商會掌櫃與江湖舊友聯名作保，當場拆穿栽贓者的拙劣手法！`,
+            onSelect: () => {
+              const chg = modifyStats({ qing: 4, ming: 4, de: 3 });
+              addLog(`💖【${ev.title} · 八方作保】平生廣結善緣的回饋在此刻顯現！數名商會掌櫃與老鏢頭趕來替你具結作保，人證物證俱在，誣陷不攻自破！(${chg.join("、")})`, "milestone");
+              updateAllUI();
+              setPauseState(false);
+            }
+          });
+        } else if (isPoisonPlague) {
+          mappedChoices.push({
+            reqStat: { qing: 100 },
+            text: `【故舊送藥 · 雪中解毒】吹響昔年結交的苗疆藥農與江湖義士留下的竹哨，立刻引來熟門熟路的故友送來對症解藥並帶路脫困！`,
+            onSelect: () => {
+              const chg = modifyStats({ qing: 4, de: 4 });
+              addLog(`💖【${ev.title} · 故舊送藥】竹哨聲剛落，昔日曾蒙你搭救的採藥好手即刻趕至，不僅送上對症靈藥，更引領眾人從密道平安撤離！(${chg.join("、")})`, "milestone");
+              updateAllUI();
+              setPauseState(false);
+            }
+          });
+        } else if (!isNaturalOrMechanism) {
+          mappedChoices.push({
+            reqStat: { qing: 110 },
+            text: `【以情化戈 · 江湖人脈解圍】朗聲報出昔年曾搭救過的綠林義士與各路故交名號，對方陣中竟有受過你恩惠之人當場收刀勸和、替你讓出生路！`,
+            onSelect: () => {
+              const chg = modifyStats({ qing: 5, de: 3, ming: 3 });
+              addLog(`💖【${ev.title} · 以情化戈】刀光劍影之間，對方一名領頭漢子忽然收兵抱拳：「當年若非閣下相救，哪有我今日！」兩方化敵為友，危局迎刃而解！(${chg.join("、")})`, "milestone");
+              updateAllUI();
+              setPauseState(false);
+            }
+          });
+        }
+      }
+
       // 2.5 上乘武學與鎮派以上武學專屬破局選項（未達品階時仍會顯示於介面但反灰鎖定，激勵玩家精進武學）
       if (!mappedChoices.some(c => c.reqSkillTier === "上乘" || c.reqSkillTier === 3)) {
         let tier3Cat = "招式";
@@ -28366,36 +28621,59 @@ ${targetW.desc}
       const livingImmCompanions = player.bonds.filter(b => !b.isDead && b.isImmortal);
       if (livingImmCompanions.length > 0 && (player.fakedDeath || Math.random() < 0.75)) {
         const targetImm = livingImmCompanions[Math.floor(Math.random() * livingImmCompanions.length)];
+        const curQing = player.stats.qing || 0;
+        const qingExtBonus = Math.min(240, Math.floor(curQing / 100) * 40);
+        const symCompYears = 40 + qingExtBonus;
+        const teaCompYears = 60 + Math.round(qingExtBonus * 1.25);
+        const guardCompYears = 180 + qingExtBonus;
+        const immChoices = [
+          {
+            text: `【陰陽合璧 · 雙修破障】與【${targetImm.name}】元神共鳴，合力煉化九天玄氣 (修為+450、情義+8、己身壽元+25、同伴壽元+${symCompYears})`,
+            onSelect: () => {
+              addCultivationQi(450);
+              player.maxLifespan += 25;
+              targetImm.maxLifespan = (targetImm.maxLifespan || 650) + symCompYears;
+              const chg = modifyStats({ qing: 8, wu: 6 });
+              addLog(`✨【洞天共修】你與【${targetImm.name}】於洞天福地共參大道，靈氣交融，己身壽元 +25 載、同伴壽元 +${symCompYears} 載！(${chg.join("、")})`, "immortal-log");
+              renderBondsTab();
+              updateAllUI();
+              setPauseState(false);
+            }
+          },
+          {
+            text: `【對弈品茗 · 笑看滄桑】煮一壺千年雪山靈茶，與【${targetImm.name}】對弈暢談 (己身壽元+40、同伴壽元+${teaCompYears}、修為+250)`,
+            onSelect: () => {
+              player.maxLifespan += 40;
+              targetImm.maxLifespan = (targetImm.maxLifespan || 650) + teaCompYears;
+              addCultivationQi(250);
+              addLog(`🍵【仙山對弈】山中無甲子，寒盡不知年。有【${targetImm.name}】相伴修仙，長生之路從不孤寂！(己身壽元 +40 載、同伴壽元 +${teaCompYears} 載)`, "immortal-log");
+              renderBondsTab();
+              updateAllUI();
+              setPauseState(false);
+            }
+          }
+        ];
+        if (curQing >= 250) {
+          immChoices.push({
+            reqStat: { qing: 250 },
+            text: `【本命真元護道 · 為【${targetImm.name}】逆天續命】以深厚情義凝成道侶羈絆，分出一縷本命真元助對方鞏固仙基並佈下擋劫道印（同伴壽元+${guardCompYears}載、獲贈護劫印、情義+10）`,
+            onSelect: () => {
+              targetImm.maxLifespan = (targetImm.maxLifespan || 650) + guardCompYears;
+              targetImm.qingTribulationShield = Math.min(3, (targetImm.qingTribulationShield || 0) + 1);
+              const chg = modifyStats({ qing: 10, de: 5 });
+              addLog(`💖【情義續命 · 護道印成】你不惜耗損一縷本命真元替【${targetImm.name}】重塑仙脈並種下護劫印，令其壽元大幅延展 +${guardCompYears} 載，來日可替其抵擋一次大劫！(${chg.join("、")})`, "immortal-log");
+              renderBondsTab();
+              updateAllUI();
+              setPauseState(false);
+            }
+          });
+        }
         setPauseState(true);
         openEventModal(
           `✨ 洞天共修 · 與【${targetImm.name}】坐而論道`,
           `${player.age} 歲仙侶/金蘭共修`,
           `雲海翻湧，仙鶴齊鳴。與你一同踏入長生仙途的【${targetImm.name}】（當前 ${targetImm.age || player.age} 歲）端坐於紫竹林間，與你雙掌相抵、陰陽靈氣周天流轉，共參太虛大道。`,
-          [
-            {
-              text: `【陰陽合璧 · 雙修破障】與【${targetImm.name}】元神共鳴，合力煉化九天玄氣 (修為+450、情義+8、雙方壽元+25)`,
-              onSelect: () => {
-                addCultivationQi(450);
-                player.maxLifespan += 25;
-                targetImm.maxLifespan = (targetImm.maxLifespan || 650) + 40;
-                const chg = modifyStats({ qing: 8, wu: 6 });
-                addLog(`✨【洞天共修】你與【${targetImm.name}】於洞天福地共參大道，靈氣交融，修為與壽元雙雙增長！(${chg.join("、")}、壽元+25載)`, "immortal-log");
-                updateAllUI();
-                setPauseState(false);
-              }
-            },
-            {
-              text: `【對弈品茗 · 笑看滄桑】煮一壺千年雪山靈茶，與【${targetImm.name}】對弈暢談 (雙方壽元+40、修為+250)`,
-              onSelect: () => {
-                player.maxLifespan += 40;
-                targetImm.maxLifespan = (targetImm.maxLifespan || 650) + 60;
-                addCultivationQi(250);
-                addLog(`🍵【仙山對弈】山中無甲子，寒盡不知年。有【${targetImm.name}】相伴修仙，長生之路從不孤寂！(雙方壽元提升)`, "immortal-log");
-                updateAllUI();
-                setPauseState(false);
-              }
-            }
-          ]
+          immChoices
         );
         return;
       }
@@ -29155,8 +29433,9 @@ ${targetW.desc}
               if (reachedLimit || Math.random() < hazardRate) {
                 const scriptObj = CHAR_PASSING_SCRIPTS[b.id];
                 const isEarly = b.age < 62 && !reachedLimit;
-                // 若為「天妒英才 · 故人喋血」且關係達友好往來以上，主角有 45% 機率提前收獲求援信號趕往馳援！
-                if (isEarly && (b.intimacyIndex || 0) >= 3 && !b.savedFromEarlyDeath && !isPaused && Math.random() < 0.45) {
+                // 若為「天妒英才 · 故人喋血」且關係達友好往來以上，主角依情義（基礎 45% 最高 80%）提前收獲求援信號趕往馳援！
+                const earlySignalChance = Math.min(0.80, 0.45 + Math.floor((player.stats.qing || 0) / 30) * 0.05);
+                if (isEarly && (b.intimacyIndex || 0) >= 3 && !b.savedFromEarlyDeath && !isPaused && Math.random() < earlySignalChance) {
                   player.pendingCompanionRescue = { bond: b, scriptObj };
                   return;
                 }
@@ -29531,10 +29810,18 @@ ${targetW.desc}
         if (triggerFamilyAndDiscipleEvent(false)) return;
       }
 
-      // 【情義實質作用 · 紅塵伴侶溫存與故人飛鴿傳書（22組不重複池）】：
-      if (player.age >= 18 && (player.stats.qing || 0) >= 80 && Math.random() < 0.018) {
-        if (typeof window.triggerQingFriendOrSpouseGift === "function") {
+      // 【情義實質作用 · 紅塵伴侶溫存、雪中送炭與故人敘舊】：
+      const curQing = player.stats.qing || 0;
+      if (player.age >= 18 && curQing >= 80) {
+        let giftProb = 0.018 + (curQing >= 150 ? 0.010 : 0) + (curQing >= 250 ? 0.010 : 0);
+        if ((player.heavyInjuries || 0) > 0 || (player.stats.cai || 0) <= 5) giftProb += 0.025;
+        if (Math.random() < giftProb && typeof window.triggerQingFriendOrSpouseGift === "function") {
           window.triggerQingFriendOrSpouseGift();
+        }
+      }
+      if (player.age >= 20 && curQing >= 100 && (player.age - (player.lastHighQingHangoutAge || 0) >= 2) && Math.random() < (0.016 * oldAgeCalmMult)) {
+        if (typeof triggerHighQingCompanionHangout === "function" && triggerHighQingCompanionHangout()) {
+          return;
         }
       }
 
@@ -30024,16 +30311,32 @@ ${targetW.desc}
         player.bonds.forEach(b => {
           if (b && !b.isDead && b.isImmortal) {
             if (!b.maxLifespan || b.maxLifespan > 9000 || b.maxLifespan < 500) {
-              b.maxLifespan = 580 + Math.floor(Math.random() * 60); // 預設約 580~640 歲大限，可透過洞天共修延壽
+              const qingLifeBonus = Math.min(400, Math.floor((player.stats.qing || 0) / 50) * 40);
+              b.maxLifespan = 580 + Math.floor(Math.random() * 60) + qingLifeBonus; // 預設約 580~640 歲（隨情義提高至多 +400），可透過洞天共修與護劫印延壽
             }
             b.age = (b.age || prevAge) + actualStep;
             if (b.age >= b.maxLifespan) {
-              b.isDead = true;
-              b.deathAge = b.age;
-              b.status = `長眠於${b.restingPlace || "冥山紫竹仙谷"}`;
-              const relTitle = b.relationTag || "神仙眷侶";
-              addLog(`🥀【仙侶應劫 · 道消坐化】與你共修長生大道數百載的${relTitle}【${b.name}】（享壽 ${b.deathAge} 歲）於衝擊更高仙階時遭遇九天玄雷大劫，為替你護住洞天道基力竭兵解，自此長眠於【${b.restingPlace || "冥山紫竹仙谷"}】。`, "danger-log");
-              renderBondsTab();
+              const curQing = player.stats.qing || 0;
+              const hasShield = (b.qingTribulationShield || 0) > 0;
+              const autoSaveChance = (curQing >= 200 && (b.qingSavedCount || 0) < 3)
+                ? Math.min(0.75, 0.25 + (curQing - 200) * 0.0008)
+                : 0;
+              if (hasShield || (autoSaveChance > 0 && Math.random() < autoSaveChance)) {
+                if (hasShield) b.qingTribulationShield--;
+                else b.qingSavedCount = (b.qingSavedCount || 0) + 1;
+                const extYears = 250 + Math.min(350, Math.floor(curQing / 2));
+                b.maxLifespan = b.age + extYears;
+                const relTitle = b.relationTag || "神仙眷侶";
+                addLog(`💖【情義護道 · 聯手渡玄雷劫】與你共修長生的${relTitle}【${b.name}】迎來九天玄雷大劫！千鈞一髮之際，你們深厚情義化作無形護道印，你替其硬抗三道主雷，助【${b.name}】破劫重生、壽元再延 +${extYears} 載（至 ${b.maxLifespan} 歲）！`, "immortal-log");
+                renderBondsTab();
+              } else {
+                b.isDead = true;
+                b.deathAge = b.age;
+                b.status = `長眠於${b.restingPlace || "冥山紫竹仙谷"}`;
+                const relTitle = b.relationTag || "神仙眷侶";
+                addLog(`🥀【仙侶應劫 · 道消坐化】與你共修長生大道數百載的${relTitle}【${b.name}】（享壽 ${b.deathAge} 歲）於衝擊更高仙階時遭遇九天玄雷大劫，為替你護住洞天道基力竭兵解，自此長眠於【${b.restingPlace || "冥山紫竹仙谷"}】。`, "danger-log");
+                renderBondsTab();
+              }
             }
           }
         });
@@ -33399,6 +33702,9 @@ ${targetW.desc}
             }
           } else if (!statMet && c.allowFatalChallenge) {
             prefixBadges += `<span class="prereq-tag danger">【武力未逮 · 強闖極易重傷或斃命】</span>`;
+          } else if (statMet && c.reqStat.qing) {
+            displayText = displayText.replace(/^【因為你[^】]+】/, "");
+            prefixBadges += `<span class="prereq-tag gold">💖 【因為你重情重義】</span>`;
           } else if (statMet && (c.reqStat.de || c.reqStat.ming)) {
             prefixBadges += `<span class="prereq-tag jade">【威望服眾】</span>`;
           }
@@ -34417,14 +34723,40 @@ ${targetW.desc}
   ];
 
   window.triggerQingFriendOrSpouseGift = function() {
-    if (!player || player.isDead || player.age < 18 || (player.stats.qing || 0) < 80) return false;
-    const livingFriends = (player.bonds || []).filter(b => b && !b.isDead && (b.intimacyIndex || 0) >= 3);
-    if (livingFriends.length === 0) return false;
+    if (!player || player.isDead || player.age < 18) return false;
+    const curQing = player.stats.qing || 0;
+    if (curQing < 80) return false;
 
-    const sender = livingFriends[Math.floor(Math.random() * livingFriends.length)];
+    const livingFriends = (player.bonds || []).filter(b => b && !b.isDead && (b.intimacyIndex || 0) >= 3);
+    const hasHeavy = (player.heavyInjuries || 0) > 0;
+    const hasLight = (player.lightInjuries || 0) > 0;
+    const isLowCai = (player.stats.cai || 0) <= 5;
+    let sender = null;
+    if (livingFriends.length > 0) {
+      sender = livingFriends[Math.floor(Math.random() * livingFriends.length)];
+    } else if (curQing >= 120 && (hasHeavy || hasLight || isLowCai)) {
+      sender = { name: "昔年受你照拂的江湖故舊", relationTag: "" };
+    } else {
+      return false;
+    }
     const isSpouse = sender.relationTag === "紅塵伴侶" || sender.relationTag === "神仙眷侶";
 
-    if ((player.lightInjuries || 0) > 0) {
+    // 1. 重傷雪中送炭（情義 ≥ 110）
+    if (hasHeavy && curQing >= 110) {
+      player.heavyInjuries = Math.max(0, (player.heavyInjuries || 0) - 1);
+      if (typeof syncPlayerInjuries === "function") syncPlayerInjuries();
+      const chg = modifyStats({ qing: 3, de: 1 });
+      if (isSpouse) {
+        addLog(`💖【雪中送炭 · 伴侶傾力救治】你的伴侶【${sender.name}】見你身負沉重內傷，親自踏雪求來稀世靈丹並徹夜輸氣護脈，生生替你拔除一處重傷！(${chg.join("、")}、重傷-1)`, "milestone");
+      } else {
+        addLog(`💖【雪中送炭 · 故人千里送大還丹】昔日故友【${sender.name}】聽聞你遭重創，立刻變賣家當託人送來極品大還丹並替你墊付醫資，助你化解一處重傷！(${chg.join("、")}、重傷-1)`, "milestone");
+      }
+      updateAllUI();
+      return true;
+    }
+
+    // 2. 輕傷療傷
+    if (hasLight) {
       player.lightInjuries = Math.max(0, (player.lightInjuries || 0) - 1);
       if (typeof syncPlayerInjuries === "function") syncPlayerInjuries();
       const chg = modifyStats({ qing: 3, wu: 1 });
@@ -34435,6 +34767,45 @@ ${targetW.desc}
       }
       updateAllUI();
       return true;
+    }
+
+    // 3. 盤纏見底接濟（情義 ≥ 100 且 財富 ≤ 5）
+    if (isLowCai && curQing >= 100) {
+      const chg = modifyStats({ cai: 10, qing: 3 });
+      addLog(`💰【雪中送炭 · 故人暗中接濟】【${sender.name}】得知你近日手頭拮据、行囊見底，毫不猶豫派人送來一封厚銀與救急字條：「區區俗物，先拿去應急，莫教英雄為五斗米折腰！」(${chg.join("、")})`, "good-log");
+      updateAllUI();
+      return true;
+    }
+
+    // 4. 秘笈收藏：故人寄來手抄批註助破隱語（情義 ≥ 130）
+    if (Array.isArray(player.collectedManuals) && player.collectedManuals.length > 0 && curQing >= 130 && Math.random() < 0.45) {
+      const targetM = resolveSkillObject(player.collectedManuals[0]);
+      if (targetM && targetM.name) {
+        player.collectedManuals.splice(0, 1);
+        gainMartialArt(targetM.name, false, {
+          forcePending: true,
+          customPendingLog: `📖【情義相助 · 故人寄來秘笈批註】你的知己【${sender.name}】得知你為《${targetM.name}》晦澀古字所困，四處託人抄來前輩手註，助你解開卷首隱語、正式轉入【參悟中】！`
+        });
+        modifyStats({ qing: 2 });
+        updateAllUI();
+        return true;
+      }
+    }
+
+    // 5. 古兵匣：故人請動鑄劍名匠代為溫養開鋒（情義 ≥ 150）
+    if (Array.isArray(player.sealedWeapons) && player.sealedWeapons.length > 0 && curQing >= 150 && Math.random() < 0.45) {
+      const targetW = resolveWeaponObject(player.sealedWeapons[0]);
+      if (targetW && targetW.name) {
+        player.sealedWeapons.splice(0, 1);
+        gainWeapon(targetW.name);
+        if (targetW.name === "太淵鎮獄劍" && DB.ARTIFACTS && DB.ARTIFACTS.jueshi_sword && !hasArtifact("jueshi_sword")) {
+          player.artifacts.push(DB.ARTIFACTS.jueshi_sword);
+        }
+        const chg = modifyStats({ qing: 2 });
+        addLog(`🔥【情義相助 · 名匠代為開鋒】你的知己【${sender.name}】感念舊情，請動隱世鑄兵名匠替你溫養古兵匣中的【${targetW.name}】，古煞盡消、正式認主入庫！(${chg.join("、")})`, "milestone");
+        updateAllUI();
+        return true;
+      }
     }
 
     const pool = isSpouse ? SPOUSE_WARMTH_EVENTS : FRIEND_GIFT_EVENTS;
@@ -34474,11 +34845,13 @@ ${targetW.desc}
       }
     }
 
-    if (player.children.length === 0 && player.disciples.length === 0) return false;
+    const livingChildren = player.children.filter(c => c && !c.isDead);
+    const livingDisciples = player.disciples.filter(d => d && !d.isDead);
+    if (livingChildren.length === 0 && livingDisciples.length === 0) return false;
 
     const livingSpouse = typeof getLivingSpouse === "function" ? getLivingSpouse() : null;
-    const child = player.children.length > 0 ? player.children[Math.floor(Math.random() * player.children.length)] : null;
-    const disc = player.disciples.length > 0 ? player.disciples[Math.floor(Math.random() * player.disciples.length)] : null;
+    const child = livingChildren.length > 0 ? livingChildren[Math.floor(Math.random() * livingChildren.length)] : null;
+    const disc = livingDisciples.length > 0 ? livingDisciples[Math.floor(Math.random() * livingDisciples.length)] : null;
 
     const childAge = child ? Math.max(1, player.age - (child.bornAtPlayerAge || player.age) + 1) : 0;
     const discAge = disc ? Math.max(14, (disc.age || 15) + Math.max(0, player.age - (disc.recruitedAtPlayerAge || player.age))) : 0;
