@@ -6257,7 +6257,8 @@ addGameData({
     if (!player || player.isDead || !bond) return false;
     setPauseState(true);
     bond.savedFromEarlyDeath = true;
-    const rTag = bond.relationTag || (typeof INTIMACY_LEVELS !== "undefined" ? (INTIMACY_LEVELS[bond.intimacyIndex || 0]?.name || INTIMACY_LEVELS[bond.intimacyIndex || 0]) : "好友");
+    const rPrefix = bond.relationTag ? (bond.relationTag.includes("義結金蘭") ? "結義摯友" : `你的${bond.relationTag}`) : "故友";
+    const rModalTag = bond.relationTag || "故友";
 
     let causeText = "";
     if (typeof causeOrScriptObj === "string") {
@@ -6300,13 +6301,13 @@ addGameData({
     const aidMultStr = qingAidMult.toFixed(2).replace(/0$/, "");
 
     const desc = `【前因 · 危機驟起】：\n` +
-      `急雨如箭，一枚染血的求援信號在天際炸開！你循跡狂奔趕至現場，只見你的${rTag}【${bond.name}】（${bond.age}歲）正陷入必死絕境——\n` +
+      `急雨如箭，一枚染血的求援信號在天際炸開！你循跡狂奔趕至現場，只見${rPrefix}【${bond.name}】（${bond.age}歲）正陷入必死絕境——\n` +
       `原來【${bond.name}】${causeText}！此刻強敵殺招已至眉睫，若無人相救，今日必將喋血長眠於【${graveyardText}】！\n\n` +
       `【抉擇與後果】：你飛身趕至戰圈外圍，生死只在一瞬之間！`;
 
     openEventModal(
       `🚨 故人危殆 · 千里馳援【${bond.name}】`,
-      `生死劫難 · ${rTag}`,
+      `生死劫難 · ${rModalTag}`,
       desc,
       [
         {
@@ -6329,7 +6330,7 @@ addGameData({
           }
         },
         {
-          text: `▸ 【並肩死戰 · 強勢救人】長嘯一聲殺入重圍，與【${bond.name}】背靠背聯手迎敵！（與同伴並肩有效武力×${aidMultStr}：當前 ${effWu} vs 浮動門檻 ${reqWu} [基準${baseReqWu}±33%]）`,
+          text: `▸ 【並肩死戰 · 強勢救人】長嘯一聲殺入重圍，與【${bond.name}】背靠背聯手迎敵！（與同伴並肩有效武力×${aidMultStr}：當前 ${effWu} vs 門檻 ${reqWu}）`,
           onSelect: () => {
             if (effWu >= reqWu) {
               bond.maxLifespan = (bond.age || 40) + 22 + Math.floor(Math.random() * 10);

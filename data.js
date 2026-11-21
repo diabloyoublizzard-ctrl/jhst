@@ -9986,7 +9986,7 @@
     "破碎虛空": { name: "破碎虛空", rarity: "神話", quote: "褪盡凡俗千般塵垢，仙門洞開，飄然白日飛昇！", condition: (p) => p.immortalStage >= 9 },
     "長生久視": { name: "長生久視", rarity: "仙品", quote: "坐看滄海化桑田，紅塵故人皆作古，唯我獨伴青山老。", condition: (p) => p.age > 120 },
     "武林神話": { name: "武林神話", rarity: "典藏", quote: "武道通神，百載江湖無人能出其右。", condition: (p) => p.stats.wu >= 115 },
-    "武林盟主": { name: "武林盟主", rarity: "史詩", quote: "群雄俯首，號令天下，莫敢不從。", condition: (p) => p.stats.wu >= 80 && p.stats.ming >= 75 },
+    "武林盟主": { name: "武林盟主", rarity: "史詩", quote: "群雄俯首，號令天下，莫敢不從。", condition: (p) => !!(p.isAllianceLeader || p.title === "武林盟主" || (Array.isArray(p.badges) && p.badges.includes("武林盟主"))) },
     "天下劍首": { name: "天下劍首", rarity: "典藏", quote: "一劍光寒十四州，天下劍客見你皆需低眉。", condition: (p) => p.stats.wu >= 85 && p.skills.some(s => (s.name || s).includes("劍")) },
     "霸刀無雙": { name: "霸刀無雙", rarity: "典藏", quote: "萬仞刀氣橫斷滄江，一刀出而群邪辟易。", condition: (p) => p.stats.wu >= 85 && p.skills.some(s => (s.name || s).includes("刀")) },
     "槍出如龍": { name: "槍出如龍", rarity: "典藏", quote: "百戰沙場一點寒芒，長槍所指所向披靡。", condition: (p) => p.stats.wu >= 85 && p.skills.some(s => (s.name || s).includes("槍") || (s.name || s).includes("棍")) },

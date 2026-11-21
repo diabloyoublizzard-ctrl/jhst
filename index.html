@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.20.1512</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.21.1351</span>
       </div>
 
       <div class="debug-row">
@@ -1148,7 +1148,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611201512"></script>
+  <script src="data.js?v=202611211351"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1161,7 +1161,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611201512"></script>
+  <script src="patches.js?v=202611211351"></script>
   <script>
 
   (function() {
@@ -2011,7 +2011,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.20.1512";
+    const GAME_VERSION = "v2026.11.21.1351";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -2811,7 +2811,7 @@
       if (!player || delta <= 0) return;
       player.injuryHistory = player.injuryHistory || [];
       const src = (player.lastEventContext && player.lastEventContext.title)
-        ? player.lastEventContext.title.replace(/^[⚔️🩸🌩️🔥⛩️🏛️🎭🔮🐉🐎🗡️✨🌱]+\s*/, "")
+        ? player.lastEventContext.title.replace(/^(?:[⚔🩸🌩🔥⛩🏛🎭🔮🐉🐎🗡✨🌱🩹]\uFE0F?)+\s*/u, "")
         : (player.inImmortalPhase ? "天劫與大道爭鋒" : "江湖風波與生死搏殺");
       player.injuryHistory.push({
         age: player.age,
@@ -4028,8 +4028,19 @@
       const handleWeaponAcquireAttempt = (bonusStats, successFlavor) => {
         const chg = modifyStats(bonusStats);
         const roll = Math.random();
-        // 1/3 機率無法獲得（神兵不認主／其他天命之子捷足先登／囊中羞澀賣了換錢／墜入深淵）
+        // 1/3 機率無法獲得（神兵不認主／其他天命之子捷足先登／囊中羞澀或識貨讓寶換銀／墜入深淵）
         if (roll < 1 / 3) {
+          const sellSilver = Math.max(8, (targetW.tier || 2) * 5);
+          const isLowSilver = (player.stats.cai || 0) <= 15;
+          const silverScenario = isLowSilver
+            ? {
+                extra: { cai: sellSilver },
+                log: `💰【囊中羞澀 · 轉手換銀】你雖得${targetW.tierName}【${targetW.name}】，奈何近日行囊空虛、盤纏見底，下山時恰逢江南豪商開出重金求購，你權衡生計只得忍痛割愛，將其換作 ${sellSilver} 兩紋銀！(${chg.join("、")}、財富+${sellSilver})`
+              }
+            : {
+                extra: { cai: sellSilver },
+                log: `💎【識貨讓寶 · 換得重金】你細看${targetW.tierName}【${targetW.name}】雖具神韻卻與自身武道路數不合，下山時恰逢江南豪商誠心重金求購，你順勢割愛換得 ${sellSilver} 兩紋銀！(${chg.join("、")}、財富+${sellSilver})`
+              };
           const missScenarios = [
             {
               log: `💨【神兵傲骨 · 棄主飛去】你伸手欲收服${targetW.tierName}【${targetW.name}】，不料此兵靈性太盛、傲骨錚錚，竟劇烈震顫掙脫你的手掌，化作一道寒芒破空沒入雲海深處，終究與你無緣！(${chg.join("、")})`
@@ -4038,10 +4049,7 @@
               extra: { de: 2 },
               log: `🌟【天命旁落 · 另擇明主】正當你握住【${targetW.name}】之際，一名氣運加身的年輕俠客踏風而至，【${targetW.name}】竟發出清越龍吟主動飛向對方！名匠長嘆「神兵擇主乃天命」，你豁達一笑拱手讓賢。(${chg.join("、")}，豁達讓賢再獲 德行+2)`
             },
-            {
-              extra: { cai: 5 },
-              log: `💰【囊中羞澀 · 轉手換銀】你雖得${targetW.tierName}【${targetW.name}】，奈何近日行囊空虛、盤纏見底，下山時恰逢江南豪商開出重金求購，你權衡生計只得忍痛割愛，將其換作一袋沉甸甸的紋銀！(${chg.join("、")}、財富+5)`
-            },
+            silverScenario,
             {
               log: `⚡【地脈崩裂 · 遺落深淵】你剛將真氣灌入【${targetW.name}】，腳下岩層忽因地火震盪驟然崩塌！你閃身避開萬斤落石保住性命，【${targetW.name}】卻脫手墜入萬丈地底深淵，再無跡可尋！(${chg.join("、")})`
             }
@@ -4170,13 +4178,29 @@ ${targetW.desc}
           { type: "武評", text: "天機生重訂《兵刃譜》，據傳有不知名的年輕劍客於太白山巔連敗三名名宿。" },
           { type: "塞外", text: "鄯善大漠夜起黑風暴，霜狼王庭移營三十里，大漠客棧駝鈴整夜未歇。" },
           { type: "朝廷", text: "靖武司頒布江淮緝盜令，各處要道關隘加派暗探盤查帶刀江湖人。" },
-          { type: "民生", text: "雲棧今年茶葉大豐，錦城錦江碼頭停滿了自中原前來收購雀舌的商船。" },
+          { type: "民生", text: "雲棧今年茶葉大豐，錦江碼頭停滿了自中原前來收購雀舌的商船。" },
           { type: "邪道", text: "流沙城以西荒漠頻現怪異骨笛聲，傳言有邪教餘孽在古剎廢墟招魂引蠱。" },
           { type: "門派", text: "寒月宮山腳清冷泉旁梅花早開，江南不少才子墨客泛舟圍聚求見清霜劍影。" },
           { type: "江湖", text: "霸刀門新開爐火鑄就九柄斷水重刃，引來各路綠林好漢齊聚赤霞鎮品刀。" },
-          { type: "市井", text: "九江鎮老茶客津津樂道當年義天盟舊事，聽客拍案叫絕，茶博士添水不及。" }
+          { type: "市井", text: "九江鎮老茶客津津樂道當年義天盟舊事，聽客拍案叫絕，茶博士添水不及。" },
+          { type: "武評", text: "華山落雁峰傳聞現出前代劍魔壁上留痕，近日已有十餘位劍道好手登山觀摩印證。" },
+          { type: "民生", text: "姑蘇今春絲綢織錦驟盛，煙雨樓前畫舫雲集，南北鏢局接單忙得不可開交。" },
+          { type: "風聞", text: "東海蓬萊漁民於大霧中拾得半截刻字青銅殘劍，傳言為百年前東渡名宿遺物。" },
+          { type: "朝廷", text: "洛陽工部整修黃河漕運大堤，朝廷徵召各地能工巧匠並重賞護堤義士。" },
+          { type: "邪道", text: "湘西黑木崖外一夜突現十餘具無名乾屍，南荒毒宗與正道巡山弟子正暗中對峙。" },
+          { type: "江湖", text: "開封龍門客棧夜辦地下易物大會，傳聞有前朝古譜與西域玄鐵悄然易主。" },
+          { type: "塞外", text: "陰山雪線今冬南移，北境馬賊趁夜南下騷擾邊鎮商隊，關外各鏢局紛紛結伴通行。" },
+          { type: "門派", text: "武當紫霄殿重開七日玄門醮壇，據聞道尊親講太極以靜制動要訣，四方道友雲集。" },
+          { type: "市井", text: "揚州瘦西湖畔新開一座說書茶園，講盡半世紀江湖恩怨，座無虛席日進斗金。" },
+          { type: "民生", text: "巴蜀青城山今秋野山藥與雲芝罕見豐收，各地醫館藥商紛紛趕赴成都府採辦。" },
+          { type: "風聞", text: "徽州著名鑄劍爐坊失竊三塊天外寒鐵，坊主懸賞百兩紋銀追查竊賊下落。" },
+          { type: "江湖", text: "太湖水寨近日整頓三十六島航道，往來商船不再受水匪劫掠，江南商旅交口稱讚。" },
+          { type: "武評", text: "百曉閣新刊《少年英豪錄》，榜首竟是一名出身漁村、使雙短戟的寒門青年。" }
         ];
-        newsItems = [dynamicPool[Math.floor(Math.random() * dynamicPool.length)]];
+        const recentTexts = new Set((player.worldHistory || []).slice(0, 18).map(h => h && h.text));
+        const freshPool = dynamicPool.filter(item => !recentTexts.has(item.text));
+        const candidatePool = freshPool.length > 0 ? freshPool : dynamicPool;
+        newsItems = [candidatePool[Math.floor(Math.random() * candidatePool.length)]];
       }
 
       newsItems.forEach(item => {
@@ -4758,6 +4782,13 @@ ${targetW.desc}
         mountObj.species = "絕世名駒";
         mountObj.age = mountObj.age || (3 + Math.floor(Math.random() * 3));          // 3~5 歲
         mountObj.maxLifespan = mountObj.maxLifespan || (22 + Math.floor(Math.random() * 11)); // 22~32 歲
+      }
+      mountObj.initialAge = mountObj.initialAge || mountObj.age;
+      if (typeof player !== "undefined" && player && mountObj.acquiredAtPlayerAge === undefined) {
+        mountObj.acquiredAtPlayerAge = player.age;
+      }
+      if (typeof mountObj.yearsOwned !== "number") {
+        mountObj.yearsOwned = 0;
       }
       mountObj.isDead = !!mountObj.isDead;
       return mountObj;
@@ -5350,10 +5381,12 @@ ${targetW.desc}
             name: target.name,
             icon: target.icon || "🐎",
             title: target.title,
-            desc: target.desc
+            desc: target.desc,
+            acquiredAtPlayerAge: player.age,
+            yearsOwned: 0
           });
           player.mounts.push(newlyAdded);
-          addLog(`${target.icon || "🐎"}【三番結緣 · 喜獲靈獸${target.name}】歷經數月重逢與風雨相伴，${target.title}【${target.name}】（當前 ${newlyAdded.age} 歲，壽元上限 ${newlyAdded.maxLifespan} 歲）徹底對你敞開心扉，正式認主隨行，已配給於右側「👥 羈絆」分頁最下方（當前隨行 ${getActiveMounts().length}/3）！（${chg.join("、")}${q.savedLifeGain > 0 ? "、壽元+" + q.savedLifeGain : ""}）`, "milestone");
+          addLog(`${target.icon || "🐎"}【三番結緣 · 喜獲靈獸${target.name}】歷經數月重逢與風雨相伴，${target.title}【${target.name}】（當前 ${newlyAdded.age} 歲，壽元上限 ${newlyAdded.maxLifespan} 歲）徹底對你敞開心扉，自此伴你闖蕩江湖！（${chg.join("、")}${q.savedLifeGain > 0 ? "、壽元+" + q.savedLifeGain : ""}）`, "milestone");
         }
         player.pendingMountQuest = null;
         if (existingActive.length > 0 && newlyAdded) {
@@ -5528,12 +5561,12 @@ ${targetW.desc}
       },
       {
         id: "org_tianji",
-        name: "天機天機閣",
+        name: "天機閣",
         icon: "📜",
         subtitle: "聽風觀星樞紐 · 算盡蒼生",
         token: "璇璣青玉簡",
         ranks: ["聽風執筆", "知微星官", "天機少閣主", "天機天樞 · 算盡蒼生"],
-        inviteDesc: "你在洛陽茶樓聽書時，一名羽扇綸巾的青衫文士笑吟吟地坐到你對面，遞上一枚溫潤的『璇璣青玉簡』：\n\n「天下武功、門派秘辛、皇朝氣運，盡在我【📜 天機天機閣】一卷竹簡之中。閣主觀你慧眼通透、足跡遍及九州，特邀你加入天機閣擔任『聽風執筆』，品評天下英豪、執掌天機風雲譜！」",
+        inviteDesc: "你在洛陽茶樓聽書時，一名羽扇綸巾的青衫文士笑吟吟地坐到你對面，遞上一枚溫潤的『璇璣青玉簡』：\n\n「天下武功、門派秘辛、皇朝氣運，盡在我【📜 天機閣】一卷竹簡之中。閣主觀你慧眼通透、足跡遍及九州，特邀你加入天機閣擔任『聽風執筆』，品評天下英豪、執掌天機風雲譜！」",
         joinStats: { ming: 6, de: 3, cai: 3 },
         missions: [
           {
@@ -5556,7 +5589,7 @@ ${targetW.desc}
             title: "📜 天機秘卷 · 揭穿偽君子掌門陰謀",
             desc: "天機閣暗樁查悉，某位表面仁義的名門宿老實則暗中勾結黑道滅門奪寶，你握有鐵證，決定於英雄宴上公諸天下！",
             choices: [
-              { text: "【當眾宣讀鐵證 · 仗劍主持公道】在英雄宴上亮出璇璣玉簡與鐵證，並親手廢去偽君子武功 (名望+6、德行+5、武力+3)", stats: { ming: 6, de: 5, wu: 3 }, result: "滿堂群豪嘩然，冤死苦主終得昭雪，天機天機閣清譽響徹九州！" },
+              { text: "【當眾宣讀鐵證 · 仗劍主持公道】在英雄宴上亮出璇璣玉簡與鐵證，並親手廢去偽君子武功 (名望+6、德行+5、武力+3)", stats: { ming: 6, de: 5, wu: 3 }, result: "滿堂群豪嘩然，冤死苦主終得昭雪，天機閣清譽響徹九州！" },
               { text: "【聯合苦主遺孤 · 設局引其自招】布下天衣無縫的局引偽君子當眾吐露實情 (名望+5、情義+5)", stats: { ming: 5, qing: 5 }, result: "惡人自食惡果，你在天機閣內的地位已僅次於閣主！" }
             ]
           }
@@ -6348,13 +6381,15 @@ ${targetW.desc}
                 desc: "於北冥馬市慧眼識珠買下的絕世汗血王駒，洗去癩瘡後通體赤紅如烈火，四蹄生風、日行千里，與你一同馳騁萬里江湖。"
               };
               if (!player.mounts.some(m => m.id === mountObj.id || m.name === mountObj.name) && getActiveMounts().length < 3) {
+                mountObj.acquiredAtPlayerAge = player.age;
+                mountObj.yearsOwned = 0;
                 assignMountLifespan(mountObj);
                 player.mounts.push(mountObj);
                 if (!player.badges.includes(`坐騎：${mountObj.name}`)) {
                   player.badges.push(`坐騎：${mountObj.name}`);
                 }
                 unlockBaixiao(`名駒：${mountObj.name}`);
-                addLog(`🐎【神駒認主 · 配給坐騎】赫連錚感佩你的慧眼與豪情，將這匹洗盡鉛華的西域神駒【${mountObj.name}】（${mountObj.age}歲，壽元上限 ${mountObj.maxLifespan}歲）正式配給你作為隨行坐騎！（當前隨行 ${getActiveMounts().length}/3）`, "milestone");
+                addLog(`🐎【神駒認主 · 結伴同行】赫連錚感佩你的慧眼與豪情，將這匹洗盡鉛華的西域神駒【${mountObj.name}】（${mountObj.age}歲，壽元上限 ${mountObj.maxLifespan}歲）贈予你相伴闖蕩九州！`, "milestone");
               }
             }
 
@@ -7135,7 +7170,7 @@ ${targetW.desc}
 
       if (chooseHeavy) {
         const sc = HEAVY_INJURY_CURE_SCENARIOS[Math.floor(Math.random() * HEAVY_INJURY_CURE_SCENARIOS.length)];
-        const cleanTitle = String(sc.title || "").replace(/^[🩸🩹]\s*/, "");
+        const cleanTitle = String(sc.title || "").replace(/^[🩸🩹]\s*/u, "");
         const effRiskRate = Math.min(92, sc.riskRate + docBonus);
         const effPillRate = Math.min(85, sc.pillRate + docBonus);
         const effPaidRate = Math.min(100, (sc.paidRate || 95) + docBonus);
@@ -7233,7 +7268,7 @@ ${targetW.desc}
 
       // 輕傷專屬求醫劇本（8 則多樣化劇本）
       const sc = LIGHT_INJURY_CURE_SCENARIOS[Math.floor(Math.random() * LIGHT_INJURY_CURE_SCENARIOS.length)];
-      const cleanTitle = String(sc.title || "").replace(/^[🩸🩹]\s*/, "");
+      const cleanTitle = String(sc.title || "").replace(/^[🩸🩹]\s*/u, "");
       const effRiskRate = Math.min(95, sc.riskRate + docBonus);
       const effPillRate = Math.min(88, sc.pillRate + docBonus);
 
@@ -8301,7 +8336,7 @@ ${targetW.desc}
       if (!player || !bond) return false;
       setPauseState(true);
       bond.savedFromEarlyDeath = true;
-      const relTitle = bond.relationTag || INTIMACY_LEVELS[bond.intimacyIndex] || "摯友";
+      const relPrefix = bond.relationTag ? (bond.relationTag.includes("義結金蘭") ? "結義摯友" : `你的${bond.relationTag}`) : "故友";
       const rawYoungText = (scriptObj && scriptObj.young)
         ? scriptObj.young
         : `在江湖險境中為護道義獨抗十餘名黑衣死士，兵刃將斷、血染征袍`;
@@ -8326,7 +8361,7 @@ ${targetW.desc}
 
       const desc = `【前因 · 危機驟起】：
 ` +
-        `急雨如箭，一枚染血的求援信號在天際炸開！你循跡狂奔趕至現場，只見你的${relTitle}【${bond.name}】（${bond.age}歲）正陷入必死絕境——
+        `急雨如箭，一枚染血的求援信號在天際炸開！你循跡狂奔趕至現場，只見${relPrefix}【${bond.name}】（${bond.age}歲）正陷入必死絕境——
 ` +
         `原來【${bond.name}】${crisisCore}！此刻強敵殺招已至眉睫，若無人相救，今日必將喋血長眠於【${bond.restingPlace || "荒山古道"}】！
 
@@ -8359,7 +8394,7 @@ ${targetW.desc}
               bond.isDead = true;
               bond.deathAge = Math.min(119, bond.age);
               bond.status = `長眠於${bond.restingPlace || "青山之側"}`;
-              addLog(`🥀【救援未逮 · 故人喋血】你雖拼死衝入敵陣受了重傷，無奈敵勢太強，終究慢了半步！你的${relTitle}【${bond.name}】（享年 ${bond.deathAge} 歲）${crisisCore}，在你懷中含笑長逝，長眠於【${bond.restingPlace || "青山綠水之側"}】。(重傷+1)`, "danger-log");
+              addLog(`🥀【救援未逮 · 故人喋血】你雖拼死衝入敵陣受了重傷，無奈敵勢太強，終究慢了半步！${relPrefix}【${bond.name}】（享年 ${bond.deathAge} 歲）${crisisCore}，在你懷中含笑長逝，長眠於【${bond.restingPlace || "青山綠水之側"}】。(重傷+1)`, "danger-log");
             }
             updateAllUI();
             setPauseState(false);
@@ -8397,7 +8432,7 @@ ${targetW.desc}
         }
       ];
 
-      openEventModal(`🚨 故人危殆 · 千里馳援【${bond.name}】`, `生死劫難 · ${relTitle}`, desc, choices);
+      openEventModal(`🚨 故人危殆 · 千里馳援【${bond.name}】`, `生死劫難 · ${bond.relationTag || "故友"}`, desc, choices);
       return true;
     }
 
@@ -12770,11 +12805,14 @@ ${targetW.desc}
             triggerAge120AscensionCeremony();
             return;
           }
-          // 壽元結束的那一年：優先檢定友人或昔年善緣來救（基礎 30%～65%，成功則壽元+3~5年）
-          if (player.lastLifespanRescueAge !== player.age) {
+          // 壽元結束的那一年：優先檢定延壽馳援（基礎 18%～35%，逐次減半，每世最多 3 次；凡人 119 歲以上不再觸發）
+          const rescueCount = player.lifespanRescueCount || 0;
+          const canRescueByAge = player.isImmortalUnlocked || player.age < (CFG.mortalMaxAge - 1);
+          if (canRescueByAge && rescueCount < 3 && player.lastLifespanRescueAge !== player.age) {
             player.lastLifespanRescueAge = player.age;
-            const qingRescueChance = Math.min(0.65, 0.30 + ((player.stats.qing || 0) * 0.002));
-            if (Math.random() < qingRescueChance) {
+            const baseChance = Math.min(0.35, 0.18 + ((player.stats.qing || 0) * 0.001));
+            const effectiveRescueChance = baseChance * Math.pow(0.5, rescueCount);
+            if (Math.random() < effectiveRescueChance) {
               triggerLifespanEndRescueModal();
               return;
             }
@@ -12958,7 +12996,8 @@ ${targetW.desc}
                 b.deathAge = Math.min(119, b.age);
                 b.status = `長眠於${b.restingPlace || "青山之側"}`;
 
-                const relTitle = b.relationTag || INTIMACY_LEVELS[b.intimacyIndex] || "故友";
+                const relPrefix = b.relationTag ? `${b.relationTag}` : "";
+                const isHostileDead = !b.relationTag && (b.intimacyIndex || 0) <= 1;
                 let deathStory = "";
                 if (scriptObj) {
                   deathStory = isEarly ? scriptObj.young : scriptObj.old;
@@ -12969,7 +13008,8 @@ ${targetW.desc}
                 }
 
                 const headerTag = isEarly ? "🥀【天妒英才 · 故人喋血】" : "🪦【故人長眠】";
-                addLog(`${headerTag}你的${relTitle}【${b.name}】（享年 ${b.deathAge} 歲）${deathStory}，自此長眠於【${b.restingPlace || "青山綠水之側"}】。世間情義猶在，斯人已乘清風去。`, "danger-log");
+                const farewellLine = isHostileDead ? "前塵恩怨隨風散，斯人已入黃土中。" : "世間情義猶在，斯人已乘清風去。";
+                addLog(`${headerTag}${relPrefix}【${b.name}】（享年 ${b.deathAge} 歲）${deathStory}，自此長眠於【${b.restingPlace || "青山綠水之側"}】。${farewellLine}`, "danger-log");
               }
             }
           });
@@ -12981,10 +13021,12 @@ ${targetW.desc}
             if (!m || m.isDead) return;
             assignMountLifespan(m);
             m.age = (m.age || 4) + 1;
+            m.yearsOwned = (m.yearsOwned || 0) + 1;
             if (!player.inImmortalPhase && m.age >= m.maxLifespan) {
               m.age = m.maxLifespan;
               m.isDead = true;
               m.deathAge = m.maxLifespan;
+              m.deathPlayerAge = player.age;
               addLog(`🥀【靈獸壽終 · 忠魂長眠】陪伴你闖蕩江湖多年的${m.title || "靈獸"}【${m.icon || "🐎"} ${m.name}】（享壽 ${m.deathAge} 歲）大限已至。牠最後一次溫順地依偎在你身旁，於秋風中安詳闔目。你將其厚葬於青山松柏之下，立石為記。`, "danger-log");
               renderBondsTab();
             }
@@ -13453,12 +13495,13 @@ ${targetW.desc}
         targetDead.visitedGraveCount = (targetDead.visitedGraveCount || 0) + 1;
         unlockBaixiao(`故人墓前：${targetDead.name}`);
         const chg = modifyStats({ qing: 2, de: 1 });
-        const rawRel = targetDead.relationTag || INTIMACY_LEVELS[targetDead.intimacyIndex] || "故人";
-        const relStr = /仇視|芥蒂/.test(rawRel) ? "舊識" : rawRel;
+        const graveLabel = targetDead.relationTag
+          ? (targetDead.relationTag.includes("義結金蘭") ? `結義故友【${targetDead.name}】` : `已故${targetDead.relationTag}【${targetDead.name}】`)
+          : `故友【${targetDead.name}】`;
         const autoGraveLines = [
-          `行經【${targetDead.restingPlace || "青山之側"}】，你特意停下腳步，買了一壺好酒獨自走到已故${relStr}【${targetDead.name}】墓前。你拂去碑上落葉，將清酒灑在青石前，靜靜坐了半日。`,
+          `行經【${targetDead.restingPlace || "青山之側"}】，你特意停下腳步，買了一壺好酒獨自走到${graveLabel}墓前。你拂去碑上落葉，將清酒灑在青石前，靜靜坐了半日。`,
           `秋風起時，你忽憶起昔年與【${targetDead.name}】相識的種種點滴，遂專程趕赴【${targetDead.restingPlace || "故人塚前"}】祭掃。碑前芳草萋萋，你低聲訴說著近來的江湖見聞，恍惚間似見故人含笑如昨。`,
-          `細雨微濛，你撐傘立於已故${relStr}【${targetDead.name}】的墓碑前（${targetDead.restingPlace || "青山綠水之側"}），替故人拭去碑上苔痕，將一束山花輕放於碑前。`
+          `細雨微濛，你撐傘立於${graveLabel}的墓碑前（${targetDead.restingPlace || "青山綠水之側"}），替故人拭去碑上苔痕，將一束山花輕放於碑前。`
         ];
         const pickedGraveLine = autoGraveLines[Math.floor(Math.random() * autoGraveLines.length)];
         addLog(`🪦【故人長思 · 墓前祭奠】${pickedGraveLine}（已探望 ${targetDead.visitedGraveCount} 次，${chg.join("、")}）`, "good-log");
@@ -13474,7 +13517,7 @@ ${targetW.desc}
         return;
       }
 
-            // 20～55 歲：有機率收到四大特殊隱世組織（玄鏡司／幽冥血衣樓／天機天機閣／龍門隱鏢局）邀約或執行晉升密令
+            // 20～55 歲：有機率收到四大特殊隱世組織（玄鏡司／幽冥血衣樓／天機閣／龍門隱鏢局）邀約或執行晉升密令
       if (player.age >= 20 && player.age <= 55 && !player.secretOrgId && Math.random() < (0.008 * oldAgeCalmMult) && triggerSecretOrgInvitation()) {
         return;
       }
@@ -13819,6 +13862,16 @@ ${targetW.desc}
       player.ganzhiIndex = (player.ganzhiIndex + actualStep) % 60;
       addCultivationQi(35 * actualStep);
       if (typeof updateFamilyMemberLifespans === "function") updateFamilyMemberLifespans();
+      if (Array.isArray(player.mounts) && player.mounts.length > 0) {
+        const mountAgeStep = Math.max(0, player.age - prevAge);
+        player.mounts.forEach(m => {
+          if (!m || m.isDead) return;
+          assignMountLifespan(m);
+          m.age = (m.age || 4) + mountAgeStep;
+          m.yearsOwned = (m.yearsOwned || 0) + mountAgeStep;
+          m.maxLifespan = Math.max(99999, m.age + 1000);
+        });
+      }
 
       // 共修仙途的同伴（b.isImmortal）隨主角一同增長歲數；若未透過洞天共修延壽，約於 600 歲左右遭遇仙途天劫或壽元大限坐化，確保享年顯示為 ~600 歲而非 77 歲！
       if (Array.isArray(player.bonds)) {
@@ -14207,21 +14260,33 @@ ${targetW.desc}
       }
 
       // 靈獸與坐騎盤點（含健在護主與先一步長眠之忠魂）
-      const livingMounts = (player.mounts || []).map(m => typeof m === "object" ? m : { name: String(m), title: "隨行異獸", icon: "🐎" });
-      const fallenMounts = (player.deadMounts || []).map(m => typeof m === "object" ? m : { name: String(m), title: "忠魂靈獸", icon: "🐎" });
+      const rawMounts = (player.mounts || []).map(m => typeof m === "object" ? m : { name: String(m), title: "隨行異獸", icon: "🐎", isDead: false });
+      const livingMounts = rawMounts.filter(m => !m.isDead);
+      const deadMountNames = new Set(rawMounts.filter(m => m.isDead).map(m => m.name));
+      const legacyDeadMounts = (player.deadMounts || [])
+        .map(m => typeof m === "object" ? m : { name: String(m), title: "忠魂靈獸", icon: "🐎", isDead: true })
+        .filter(m => !deadMountNames.has(m.name));
+      const fallenMounts = [...rawMounts.filter(m => m.isDead), ...legacyDeadMounts];
+      const calcMountYears = (m) => {
+        if (typeof m.yearsOwned === "number" && m.yearsOwned > 0) return m.yearsOwned;
+        const endAge = m.isDead && typeof m.deathPlayerAge === "number" ? m.deathPlayerAge : player.age;
+        if (typeof m.acquiredAtPlayerAge === "number") return Math.max(1, endAge - m.acquiredAtPlayerAge);
+        if (typeof m.age === "number" && typeof m.initialAge === "number") return Math.max(1, m.age - m.initialAge);
+        return 1;
+      };
       const allMounts = [
         ...livingMounts.map(m => ({
           icon: m.icon || "🦌",
           name: m.name,
           tier: m.title || "洞天瑞獸",
-          status: `✓ 隨行護主（相伴 ${Math.max(1, m.yearsOwned || 1)} 載）`,
+          status: `✓ 隨行護主（相伴 ${calcMountYears(m)} 載）`,
           isAlive: true
         })),
         ...fallenMounts.map(m => ({
           icon: m.icon || "🐎",
           name: m.name,
           tier: m.title || "隨行名駒",
-          status: `🪦 忠魂長眠（享壽 ${m.maxLifespan || m.yearsOwned || 18} 歲）`,
+          status: `🪦 忠魂長眠（享壽 ${m.deathAge || m.maxLifespan || 18} 歲 · 相伴 ${calcMountYears(m)} 載）`,
           isAlive: false
         }))
       ];
@@ -14237,7 +14302,8 @@ ${targetW.desc}
           beastStory = `🐾 靈獸守塚：你辭世之後，隨行靈獸【${leadBeast.name}】${otherNames ? "與" + otherNames : ""}伏於你的青塚之畔悲鳴三日不肯離去；此後每逢風雪之夜，山民皆見瑞獸踏霧巡山、替你守望孤墳。`;
         }
       } else if (fallenMounts.length > 0) {
-        beastStory = `🐾 故獸重逢：曾伴你馳騁風雪的【${fallenMounts[0].name}】已先一步長眠青山；如今一人一騎終在九泉之下重逢，再踏萬里長風。`;
+        const fallenNames = fallenMounts.map(m => `【${m.name}】`).join("、");
+        beastStory = `🐾 故獸重逢：曾伴你馳騁風雪的${fallenNames}${fallenMounts.length > 1 ? "皆" : ""}已先一步長眠青山；如今一人一騎終在九泉之下重逢，再踏萬里長風。`;
       }
 
       // 太史公小傳
@@ -14265,10 +14331,11 @@ ${targetW.desc}
       if (player.secretOrg) {
         bioParts.push(`後受邀入幕隱世組織【${player.secretOrg}】，暗掌風雲。`);
       }
+      const firstMount = livingMounts[0] || fallenMounts[0] || null;
       if (equippedWeaponName) {
-        bioParts.push(`平生佩兵「${equippedWeaponName}」${livingMounts.length ? "，攜靈獸「" + livingMounts[0].name + "」踏遍名山大川" : ""}。`);
-      } else if (livingMounts.length) {
-        bioParts.push(`平生有靈獸「${livingMounts[0].name}」相伴，踏遍名山大川。`);
+        bioParts.push(`平生佩兵「${equippedWeaponName}」${firstMount ? "，曾與靈獸「" + firstMount.name + "」踏遍名山大川" : ""}。`);
+      } else if (firstMount) {
+        bioParts.push(`平生曾有靈獸「${firstMount.name}」相伴，踏遍名山大川。`);
       }
       if (spouseBond) {
         const childNamesStr = (player.children && player.children.length > 0)
@@ -14431,6 +14498,10 @@ ${targetW.desc}
           const diedTogether = !!(b.diedWithPlayer || (b.status && b.status.includes("與你並肩")) || (b.deathAge === player.age && reasonText && reasonText.includes(b.name)));
           if (diedTogether) {
             afterwordLines.push(`【${b.name}（與你同日殉難 · 享年${b.deathAge || player.age}歲）】於沙場之上與你並肩死戰至最後一刻，雙雙壯烈成仁；世人感念你們生死相隨，將二人合葬於【${b.restingPlace || "青山之側"}】，黃泉路上亦並肩同行。`);
+          } else if (!b.relationTag && (b.intimacyIndex || 0) <= 1) {
+            afterwordLines.push(`【${b.name}（先你而去 · 享年${b.deathAge || b.age}歲）】已先一步長眠於【${b.restingPlace || "青山之側"}】，前塵恩怨皆隨黃土散盡，各赴來生。`);
+          } else if (!b.relationTag && (b.intimacyIndex || 0) === 2) {
+            afterwordLines.push(`【${b.name}（先你而去 · 享年${b.deathAge || b.age}歲）】已先一步長眠於【${b.restingPlace || "青山之側"}】，萍水相逢之緣至此畫下句點。`);
           } else {
             afterwordLines.push(`【${b.name}（先你而去 · 享年${b.deathAge || b.age}歲）】已先一步長眠於【${b.restingPlace || "青山之側"}】，黃泉路上含笑相迎。`);
           }
@@ -14438,11 +14509,25 @@ ${targetW.desc}
         if (afterwordLines.length === 0) {
           afterwordLines.push("孤塚立於荒野，未有故人前來祭拜，唯有山風吹落枯葉，替你拂去碑上微塵。");
         }
-        if ((player.children && player.children.length > 0) || (player.disciples && player.disciples.length > 0)) {
-          const cList = (player.children || []).map(c => `${c.orderLabel}【${c.name}】`);
-          const dList = (player.disciples || []).map(d => `${d.title}【${d.name}】`);
-          const heirsStr = [...cList, ...dList].join("與");
-          afterwordLines.push(`🌱 薪火傳承：${heirsStr}跪於你的碑前立誓繼承遺志，此後攜手闖蕩九州江湖，令你一脈的俠名傳頌百年不衰。`);
+        const livingChildren = (player.children || []).filter(c => c && !c.isDead);
+        const deadChildren = (player.children || []).filter(c => c && c.isDead);
+        const livingDisciples = (player.disciples || []).filter(d => d && !d.isDead);
+        const deadDisciples = (player.disciples || []).filter(d => d && d.isDead);
+        if (livingChildren.length > 0 || livingDisciples.length > 0 || deadChildren.length > 0 || deadDisciples.length > 0) {
+          const livingHeirs = [
+            ...livingChildren.map(c => `${c.orderLabel || "子女"}【${c.name}】`),
+            ...livingDisciples.map(d => `${d.title || "親傳弟子"}【${d.name}】`)
+          ];
+          const deadHeirs = [
+            ...deadChildren.map(c => `${c.orderLabel || "子女"}【${c.name}】`),
+            ...deadDisciples.map(d => `${d.title || "親傳弟子"}【${d.name}】`)
+          ];
+          if (livingHeirs.length > 0) {
+            const deadNote = deadHeirs.length > 0 ? `（已故${deadHeirs.join("與")}一脈後人亦同來叩拜）` : "";
+            afterwordLines.push(`🌱 薪火傳承：${livingHeirs.join("與")}跪於你的碑前立誓繼承遺志${deadNote}，此後攜手闖蕩九州江湖，令你一脈的俠名傳頌百年不衰。`);
+          } else {
+            afterwordLines.push(`🌱 薪火傳承：${deadHeirs.join("與")}雖已先一步壽終長眠，其門下再傳後輩仍齊聚你的碑前叩首立誓，令你一脈的俠名與家風傳頌百年不衰。`);
+          }
         }
         if (equippedWeaponName) {
           if (/手套|拳套|護腕|指環|爪|掌套/.test(equippedWeaponName)) {
@@ -14704,44 +14789,212 @@ ${targetW.desc}
       link.click();
     }
 
-    // 壽元耗盡之年：30% 機率觸發「同伴馳援續命」或「昔日因果善果報恩續命」（成功則壽元+3~5載，失敗則到此一遊）
-    function triggerLifespanEndRescueModal() {
+    // 壽元耗盡之年：低機率觸發「故人／善果／後輩／名士／瑞獸馳援續命」（同局不重複劇本、最多 3 次；成功則壽元 +3~5 載）
+    function triggerLifespanEndRescueModal(forceScenarioId = null) {
       if (!player) return;
       setPauseState(true);
 
-      const livingBonds = (player.bonds || []).filter(b => !b.isDead && b.intimacyIndex >= 3);
+      const livingBonds = (player.bonds || []).filter(b => !b.isDead && (b.intimacyIndex || 0) >= 3);
       const karmicList = Array.isArray(player.karmicSeeds) ? player.karmicSeeds : [];
       const savedXiaoman = player.cangzhouOutcome === "saved_xiaoman";
+      const allChildren = Array.isArray(player.children) ? player.children : [];
+      const allDisciples = Array.isArray(player.disciples) ? player.disciples : [];
+      const activeMounts = (typeof getActiveMounts === "function")
+        ? getActiveMounts()
+        : (player.mounts || []).filter(m => m && !m.isDead);
+      player.usedLifespanRescues = Array.isArray(player.usedLifespanRescues) ? player.usedLifespanRescues : [];
 
-      let rescuerTitle = "";
-      let narrative = "";
-      let isBondRescue = false;
+      const rescueScenarios = [
+        {
+          id: "rescue_living_bond",
+          eligible: () => livingBonds.length > 0,
+          weight: () => 30,
+          build: () => {
+            const topBond = [...livingBonds].sort((a, b) => (b.intimacyIndex || 0) - (a.intimacyIndex || 0))[0] || { name: "知交故友" };
+            return {
+              rescuerTitle: `生死故人【${topBond.name}】`,
+              modalTitle: `🕯️ 陽壽將盡 · 故人【${topBond.name}】千里馳援`,
+              modalTag: "生死大限 · 紅塵情義",
+              narrative: `大限將至，你氣血漸枯、意識模糊地臥於榻上。風雪之夜，房門忽然被撞開——與你結下深厚羈絆的【${topBond.name}】滿身霜雪、雙目通紅地奔至榻前！\n\n「不准閉眼！我踏遍千山萬水尋來這株千年續命靈藥，再以自身本命真元助你衝關，無論如何也要向閻王爺再搶幾年光陰！」`,
+              choice1Label: `💊 【凝神配合 · 吞服靈丹衝擊生門】強提最後一絲心神配合【${topBond.name}】引藥入脈`,
+              choice1Method: "吞服靈丹衝擊生門",
+              choice2Label: `☯️ 【真元交融 · 順應天命溫養心脈】握住【${topBond.name}】的手，以平緩吐納接引續命真元`,
+              choice2Method: "真元交融溫養心脈"
+            };
+          }
+        },
+        {
+          id: "rescue_xiaoman",
+          eligible: () => savedXiaoman,
+          weight: () => 20,
+          build: () => {
+            if ((player.age || 0) <= 85) {
+              return {
+                rescuerTitle: "滄州醫女【溫小滿】",
+                modalTitle: "🌿 滄州故人 · 溫小滿逆天九針續命",
+                modalTag: "生死大限 · 醫道報恩",
+                narrative: `大限將至，你油盡燈枯臥於榻上。恍惚間聞到一陣熟悉的甘草清香——當年你在滄州鐵獅渡火海救下的小醫女【溫小滿】竟背著藥箱星夜兼程趕到！\n\n「少俠別睡！當年你在火海裡背我出來，今日換小滿用畢生所學的『逆天九針』與百年老參替你續命！」`,
+                choice1Label: "💉 【配合施針 · 承接『逆天九針』固本培元】忍住酸麻脹痛引動殘存真氣隨針遊走",
+                choice1Method: "逆天九針固本培元",
+                choice2Label: "🍵 【慢飲參湯 · 真元溫養五臟心脈】就著溫小滿遞來的百年老參湯平緩調息",
+                choice2Method: "百年老參溫養心脈"
+              };
+            }
+            return {
+              rescuerTitle: "小滿濟世堂傳人【溫青禾】",
+              modalTitle: "🌿 醫館傳承 · 溫青禾奉師命馳援續命",
+              modalTag: "生死大限 · 醫道報恩",
+              narrative: `大限將至，你氣若游絲臥於榻上。風雪之中，一名神情焦灼的年輕醫女捧著藥箱快馬趕至——她自稱小滿濟世堂親傳弟子【溫青禾】。\n\n「恩公莫要合眼！年事已高的溫師尊算出您近日壽元將盡，特命弟子星夜攜『逆天九針』真訣與鎮堂老參趕來馳援，師尊說當年滄州火海之恩，濟世堂一脈永世不忘！」`,
+              choice1Label: "💉 【承接真訣 · 依溫小滿所傳『逆天九針』歸元】靜氣配合溫青禾落針開通死穴",
+              choice1Method: "承接濟世堂逆天九針",
+              choice2Label: "🍵 【含服鎮堂參片 · 接引藥力緩護丹田】順應藥湯溫潤滋養將熄的心脈",
+              choice2Method: "鎮堂老參溫養丹田"
+            };
+          }
+        },
+        {
+          id: "rescue_heir_ginseng",
+          eligible: () => allChildren.length > 0 || allDisciples.length > 0,
+          weight: () => 20,
+          build: () => {
+            const livingChild = allChildren.find(c => !c.isDead);
+            const livingDisciple = allDisciples.find(d => !d.isDead);
+            let saviorLabel = "門下後輩";
+            let saviorDesc = "";
+            if (livingChild) {
+              saviorLabel = `${livingChild.orderLabel || "骨肉"}【${livingChild.name}】`;
+              saviorDesc = `你的${saviorLabel}膝蓋磨破、雙手凍紫地跪在榻前，雙手顫抖著奉上一株血氣盎然的極品『雪峰千年血參』。\n\n「您千萬撐住！孩兒踏遍天山萬丈冰崖才尋得這株救命血參，定要替您向老天爺再討幾年康泰！」`;
+            } else if (livingDisciple) {
+              saviorLabel = `${livingDisciple.title || "親傳弟子"}【${livingDisciple.name}】`;
+              saviorDesc = `你的${saviorLabel}滿身霜雪地闖進房門，小心翼翼打開錦盒，裡頭躺著一株散發奇香的『雪峰千年血參』。\n\n「師尊教誨未敢一日忘懷！弟子冒死攀上絕壁採回此參，今日無論如何也要守住師尊最後這口先天元氣！」`;
+            } else {
+              const elder = allDisciples[0] || allChildren[0];
+              saviorLabel = elder ? `【${elder.name}】一脈再傳後輩` : "門下再傳後輩";
+              saviorDesc = `燭火明滅間，數名身背長劍的青年少俠含淚叩入房門——竟是已故${saviorLabel}！\n\n「先祖靈位前日日供著您的遺訓，我們聽聞祖師大限將臨，合數人之力於極北冰壁採得『雪峰千年血參』趕來，求祖師莫急著撇下後人！」`;
+            }
+            return {
+              rescuerTitle: saviorLabel,
+              modalTitle: "🏔️ 薪火孝心 · 雪峰千年血參續命",
+              modalTag: "生死大限 · 一脈牽絆",
+              narrative: `大限將至，你臥於榻上聽見外頭風雪呼號，意識已如風中殘燭。就在氣海將絕之際，房門忽被推開——${saviorDesc}`,
+              choice1Label: "🌿 【生嚼血參鬚根 · 衝開枯竭奇經】傾盡餘力將磅礴血參精氣逼入丹田氣海",
+              choice1Method: "煉化雪峰千年血參",
+              choice2Label: "🔥 【含參舌底 · 藉後輩內力導引歸元】以溫順吐納慢慢化開千年藥力護住生機",
+              choice2Method: "後輩護法導引血參藥力"
+            };
+          }
+        },
+        {
+          id: "rescue_zhongnan_taoist",
+          eligible: () => true,
+          weight: () => 15,
+          build: () => ({
+            rescuerTitle: "終南老道【玄虛真人】",
+            modalTitle: "☯️ 終南紫氣 · 老道踏月向天借壽",
+            modalTag: "生死大限 · 玄門道緣",
+            narrative: `夜深氣寒，你已覺四肢漸冷、陽壽將盡。忽聞窗外松風鶴唳，一名手持拂塵的白髯老道飄然推扉而入——正是隱居終南山、昔年曾與你論道有緣的【玄虛真人】！\n\n老道神色肅穆地自袖中取出九轉紫金葫蘆，倒出一枚霞光微流的上品丹丸：「貧道夜觀北斗，見閣下善星未絕而命火將熄，特攜一爐『七返紫氣金丹』趕來，且隨貧道靜心調息、再借紅塵數載光陰！」`,
+            choice1Label: "💎 【吞服七返紫氣金丹 · 引紫氣歸元】集中殘存意念煉化金丹重燃命火",
+            choice1Method: "服用七返紫氣金丹",
+            choice2Label: "🌌 【依真人導引 · 靜觀星斗接引生機】順隨玄門純陽吐納替五臟續氣延壽",
+            choice2Method: "玄門紫氣吐納借壽"
+          })
+        },
+        {
+          id: "rescue_beast_nectar",
+          eligible: () => activeMounts.length > 0,
+          weight: () => 20,
+          build: () => {
+            const leadBeast = activeMounts[0] || (player.mounts || [])[0] || { name: "山中靈鹿", icon: "🦌" };
+            return {
+              rescuerTitle: `護主靈獸【${leadBeast.name}】`,
+              modalTitle: `${leadBeast.icon || "🐾"} 瑞獸護主 · 萬年石鐘乳續命`,
+              modalTag: "生死大限 · 萬靈至誠",
+              narrative: `連日以來你臥榻不起，生機漸微。伴你行走江湖多年的【${leadBeast.name}】早已察覺不對，三日前便悄悄消失於茫茫山野。\n\n就在此夜你即將氣絕之際，遍體鱗傷的【${leadBeast.name}】竟風塵僕僕地趕回榻前，小心翼翼地放下一枚盛滿乳白靈液的天然石臼！那竟是隱於百里鬼蝠幽洞最深處、數百年方滴成一滴的『萬年地脈石鐘乳』！牠望著你發出低沉急切的哀鳴，似在催促你快些飲下。`,
+              choice1Label: `💧 【一口飲盡地脈石鐘乳 · 激發萬靈生機】仰首吞下乳白靈漿重鑄枯竭氣海`,
+              choice1Method: "飲下萬年石鐘乳續命",
+              choice2Label: `🤍 【輕撫【${leadBeast.name}】額頭 · 小口含化靈液護心】不負靈獸拼死尋藥之情，徐徐調息歸元`,
+              choice2Method: "感念靈獸至誠含化靈液"
+            };
+          }
+        },
+        {
+          id: "rescue_caravan_snowlotus",
+          eligible: () => true,
+          weight: () => karmicList.length > 0 ? 22 : 15,
+          build: () => {
+            let karmicNote = "當年受過你護送與搭救的大漠商隊後人【阿史那商首】";
+            if (karmicList.length > 0) {
+              const seedObj = karmicList[Math.floor(Math.random() * karmicList.length)];
+              const seedDesc = typeof seedObj === "string"
+                ? seedObj
+                : (seedObj?.who || seedObj?.label || seedObj?.text || "");
+              if (seedDesc) karmicNote = `昔年因緣受惠者（${seedDesc}）偕西域舊商後人【阿史那商首】`;
+            }
+            return {
+              rescuerTitle: karmicList.length > 0 ? "昔日受恩故人" : "西域商隊後人【阿史那】",
+              modalTitle: "🪷 駝鈴報恩 · 天山雪蓮王千金難買",
+              modalTag: "生死大限 · 因果善報",
+              narrative: `寒夜孤燈下，你氣海乾涸，眼皮沉重如山。院外忽傳急促駝鈴與馬蹄聲——${karmicNote}竟換乘八匹快馬趕到門前！\n\n來者不顧滿面風沙「撲通」跪在你的榻前，捧出以寒冰玄玉匣封印的稀世奇珍『天山冰心雪蓮王』：「先祖牌位下常懸恩公畫像！這朵三百年方開花的天山雪蓮王本是商隊傳家鎮壓之寶，今日願換恩公長留人間幾載春秋！」`,
+              choice1Label: "🪷 【取雪蓮花蕊和溫酒服下 · 蕩開體內死氣】藉雪山寒陽二氣衝散大限死劫",
+              choice1Method: "服下天山冰心雪蓮王",
+              choice2Label: "🤝 【謝過盛情 · 以蓮瓣化湯徐徐溫養心脈】收下這份跨越歲月的情義與善果",
+              choice2Method: "雪蓮溫湯溫養心脈"
+            };
+          }
+        },
+        {
+          id: "rescue_monk_dahuandan",
+          eligible: () => true,
+          weight: () => ((player.stats && player.stats.de) || 0) >= 60 ? 22 : 15,
+          build: () => ({
+            rescuerTitle: "古剎老禪師【無相尊者】",
+            modalTitle: "☸️ 梵音續脈 · 古剎老僧持菩提大還丹",
+            modalTag: "生死大限 · 佛門善緣",
+            narrative: `你陽壽將盡之夜，窗前忽傳悠遠深沉的古剎禪鐘，一陣溫厚清正的佛門真氣護住了你搖搖欲墜的靈台。白眉垂胸的古剎高僧【無相尊者】持錫杖立於燈影之下。\n\n「阿彌陀佛。老衲聞施主半生行事不愧天地，命火雖將盡而德澤猶厚。這枚寺中秘藏數十載的『菩提大還丹』，今日便贈與有緣人續這半局人間棋！」說罷盤膝為你輕誦淨心梵音。`,
+            choice1Label: "🟡 【雙手合十接過菩提大還丹 · 一氣煉化歸元】吞服禪丹配合純淨內息衝開死關",
+            choice1Method: "煉化菩提大還丹",
+            choice2Label: "📿 【靜聽梵音獅子吼 · 依禪定呼吸溫養神魂】隨老禪師梵韻收攝散亂元氣",
+            choice2Method: "佛門梵音禪定續脈"
+          })
+        }
+      ];
 
-      if (livingBonds.length > 0 && (karmicList.length === 0 || Math.random() < 0.6)) {
-        isBondRescue = true;
-        const topBond = [...livingBonds].sort((a, b) => (b.intimacyIndex || 0) - (a.intimacyIndex || 0))[0];
-        rescuerTitle = `生死故人【${topBond.name}】`;
-        narrative = `大限將至，你氣血漸枯、意識模糊地臥於榻上。風雪之夜，房門忽然被撞開——與你結下深厚羈絆的【${topBond.name}】滿身霜雪、雙目通紅地奔至榻前！\n\n「不准閉眼！我踏遍千山萬水尋來這株千年續命靈藥，再以自身本命真元助你衝關，無論如何也要向閻王爺再搶幾年光陰！」`;
-      } else if (savedXiaoman) {
-        rescuerTitle = "滄州小醫女【溫小滿】";
-        narrative = `大限將至，你油盡燈枯臥於榻上。恍惚間聞到一陣熟悉的甘草清香——當年你在滄州鐵獅渡火海救下的小醫女【溫小滿】竟背著藥箱星夜兼程趕到！\n\n「少俠別睡！當年你在火海裡背我出來，今日換小滿用畢生所學的『逆天九針』與百年老參替你續命！」`;
-      } else if (karmicList.length > 0) {
-        const seedObj = karmicList[Math.floor(Math.random() * karmicList.length)];
-        const seedDesc = typeof seedObj === "string"
-          ? seedObj
-          : (seedObj?.who || seedObj?.label || seedObj?.text || "昔年受你搭救的江湖旅人");
-        rescuerTitle = `昔日受恩者（${seedDesc}）`;
-        narrative = `大限將至，你油盡燈枯、生機漸散。就在燈火將滅之際，一名風塵僕僕的訪客叩門而入——竟是【${seedDesc}】！\n\n對方跪在你的榻前熱淚盈眶，雙手奉上一枚溫潤生光的家傳千年靈丹：「恩公當年一念之仁救我性命，我尋訪名山十載方得此靈藥，只求為恩公再續人間歲月！」`;
-      } else {
-        rescuerTitle = "昔年受惠的雲遊老醫仙";
-        narrative = `大限將至，你氣若游絲臥於榻上。門外忽傳清朗笑聲，一名昔年受過你善舉恩惠的雲遊老醫仙踏月而來，手捻三寸金針立於榻前：\n\n「老夫夜觀星象見善人星黯，特攜九轉還魂丹趕來，且看老夫替少俠向天借命！」`;
+      let pickedScenario = null;
+      if (forceScenarioId) {
+        pickedScenario = rescueScenarios.find(s => s.id === forceScenarioId) || null;
       }
+      if (!pickedScenario) {
+        let pool = rescueScenarios.filter(s => s.eligible() && !player.usedLifespanRescues.includes(s.id));
+        if (pool.length === 0) {
+          pool = rescueScenarios.filter(s => s.eligible());
+        }
+        const totalWeight = pool.reduce((sum, s) => sum + (typeof s.weight === "function" ? s.weight() : 10), 0);
+        let r = Math.random() * Math.max(1, totalWeight);
+        pickedScenario = pool[pool.length - 1];
+        for (let i = 0; i < pool.length; i++) {
+          r -= (typeof pool[i].weight === "function" ? pool[i].weight() : 10);
+          if (r <= 0) {
+            pickedScenario = pool[i];
+            break;
+          }
+        }
+      }
+
+      if (!player.usedLifespanRescues.includes(pickedScenario.id)) {
+        player.usedLifespanRescues.push(pickedScenario.id);
+      }
+      const view = pickedScenario.build();
+      const rescuerTitle = view.rescuerTitle;
 
       const executeRescueAttempt = (methodLabel, baseSuccessRate) => {
         const roll = Math.random() * 100;
         if (roll < baseSuccessRate) {
-          const addYears = 3 + Math.floor(Math.random() * 3); // +3 ~ +5 年
+          const rawAddYears = 3 + Math.floor(Math.random() * 3); // +3 ~ +5 年
+          const addYears = player.isImmortalUnlocked
+            ? rawAddYears
+            : Math.max(1, Math.min(rawAddYears, Math.max(1, (CFG.mortalMaxAge || 120) - (player.maxLifespan || player.age))));
           player.maxLifespan += addYears;
+          player.lifespanRescueCount = (player.lifespanRescueCount || 0) + 1;
           player.lifespanEndModalShown = false;
           const chg = modifyStats({ qing: 3, de: 2 });
           addLog(`🌟【逆天續命 · 故人相救】陽壽將盡之際，幸得${rescuerTitle}千里馳援（${methodLabel}），生生將你從鬼門關前拉了回來！枯竭的氣海重煥生機，你的壽元上限成功延展 +${addYears} 載！(${chg.join("、")}、壽元+${addYears}載)`, "good-log");
@@ -14750,9 +15003,9 @@ ${targetW.desc}
         } else {
           const hasNoInjury = (player.lightInjuries || 0) === 0 && (player.heavyInjuries || 0) === 0 && (player.injuries || 0) === 0;
           const failReason = hasNoInjury
-            ? `大限到時雖有${rescuerTitle}傾力施救，奈何天命難違，你在故人溫暖的懷抱中含笑壽終正寢，享壽 ${player.age} 歲。`
-            : `大限到時雖有${rescuerTitle}傾力施救，終究油盡燈枯、回天乏術，於故人淚水中安詳坐化，享壽 ${player.age} 歲。`;
-          addLog(`🥀【天命難違 · 含笑而逝】${rescuerTitle}雖拼盡全力為你施救（${methodLabel}），奈何你生機已盡，你握著對方的手輕聲道謝，安然合上了雙眼。`, "danger-log");
+            ? `大限到時雖有${rescuerTitle}傾力施救，奈何天命難違，你在溫暖慰藉中含笑壽終正寢，享壽 ${player.age} 歲。`
+            : `大限到時雖有${rescuerTitle}傾力施救，終究油盡燈枯、回天乏術，於哀慟聲中安詳坐化，享壽 ${player.age} 歲。`;
+          addLog(`🥀【天命難違 · 含笑而逝】${rescuerTitle}雖拼盡全力為你施救（${methodLabel}），奈何你生機已盡，你輕聲道謝後安然合上了雙眼。`, "danger-log");
           triggerDeathOrAscension(failReason);
         }
       };
@@ -14761,16 +15014,16 @@ ${targetW.desc}
       const finalRescueRate = Math.min(88, 68 + qingSuccessBonus);
       const choices = [
         {
-          text: `💊 【凝神配合 · 吞服靈丹衝擊生門】強提最後一絲心神配合${rescuerTitle}引藥入脈（成功率 ${finalRescueRate}% [含情義加成]，成功則壽元 +3～5 年）`,
-          onSelect: () => executeRescueAttempt("吞服靈丹衝擊生門", finalRescueRate)
+          text: `${view.choice1Label}（成功率 ${finalRescueRate}% [含情義加成]，成功則壽元 +3～5 年）`,
+          onSelect: () => executeRescueAttempt(view.choice1Method, finalRescueRate)
         },
         {
-          text: `☯️ 【真元交融 · 順應天命溫養心脈】握住對方的手，以平緩吐納接引續命真元（成功率 ${finalRescueRate}% [含情義加成]，成功則壽元 +3～5 年）`,
-          onSelect: () => executeRescueAttempt("真元交融溫養心脈", finalRescueRate)
+          text: `${view.choice2Label}（成功率 ${finalRescueRate}% [含情義加成]，成功則壽元 +3～5 年）`,
+          onSelect: () => executeRescueAttempt(view.choice2Method, finalRescueRate)
         }
       ];
 
-      openEventModal("🕯️ 陽壽將盡 · 故人與善果逆天續命", "生死大限 · 因果馳援", narrative, choices);
+      openEventModal(view.modalTitle, view.modalTag, view.narrative, choices);
     }
 
     // 壽元結束且未獲續命時，依玩家生平經歷從十套終章劇本抽選演出，玩家做出最後抉擇後才顯示「到此一遊」
@@ -14788,7 +15041,8 @@ ${targetW.desc}
       const equippedWeaponObj = (player.equippedWeapon && typeof player.equippedWeapon === "object") ? player.equippedWeapon : null;
       const equippedWeaponName = equippedWeaponObj ? (equippedWeaponObj.name || "") : String(player.equippedWeapon || "");
       const bestAtk = getBestLearnedSkillName("招式", "家傳絕學").replace(/^[《「]+|[》」]+$/g, "");
-      const hasSectOrRole = (player.sect && player.sect !== "無門無派" && player.sect !== "江湖散修") || !!player.isAllianceLeader || player.title === "武林盟主" || player.title === "開山祖師";
+      const hasTrueSect = !!(player.sect && !player.sect.includes("無門無派") && !player.sect.includes("江湖散修") && !player.sect.includes("散人"));
+      const hasSectOrRole = hasTrueSect || !!player.isAllianceLeader || player.title === "武林盟主" || player.title === "開山祖師";
       const hasZhenpaiOrHighWu = ((player.stats && player.stats.wu) || 0) >= 90 || !!equippedWeaponName || (player.skills || []).some(s => getSkillTierPriority(s.tier) >= 4);
       const hasNoCurrentInjury = (player.lightInjuries || 0) === 0 && (player.heavyInjuries || 0) === 0 && (player.injuries || 0) === 0;
       const injHist = Array.isArray(player.injuryHistory) ? player.injuryHistory : [];
@@ -14949,7 +15203,7 @@ ${targetW.desc}
           eligible: () => hasSectOrRole,
           weight: () => 18,
           build: () => {
-            const placeName = (player.sect && player.sect !== "無門無派" && player.sect !== "江湖散修")
+            const placeName = hasTrueSect
               ? `【${player.sect}】`
               : (player.isAllianceLeader || player.title === "武林盟主" ? "【武林盟總壇】" : "【山門大殿】");
             return {
@@ -18568,7 +18822,8 @@ ${targetW.desc}
     if (!player || player.isDead || !bond) return false;
     setPauseState(true);
     bond.savedFromEarlyDeath = true;
-    const rTag = bond.relationTag || (typeof INTIMACY_LEVELS !== "undefined" ? (INTIMACY_LEVELS[bond.intimacyIndex || 0]?.name || INTIMACY_LEVELS[bond.intimacyIndex || 0]) : "好友");
+    const rPrefix = bond.relationTag ? (bond.relationTag.includes("義結金蘭") ? "結義摯友" : `你的${bond.relationTag}`) : "故友";
+    const rModalTag = bond.relationTag || "故友";
 
     let causeText = "";
     if (typeof causeOrScriptObj === "string") {
@@ -18611,13 +18866,13 @@ ${targetW.desc}
     const aidMultStr = qingAidMult.toFixed(2).replace(/0$/, "");
 
     const desc = `【前因 · 危機驟起】：\n` +
-      `急雨如箭，一枚染血的求援信號在天際炸開！你循跡狂奔趕至現場，只見你的${rTag}【${bond.name}】（${bond.age}歲）正陷入必死絕境——\n` +
+      `急雨如箭，一枚染血的求援信號在天際炸開！你循跡狂奔趕至現場，只見${rPrefix}【${bond.name}】（${bond.age}歲）正陷入必死絕境——\n` +
       `原來【${bond.name}】${causeText}！此刻強敵殺招已至眉睫，若無人相救，今日必將喋血長眠於【${graveyardText}】！\n\n` +
       `【抉擇與後果】：你飛身趕至戰圈外圍，生死只在一瞬之間！`;
 
     openEventModal(
       `🚨 故人危殆 · 千里馳援【${bond.name}】`,
-      `生死劫難 · ${rTag}`,
+      `生死劫難 · ${rModalTag}`,
       desc,
       [
         {
