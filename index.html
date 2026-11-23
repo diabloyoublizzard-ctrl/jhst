@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.23.0806</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.23.1204</span>
       </div>
 
       <div class="debug-row">
@@ -1148,7 +1148,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611230806"></script>
+  <script src="data.js?v=202611231204"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1161,7 +1161,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611230806"></script>
+  <script src="patches.js?v=202611231204"></script>
   <script>
 
   (function() {
@@ -2011,7 +2011,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.23.0806";
+    const GAME_VERSION = "v2026.11.23.1204";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -12233,6 +12233,115 @@ ${targetW.desc}
       updateAllUI();
     }
 
+    function getBodyTemperRate() {
+      if (!player) return 0.80;
+      const nextIdx = (player.bodyTierIndex || 0) + 1;
+      const baseRates = [1.0, 0.80, 0.68, 0.55, 0.42, 0.30];
+      const base = baseRates[nextIdx] !== undefined ? baseRates[nextIdx] : 0.30;
+      const realmBonus = (player.immortalStage || 0) * 0.02;
+      const rootBonus = (player.rootTierIndex || 0) * 0.015;
+      const failBonus = Math.min(0.32, (player.bodyTemperFailStreak || 0) * 0.08);
+      const itemBonus = Math.min(0.30, player.bodyTemperBonus || 0);
+      const raw = base + realmBonus + rootBonus + failBonus + itemBonus;
+      return Math.min(0.92, Math.max(0.15, Math.round(raw * 100) / 100));
+    }
+
+    function getRootCleanseRate() {
+      if (!player) return 0.80;
+      const nextIdx = (player.rootTierIndex || 0) + 1;
+      const baseRates = [1.0, 0.80, 0.65, 0.50, 0.38, 0.26];
+      const base = baseRates[nextIdx] !== undefined ? baseRates[nextIdx] : 0.26;
+      const realmBonus = (player.immortalStage || 0) * 0.02;
+      const bodyBonus = (player.bodyTierIndex || 0) * 0.015;
+      const failBonus = Math.min(0.32, (player.rootCleanseFailStreak || 0) * 0.08);
+      const itemBonus = Math.min(0.30, player.rootCleanseBonus || 0);
+      const raw = base + realmBonus + bodyBonus + failBonus + itemBonus;
+      return Math.min(0.92, Math.max(0.15, Math.round(raw * 100) / 100));
+    }
+
+    function applyBodyOrRootFailurePenalty(mortalKind, immortalKind) {
+      if (!player.inImmortalPhase) {
+        addLightInjury(1);
+        return `${mortalKind}受輕傷 1 處`;
+      }
+      player.maxLifespan = Math.max(player.age + 1, player.maxLifespan - 5);
+      return `${immortalKind}折損 5 載壽元`;
+    }
+
+    function attemptBodyTemper() {
+      if (!player || player.isDead) return false;
+      const nextBody = BODY_TIERS[(player.bodyTierIndex || 0) + 1];
+      if (!nextBody || (player.qi || 0) < nextBody.cost) return false;
+
+      const rate = getBodyTemperRate();
+      player.qi = Math.max(0, player.qi - nextBody.cost);
+      player.bodyTemperBonus = 0;
+      player.scriptureLogs = player.scriptureLogs || [];
+      const timeTag = `[${getCurrentGanzhi()}年 · ${player.age}歲${player.inImmortalPhase ? "" : (player.month + "月")}]`;
+
+      if (Math.random() < rate) {
+        player.bodyTierIndex = (player.bodyTierIndex || 0) + 1;
+        player.bodyTemperFailStreak = 0;
+        player.maxLifespan += 15;
+        modifyStats({ wu: 8 });
+        addLog(`🔥【肉身淬鍊功成】耗費 ${nextBody.cost} 修為引動天地鍛骨真力（成功率 ${Math.round(rate * 100)}%），氣血重塑晉升為【${nextBody.name}】（${nextBody.mult}x，壽元 +15 載、武力 +8）！`, "immortal-log");
+        player.scriptureLogs.unshift({
+          isCrit: true,
+          html: `<span style="color:var(--gold-bright);font-weight:bold;">${timeTag}🔥【肉身淬鍊功成】</span>筋骨重鑄為<strong style="color:var(--jade-bright);">【${nextBody.name}】</strong>，壽元 +15 載！`
+        });
+      } else {
+        // 太虛神甲專擋死劫，此處不消耗神甲
+        player.bodyTemperFailStreak = Math.min(4, (player.bodyTemperFailStreak || 0) + 1);
+        const penaltyNote = applyBodyOrRootFailurePenalty("氣血逆行", "本源受創");
+        if (player.isDead) return false;
+        const streakPct = Math.min(32, player.bodyTemperFailStreak * 8);
+        addLog(`💥【肉身淬鍊失利】強行衝擊【${nextBody.name}】未能穩住狂暴鍛骨氣血（成功率 ${Math.round(rate * 100)}%），${penaltyNote}；惟破境感悟沉澱於骨髓（下次保底累積 +${streakPct}%）！`, "danger-log");
+        player.scriptureLogs.unshift({
+          isCrit: false,
+          html: `<span style="color:#ff8e8e;font-weight:bold;">${timeTag}💥【淬鍊失利】</span>衝擊【${nextBody.name}】受挫，${penaltyNote}（累積保底 +${streakPct}%）。`
+        });
+      }
+      if (player.scriptureLogs.length > 50) player.scriptureLogs.length = 50;
+      if (!player.isDead) updateAllUI();
+      return true;
+    }
+
+    function attemptRootCleanse() {
+      if (!player || player.isDead) return false;
+      const nextRoot = ROOT_TIERS[(player.rootTierIndex || 0) + 1];
+      if (!nextRoot || (player.qi || 0) < nextRoot.cost) return false;
+
+      const rate = getRootCleanseRate();
+      player.qi = Math.max(0, player.qi - nextRoot.cost);
+      player.rootCleanseBonus = 0;
+      player.scriptureLogs = player.scriptureLogs || [];
+      const timeTag = `[${getCurrentGanzhi()}年 · ${player.age}歲${player.inImmortalPhase ? "" : (player.month + "月")}]`;
+
+      if (Math.random() < rate) {
+        player.rootTierIndex = (player.rootTierIndex || 0) + 1;
+        player.rootCleanseFailStreak = 0;
+        addLog(`✨【靈根洗髓功成】耗費 ${nextRoot.cost} 修為滌淨塵埃經脈（成功率 ${Math.round(rate * 100)}%），靈根蛻變為【${nextRoot.name}】（吐納倍率 ${nextRoot.rate}x）！`, "immortal-log");
+        player.scriptureLogs.unshift({
+          isCrit: true,
+          html: `<span style="color:var(--gold-bright);font-weight:bold;">${timeTag}✨【靈根洗髓功成】</span>靈根蛻變為<strong style="color:var(--jade-bright);">【${nextRoot.name}】</strong>（${nextRoot.rate}x）！`
+        });
+      } else {
+        // 太虛神甲專擋死劫，此處不消耗神甲
+        player.rootCleanseFailStreak = Math.min(4, (player.rootCleanseFailStreak || 0) + 1);
+        const penaltyNote = applyBodyOrRootFailurePenalty("經脈震盪", "靈脈震盪");
+        if (player.isDead) return false;
+        const streakPct = Math.min(32, player.rootCleanseFailStreak * 8);
+        addLog(`💥【靈根洗髓失利】引氣衝關【${nextRoot.name}】途中靈氣潰散（成功率 ${Math.round(rate * 100)}%），${penaltyNote}；然道韻餘緒留存（下次保底累積 +${streakPct}%）！`, "danger-log");
+        player.scriptureLogs.unshift({
+          isCrit: false,
+          html: `<span style="color:#ff8e8e;font-weight:bold;">${timeTag}💥【洗髓失利】</span>衝擊【${nextRoot.name}】潰散，${penaltyNote}（累積保底 +${streakPct}%）。`
+        });
+      }
+      if (player.scriptureLogs.length > 50) player.scriptureLogs.length = 50;
+      if (!player.isDead) updateAllUI();
+      return true;
+    }
+
 
     // 📜 洞天修真：參悟經典（每年隨機獲得 0～12 次機會，運轉周天並有機率一次獲得大量修為，紀錄收合於按鈕下方不洗版生平卷）
     function comprehendScriptureAction() {
@@ -12999,12 +13108,13 @@ ${targetW.desc}
           document.getElementById("btn-fake-death").style.display = "inline-block";
         }
 
-        // 若已開啟仙緣且持有至少一部已解鎖的仙道典籍，每年隨機獲得 0～12 次【參悟經典】機會
+        // 若已開啟仙緣且持有至少一部已解鎖的仙道典籍，每年隨機獲得 0～12 次【參悟經典】機會（累計 ≥ 50 次後靜默累計不洗版）
         const hasUnlockedScripture = (player.skills || []).some(s => s && s.isScripture && !s.isLockedScripture);
         if (player.isImmortalUnlocked && hasUnlockedScripture) {
+          const prevUses = player.scriptureUses || 0;
           const yearlyGain = Math.floor(Math.random() * 13);
-          player.scriptureUses = (player.scriptureUses || 0) + yearlyGain;
-          if (yearlyGain > 0) {
+          player.scriptureUses = prevUses + yearlyGain;
+          if (yearlyGain > 0 && prevUses < 50) {
             addLog(`📜【歲末靈機】新歲交替，你感應天地道韻，獲得 ${yearlyGain} 次【參悟經典】契機（當前累計 ${player.scriptureUses} 次）。`, "immortal-log");
           }
         }
@@ -13542,6 +13652,15 @@ ${targetW.desc}
         return;
       }
 
+      // 120 歲前已點亮仙緣者：低機率提前偶遇修仙初探歷險（靈脈、煉體法門、靈材、散修），由凡入仙漸進過渡
+      if (player.earlyImmortalCooldown > 0) player.earlyImmortalCooldown--;
+      if (player.isImmortalUnlocked && !player.inImmortalPhase && player.age >= 18 && (player.earlyImmortalCooldown || 0) <= 0 && Math.random() < 0.022) {
+        if (typeof triggerImmortalStoryEvent === "function" && triggerImmortalStoryEvent({ earlyOnly: true })) {
+          player.earlyImmortalCooldown = 8;
+          return;
+        }
+      }
+
       // 生平卷機率尋獲上古【仙道經典】（未開仙緣時鎖定不可用，開仙緣後可於洞天修真參悟）
       const mortalHeldScripturesCount = (player.skills || []).filter(s => s && s.isScripture).length;
       const canFindScripture = player.isImmortalUnlocked || mortalHeldScripturesCount < 1;
@@ -13961,6 +14080,142 @@ ${targetW.desc}
       ]
     };
 
+    // 統一分發修仙者歷險劇本（凡塵開仙緣暖身 + 洞天修真卷共用；全劇本池不重複輪抽，修為隨境界縮放並連動淬體／洗髓靈韻）
+    function triggerImmortalStoryEvent(opts = {}) {
+      if (!player || player.isDead) return false;
+      const { earlyOnly = false, forceEventId = null } = opts || {};
+      const allPool = (DB.EVENTS && Array.isArray(DB.EVENTS.immortal_events) && DB.EVENTS.immortal_events.length > 0)
+        ? DB.EVENTS.immortal_events
+        : (FALLBACK_DATA.EVENTS.immortal_events || []);
+      if (!allPool || allPool.length === 0) return false;
+
+      if (!(player.usedImmortalEvents instanceof Set)) {
+        player.usedImmortalEvents = new Set(Array.isArray(player.usedImmortalEvents) ? player.usedImmortalEvents : []);
+      }
+
+      let ev = null;
+      if (forceEventId) {
+        ev = allPool.find(e => e && (e.id === forceEventId || e.title === forceEventId)) || null;
+      }
+      if (!ev) {
+        const subPool = earlyOnly ? allPool.filter(e => e && e.earlyImmortal === true) : allPool;
+        const workPool = subPool.length > 0 ? subPool : allPool;
+        let candidates = workPool.filter(e => e && !player.usedImmortalEvents.has(e.id || e.title));
+        if (candidates.length === 0) {
+          workPool.forEach(e => {
+            if (e) player.usedImmortalEvents.delete(e.id || e.title);
+          });
+          candidates = workPool;
+        }
+        ev = candidates[Math.floor(Math.random() * candidates.length)];
+      }
+      if (!ev) return false;
+
+      player.usedImmortalEvents.add(ev.id || ev.title);
+      setPauseState(true);
+
+      const stageScale = player.inImmortalPhase ? (1 + (player.immortalStage || 0) * 0.45) : 0.75;
+      const powerBonus = Math.min(0.15, ((player.immortalStage || 0) * 0.02) + ((player.bodyTierIndex || 0) * 0.02) + ((player.rootTierIndex || 0) * 0.02));
+      const modalTitle = player.inImmortalPhase ? `🌌 洞天奇遇 · ${ev.title}` : `✨ 仙途初探 · ${ev.title}`;
+      const modalTag = player.inImmortalPhase
+        ? `${player.age} 歲修真紀事 · ${ev.category || "大道"}`
+        : `${player.age} 歲 · 修仙歷險（${ev.category || "機緣"}）`;
+
+      openEventModal(
+        modalTitle,
+        modalTag,
+        ev.desc,
+        (ev.choices || []).map(c => ({
+          text: c.text,
+          onSelect: () => {
+            if (!player || player.isDead) return;
+            const rawQi = c.qiDelta || c.cultGain || 0;
+
+            if (typeof c.riskRate === "number") {
+              const effRate = Math.min(0.95, Math.max(0.20, c.riskRate + powerBonus));
+              if (Math.random() >= effRate) {
+                const failNotes = [];
+                if (c.failQiDelta) {
+                  addCultivationQi(Math.round(c.failQiDelta * stageScale));
+                }
+                if (c.failStats) {
+                  const stChg = modifyStats(c.failStats);
+                  if (stChg.length) failNotes.push(...stChg);
+                }
+                if (!player.inImmortalPhase && c.failLightInjury) {
+                  addLightInjury(c.failLightInjury);
+                  failNotes.push(`輕傷+${c.failLightInjury}`);
+                  if (player.isDead) return;
+                } else if (player.inImmortalPhase && c.failLifeLoss) {
+                  player.maxLifespan = Math.max(player.age + 1, player.maxLifespan - c.failLifeLoss);
+                  failNotes.push(`壽元-${c.failLifeLoss}載`);
+                }
+                const fSuffix = failNotes.length > 0 ? `（${failNotes.join("、")}）` : "";
+                addLog(`🌪️【${ev.title}】${c.failResult || "機緣受阻，你及時抽身退避調息。"}${fSuffix}`, player.inImmortalPhase ? "danger-log" : "milestone");
+                updateAllUI();
+                setPauseState(false);
+                return;
+              }
+            }
+
+            const extraNotes = [];
+            if (rawQi) addCultivationQi(Math.round(rawQi * stageScale));
+            if (c.lifeGain) {
+              player.maxLifespan += c.lifeGain;
+              extraNotes.push(`壽元+${c.lifeGain}載`);
+            }
+            if (c.stats) {
+              const stChg = modifyStats(c.stats);
+              if (stChg.length) extraNotes.push(...stChg);
+            }
+            if (c.scriptureUsesDelta) {
+              player.scriptureUses = (player.scriptureUses || 0) + c.scriptureUsesDelta;
+              extraNotes.push(`參悟契機+${c.scriptureUsesDelta}`);
+            }
+            if (c.breakthroughBonusDelta) {
+              player.scriptureBreakthroughBonus = Math.min(0.30, Math.round(((player.scriptureBreakthroughBonus || 0) + c.breakthroughBonusDelta) * 100) / 100);
+              extraNotes.push(`破境感悟+${Math.round(c.breakthroughBonusDelta * 100)}%`);
+            }
+
+            let bodyUpgraded = false;
+            if (c.directBodyChance && (player.bodyTierIndex || 0) < BODY_TIERS.length - 1 && Math.random() < c.directBodyChance) {
+              player.bodyTierIndex = (player.bodyTierIndex || 0) + 1;
+              player.bodyTemperFailStreak = 0;
+              const newB = BODY_TIERS[player.bodyTierIndex];
+              extraNotes.push(`肉身直接蛻變為【${newB.name}】`);
+              bodyUpgraded = true;
+            }
+            const addBodyBonus = c.bodyBonusDelta || (c.directBodyChance && !bodyUpgraded ? 0.15 : 0);
+            if (addBodyBonus > 0 && !bodyUpgraded) {
+              player.bodyTemperBonus = Math.min(0.30, Math.round(((player.bodyTemperBonus || 0) + addBodyBonus) * 100) / 100);
+              extraNotes.push(`淬體靈韻+${Math.round(addBodyBonus * 100)}%`);
+            }
+
+            let rootUpgraded = false;
+            if (c.directRootChance && (player.rootTierIndex || 0) < ROOT_TIERS.length - 1 && Math.random() < c.directRootChance) {
+              player.rootTierIndex = (player.rootTierIndex || 0) + 1;
+              player.rootCleanseFailStreak = 0;
+              const newR = ROOT_TIERS[player.rootTierIndex];
+              extraNotes.push(`靈根直接晉升為【${newR.name}】`);
+              rootUpgraded = true;
+            }
+            const addRootBonus = c.rootBonusDelta || (c.directRootChance && !rootUpgraded ? 0.15 : 0);
+            if (addRootBonus > 0 && !rootUpgraded) {
+              player.rootCleanseBonus = Math.min(0.30, Math.round(((player.rootCleanseBonus || 0) + addRootBonus) * 100) / 100);
+              extraNotes.push(`洗髓靈韻+${Math.round(addRootBonus * 100)}%`);
+            }
+
+            const iconPrefix = player.inImmortalPhase ? "🌌" : "✨";
+            const noteSuffix = extraNotes.length > 0 ? `（${extraNotes.join("、")}）` : "";
+            addLog(`${iconPrefix}【${ev.title}】${c.result || c.gain || "道心益發堅定！"}${noteSuffix}`, "immortal-log");
+            updateAllUI();
+            setPauseState(false);
+          }
+        }))
+      );
+      return true;
+    }
+
     function tickImmortalYear() {
       const prevAge = player.age;
       const prevCentury = Math.floor(player.age / 100);
@@ -14047,13 +14302,14 @@ ${targetW.desc}
         });
       }
 
-      // 每次推進可獲得隨機參悟次數（高齡跨度大時按比例微幅加成）
+      // 每次推進可獲得隨機參悟次數（高齡跨度大時按比例微幅加成；累計 ≥ 50 次後靜默累計不洗版）
       const hasUnlockedScripture = (player.skills || []).some(s => s && s.isScripture && !s.isLockedScripture);
       if (hasUnlockedScripture) {
         const scriptureBonusMult = actualStep >= 400 ? 3 : (actualStep >= 100 ? 2 : 1);
         const scriptureGain = Math.floor(Math.random() * 13) * scriptureBonusMult;
-        player.scriptureUses = (player.scriptureUses || 0) + scriptureGain;
-        if (scriptureGain > 0) {
+        const prevUses = player.scriptureUses || 0;
+        player.scriptureUses = prevUses + scriptureGain;
+        if (scriptureGain > 0 && prevUses < 50) {
           addLog(`📜【洞天道韻】閉關歲月流轉（+${actualStep}載），你感應大道獲得 ${scriptureGain} 次【參悟經典】契機（當前可用 ${player.scriptureUses} 次）。`, "immortal-log");
         }
       }
@@ -14124,38 +14380,31 @@ ${targetW.desc}
         return;
       }
 
-      if (Math.random() < 0.28) {
-        const immPool = DB.EVENTS.immortal_events || FALLBACK_DATA.EVENTS.immortal_events;
-        const ev = immPool[Math.floor(Math.random() * immPool.length)];
-        setPauseState(true);
-        openEventModal(
-          `🌌 洞天奇遇 · ${ev.title}`,
-          `${player.age} 歲修真紀事`,
-          ev.desc,
-          (ev.choices || []).map(c => ({
-            text: c.text,
-            onSelect: () => {
-              if (c.qiDelta || c.cultGain) addCultivationQi(c.qiDelta || c.cultGain);
-              if (c.lifeGain) player.maxLifespan += c.lifeGain;
-              if (c.stats) modifyStats(c.stats);
-              addLog(`🌌【${ev.title}】${c.result || c.gain || "道心益發堅定！"}`, "immortal-log");
-              updateAllUI();
-              setPauseState(false);
-            }
-          }))
-        );
-      } else {
-        const microPool = [
-          `閉關苦修 ${stepYears} 載，你在極北玄冰之上打熬皮肉，周身氣血如烘爐運轉。`,
-          `山中無甲子，轉眼已過 ${stepYears} 年。後山靈藥園甘霖天降，你吐納乙木精氣，道基愈發渾厚。`,
-          `神遊太虛 ${stepYears} 載，偶遇上古靈穴，你長鯨吸水般吞吐三百年靈霧，靈根微鳴。`,
-          `閉目參玄 ${stepYears} 春秋，洞外古松積雪消融又覆，你對天地陰陽至理更添一分明悟。`,
-          `靜坐紫府洞天 ${stepYears} 載，你引九天星輝洗滌元神，識海澄澈如萬里晴空。`,
-          `御劍巡遊東海雲端，轉瞬已過 ${stepYears} 春秋，看潮起潮落、凡間世代更替，道心愈發超然。`,
-          `於洞府丹室靜守丹火 ${stepYears} 載，吞服自煉太清靈丹，紫府真元愈發凝練醇厚。`
-        ];
-        addLog(`🧘 ${microPool[Math.floor(Math.random() * microPool.length)]}`, "immortal-log");
+      if (Math.random() < 0.58 && triggerImmortalStoryEvent({ earlyOnly: false })) {
+        return;
       }
+      const microPool = [
+        `閉關苦修 ${actualStep} 載，你在極北玄冰之上打熬皮肉，周身氣血如烘爐運轉。`,
+        `山中無甲子，轉眼已過 ${actualStep} 年。後山靈藥園甘霖天降，你吐納乙木精氣，道基愈發渾厚。`,
+        `神遊太虛 ${actualStep} 載，偶遇上古靈穴，你長鯨吸水般吞吐三百年靈霧，靈根微鳴。`,
+        `閉目參玄 ${actualStep} 春秋，洞外古松積雪消融又覆，你對天地陰陽至理更添一分明悟。`,
+        `靜坐紫府洞天 ${actualStep} 載，你引九天星輝洗滌元神，識海澄澈如萬里晴空。`,
+        `御劍巡遊東海雲端，轉瞬已過 ${actualStep} 春秋，看潮起潮落、凡間世代更替，道心愈發超然。`,
+        `於洞府丹室靜守丹火 ${actualStep} 載，吞服自煉太清靈丹，紫府真元愈發凝練醇厚。`,
+        `潛入深山古潭靜聽水聲 ${actualStep} 載，水流激石而無止息，你的道心與水脈漸趨合一。`,
+        `散遊南荒大澤 ${actualStep} 春秋，偶觀靈鶴銜芝、異獸戲雲，從萬靈生滅間悟透自然大道。`,
+        `立於太華雲海絕巔觀嵐氣聚散 ${actualStep} 年，身旁佩兵隱隱鳴動，似與天地道韻同頻。`,
+        `於千丈地火井畔垂膝吐納 ${actualStep} 載，以純陽火氣焚去經脈最後一絲晦暗滯氣。`,
+        `夜踏月華御風巡行九州萬里，看燈火興衰 ${actualStep} 春秋，恍覺長生之路亦是一場修行。`,
+        `將百年前所記前人手札重新展讀 ${actualStep} 載，昔年不解的晦澀關竅忽如冰釋春融。`,
+        `棲身西域荒原古石林打坐 ${actualStep} 載，風沙雕刻石柱而你不為所動，道胎愈發堅凝。`
+      ];
+      let pickIdx = Math.floor(Math.random() * microPool.length);
+      if (microPool.length > 1 && pickIdx === player.lastImmortalMicroIdx) {
+        pickIdx = (pickIdx + 1) % microPool.length;
+      }
+      player.lastImmortalMicroIdx = pickIdx;
+      addLog(`🧘 ${microPool[pickIdx]}`, "immortal-log");
     }
 
     function pickNonRepeatingEvent(pool, prefix) {
@@ -14519,8 +14768,8 @@ ${targetW.desc}
       const curBodyObj = (typeof BODY_TIERS !== "undefined" && BODY_TIERS[player.bodyTierIndex || 0])
         ? BODY_TIERS[player.bodyTierIndex || 0]
         : { name: "凡胎肉身", desc: "尋常武夫之軀" };
-      const spiritRootObj = (typeof SPIRIT_ROOT_TIERS !== "undefined" && SPIRIT_ROOT_TIERS[player.spiritRootTier || 0])
-        ? SPIRIT_ROOT_TIERS[player.spiritRootTier || 0]
+      const spiritRootObj = (typeof ROOT_TIERS !== "undefined" && ROOT_TIERS[player.rootTierIndex || 0])
+        ? ROOT_TIERS[player.rootTierIndex || 0]
         : { name: player.isImmortalUnlocked ? "下品真靈根" : "凡品雜靈根" };
       const totalOwnedWeapons = (player.ownedWeapons || []).length;
       const totalSealedWeapons = (player.sealedWeapons || []).length;
@@ -17140,7 +17389,8 @@ ${targetW.desc}
         bodyBtn.style.opacity = "";
         bodyBtn.style.filter = "";
       } else {
-        bodyBtn.textContent = `🔥 肉身淬鍊 (耗${nextBody.cost})`;
+        const bPct = Math.round(getBodyTemperRate() * 100);
+        bodyBtn.textContent = `🔥 肉身淬鍊 (耗${nextBody.cost} · ${bPct}%${(player.bodyTemperBonus || 0) > 0 ? "含靈韻" : ""})`;
         bodyBtn.disabled = player.qi < nextBody.cost;
         bodyBtn.style.opacity = "";
         bodyBtn.style.filter = "";
@@ -17158,7 +17408,8 @@ ${targetW.desc}
         rootBtn.style.opacity = "";
         rootBtn.style.filter = "";
       } else {
-        rootBtn.textContent = `✨ 靈根洗髓 (耗${nextRoot.cost})`;
+        const rPct = Math.round(getRootCleanseRate() * 100);
+        rootBtn.textContent = `✨ 靈根洗髓 (耗${nextRoot.cost} · ${rPct}%${(player.rootCleanseBonus || 0) > 0 ? "含靈韻" : ""})`;
         rootBtn.disabled = player.qi < nextRoot.cost;
         rootBtn.style.opacity = "";
         rootBtn.style.filter = "";
@@ -18162,28 +18413,8 @@ ${targetW.desc}
         btnCultivate.addEventListener("touchcancel", stopHolding);
       }
       document.getElementById("btn-breakthrough").addEventListener("click", attemptBreakthrough);
-      document.getElementById("btn-temper-body").addEventListener("click", () => {
-        if (!player || player.isDead) return;
-        const nextBody = BODY_TIERS[player?.bodyTierIndex + 1];
-        if (player && nextBody && player.qi >= nextBody.cost) {
-          player.qi = Math.max(0, player.qi - nextBody.cost);
-          player.bodyTierIndex++;
-          player.maxLifespan += 15;
-          modifyStats({ wu: 8 });
-          addLog(`🔥【肉身淬鍊】耗費 ${nextBody.cost} 修為淬鍊道軀，晉升為【${nextBody.name}】，壽元 +15 載！`, "immortal-log");
-          updateAllUI();
-        }
-      });
-      document.getElementById("btn-cleanse-root").addEventListener("click", () => {
-        if (!player || player.isDead) return;
-        const nextRoot = ROOT_TIERS[player?.rootTierIndex + 1];
-        if (player && nextRoot && player.qi >= nextRoot.cost) {
-          player.qi = Math.max(0, player.qi - nextRoot.cost);
-          player.rootTierIndex++;
-          addLog(`✨【靈根洗髓】耗費 ${nextRoot.cost} 修為洗滌經脈，晉升為【${nextRoot.name}】（吐納倍率 ${nextRoot.rate}x）！`, "immortal-log");
-          updateAllUI();
-        }
-      });
+      document.getElementById("btn-temper-body").addEventListener("click", attemptBodyTemper);
+      document.getElementById("btn-cleanse-root").addEventListener("click", attemptRootCleanse);
 
       // 🛠️ 封測調試抽屜與熱更新按鈕
       const dbgDrawer = document.getElementById("debug-drawer");

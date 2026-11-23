@@ -9893,87 +9893,459 @@
       }
     ],
 
-    // 修仙後（洞天修真期）專屬劇本
+    // 修仙後（凡塵開仙緣暖身＋洞天修真期）專屬劇本：共 40 則（原有 10 則＋五大主題各 6 則共 30 則）
     immortal_events: [
       {
+        id: "imm_legacy_01",
+        category: "古蹟",
+        earlyImmortal: false,
         title: "萬載玄冰窟 · 古修遺蛻",
         desc: "極北冰原傳來靈力震盪，萬載玄冰裂開，露出一具上古元嬰大能的坐化遺蛻。",
         choices: [
-          { text: "奪取玄冰靈髓煉化", qiDelta: 1200, result: "你煉化玄冰靈髓，修為大幅精進！" },
-          { text: "靜坐參悟古修劍痕", qiDelta: 800, stats: { wu: 8 }, result: "你參透古修劍意，武道與仙道相融！" }
+          { text: "奪取玄冰靈髓煉化（大量修為、武力微增）", qiDelta: 1200, result: "你煉化玄冰靈髓，修為大幅精進！" },
+          { text: "靜坐參悟古修劍痕（修為、武力+8）", qiDelta: 800, stats: { wu: 8 }, result: "你參透古修劍意，武道與仙道相融！" }
         ]
       },
       {
+        id: "imm_legacy_02",
+        category: "仙會",
+        earlyImmortal: false,
         title: "東海仙山 · 蓬萊摘星大典",
         desc: "東海迷霧散去，傳說中的蓬萊仙島重現世間，島頂有一株萬年造化蟠桃樹即將成熟！",
         choices: [
-          { text: "登島奪桃，與各界老怪爭鋒", qiDelta: 2200, stats: { wu: 10 }, result: "你奪得一枚萬年仙桃服下，修為與氣血暴漲！" },
-          { text: "於紫霄水榭與散仙坐而論道", qiDelta: 1500, stats: { de: 8 }, result: "你與群仙論道三日，道基愈發圓融無瑕！" }
+          { text: "登島奪桃，與各界老怪爭鋒（修為大進、武力+10）", qiDelta: 2200, stats: { wu: 10 }, result: "你奪得一枚萬年仙桃服下，修為與氣血暴漲！" },
+          { text: "於紫霄水榭與散仙坐而論道（穩健修為、德行+8）", qiDelta: 1500, stats: { de: 8 }, result: "你與群仙論道三日，道基愈發圓融無瑕！" }
         ]
       },
       {
+        id: "imm_legacy_03",
+        category: "仙凡",
+        earlyImmortal: false,
         title: "故人遺刀 · 仙城拍賣會",
         desc: "你神遊物外路過九州大仙城，在修士拍賣盛會上，一件作為凡鐵添頭的古兵赫然在列——那竟是百年前你凡間故友形影不離的佩刃！刀身佈滿歲月鏽蝕，台下修士正戲謔稱其為『凡俗螻蟻破銅爛鐵』。",
         choices: [
-          { text: "當場釋放浩瀚威壓奪回故人佩刃，洗去鏽跡置於洞府供奉", qiDelta: 1200, stats: { qing: 15, ming: 10 }, result: "長刀入手冰冷依舊，你撫過刀柄磨損的刻字，恍惚間又看見當年故友在陽光下耍帥的模樣。道心通明！" },
-          { text: "暗中以神念將此刀贈予台下一位身懷故人刀意傳承的落魄少年", qiDelta: 1600, stats: { de: 12, qing: 10 }, result: "少年得刀後如獲至寶叩首離去，昔年故人的刀道在人間重燃薪火！" },
-          { text: "物是人非，留戀凡兵徒增道心裂痕，閉目任由他人買走", qiDelta: 2500, stats: { qing: -10 }, result: "你斬斷前塵舊念，修為大進，眼神愈發清冷如霜。" }
+          { text: "當場釋放威壓奪回故人佩刃，洗去鏽跡置於洞府供奉（修為、情義+15、名望+10）", qiDelta: 1200, stats: { qing: 15, ming: 10 }, result: "長刀入手冰冷依舊，你撫過刀柄磨損的刻字，恍惚間又看見當年故友在陽光下笑罵的模樣。道心通明！" },
+          { text: "暗中以神念將此刀贈予台下一位身懷故人刀意傳承的落魄少年（修為、德行+12、情義+10）", qiDelta: 1600, stats: { de: 12, qing: 10 }, result: "少年得刀後如獲至寶叩首離去，昔年故人的刀道在人間重燃薪火！" },
+          { text: "物是人非，留戀凡兵徒增道心牽絆，閉目任由他人買走（修為大幅提升、情義-10）", qiDelta: 2500, stats: { qing: -10 }, result: "你斬斷前塵舊念，修為大進，眼神愈發清冷如霜。" }
         ]
       },
       {
+        id: "imm_legacy_04",
+        category: "仙凡",
+        earlyImmortal: false,
         title: "百年歸鄉 · 故居已成荒丘",
         desc: "閉關數百載，偶起心血來潮，你踏雲回到了少年時出生的故鄉小鎮。當年的小酒肆早已塌毀，昔日院裡的桃樹已長成參天枯木，幾名凡間稚童正在樹下哼唱著帶有你百年前名號的古老童謠。",
         choices: [
-          { text: "於枯樹旁彈指點出一汪不竭靈泉，庇護故土生民無病無災", qiDelta: 1400, lifeGain: 20, stats: { de: 15, qing: 10 }, result: "清泉湧出，枯木逢春！你在雲端駐足良久，未驚動一人，拂袖隱入蒼穹。【壽元+20載】" },
-          { text: "化作白髮老翁至祠堂翻看泛黃族譜，追憶父母與手足生平", qiDelta: 2000, stats: { qing: 18, de: 6 }, result: "指尖撫過族譜上早已乾涸的墨跡，你頓悟『紅塵如夢、大道有情』，元神修為暴漲！" }
+          { text: "於枯樹旁彈指點出一汪不竭靈泉，庇護故土生民無病無災（修為、壽元+20、德行+15、情義+10）", qiDelta: 1400, lifeGain: 20, stats: { de: 15, qing: 10 }, result: "清泉湧出，枯木逢春！你在雲端駐足良久，未驚動一人，拂袖隱入蒼穹。" },
+          { text: "化作白髮老翁至祠堂翻看泛黃族譜，追憶父母與手足生平（修為、情義+18、德行+6）", qiDelta: 2000, stats: { qing: 18, de: 6 }, result: "指尖撫過族譜上早已乾涸的墨跡，你頓悟『紅塵如夢、大道有情』，元神修為暴漲！" }
         ]
       },
       {
+        id: "imm_legacy_05",
+        category: "煉體",
+        earlyImmortal: false,
         title: "地脈煞穴 · 萬載地心熔火",
         desc: "冥山地脈深處裂開，湧出一池毀滅性的萬載地心熔火，中央生長著一株通體晶瑩的『地皇淬骨草』，狂暴火毒足以讓尋常修士化作飛灰！",
         choices: [
-          { text: "憑藉強橫體魄直接躍入熔火，生吞地皇淬骨草淬鍊道軀！", qiDelta: 3800, lifeGain: 35, stats: { wu: 15, ming: 8 }, result: "地煞真火焚身，你仰天長嘯將火毒全數煉入骨髓，道軀泛起不滅金芒！【修為+3800，壽元+35載】" },
-          { text: "以大法力封印地火裂隙，避免煞氣外洩塗炭山麓生靈", qiDelta: 2000, lifeGain: 30, stats: { de: 15, ming: 10 }, result: "天降功德金光沒入你的頂門，道心圓融無暇！【修為+2000，壽元+30載】" }
+          { text: "憑藉強橫體魄直接躍入熔火，生吞地皇淬骨草淬鍊道軀（修為大漲、壽元+35、武力+15、淬體靈韻+15%）", qiDelta: 3800, lifeGain: 35, bodyBonusDelta: 0.15, stats: { wu: 15, ming: 8 }, result: "地煞真火焚身，你仰天長嘯將火毒全數煉入骨髓，道軀泛起不滅金芒，肉身契機隨之沸騰！" },
+          { text: "以大法力封印地火裂隙，避免煞氣外洩塗炭山麓生靈（修為、壽元+30、德行+15、名望+10）", qiDelta: 2000, lifeGain: 30, stats: { de: 15, ming: 10 }, result: "天降功德金光沒入你的頂門，道心圓融無暇！" }
         ]
       },
       {
+        id: "imm_legacy_06",
+        category: "靈根",
+        earlyImmortal: false,
         title: "天道靈泉 · 太古化神洗髓池",
         desc: "東海歸墟深處顯現一座太古神族遺留的『化神靈液池』，池水蘊含先天造化之氣，卻也殘留著上古神魔的狂暴執念！",
         choices: [
-          { text: "縱身入池全力洗髓，將神魔執念皆化作道基薪柴！", qiDelta: 4200, lifeGain: 30, stats: { wu: 10, de: 10 }, result: "你於池中枯坐九九八十一日，洗去全身濁氣，靈根澄澈如琉璃！【修為+4200，壽元+30載】" },
-          { text: "於池畔布下九宮周天陣稀釋靈液，溫和浸潤自身氣海", qiDelta: 2600, lifeGain: 25, stats: { de: 6 }, result: "靈液化作涓涓細流滋養氣海，根基愈發穩固！【修為+2600，壽元+25載】" }
+          { text: "縱身入池全力洗髓，將神魔執念皆化作道基薪柴（修為暴漲、壽元+30、武力+10、洗髓靈韻+15%）", qiDelta: 4200, lifeGain: 30, rootBonusDelta: 0.15, stats: { wu: 10, de: 10 }, result: "你於池中枯坐九九八十一日，洗去全身濁氣，靈根澄澈如琉璃！" },
+          { text: "於池畔布下九宮周天陣稀釋靈液，溫和浸潤自身氣海（穩健修為、壽元+25、德行+6）", qiDelta: 2600, lifeGain: 25, stats: { de: 6 }, result: "靈液化作涓涓細流滋養氣海，根基愈發穩固！" }
         ]
       },
       {
+        id: "imm_legacy_07",
+        category: "煉體",
+        earlyImmortal: false,
         title: "九天罡風層 · 太虛淬神",
         desc: "你御風直上九萬里高空，踏入凡人觸之即碎的『九天玄煞罡風層』，漫天銀色風刃如萬劍穿空，正是磨礪法體與劍意的絕佳之地！",
         choices: [
-          { text: "散去護體靈光，以肉身與元神硬抗九天罡風洗禮", qiDelta: 2800, lifeGain: 20, stats: { wu: 12 }, result: "千百道罡風割裂又癒合，你的仙道法體愈發堅不可摧！【修為+2800，壽元+20載】" },
-          { text: "於罡風核心靜觀天道風眼軌跡，推演無上御風仙術", qiDelta: 2200, stats: { de: 8, ming: 6 }, result: "你悟透九天風道法則，身形一晃便可瞬息萬里！【修為+2200】" }
+          { text: "散去護體靈光，以肉身與元神硬抗九天罡風洗禮（修為、壽元+20、武力+12、淬體靈韻+15%）", qiDelta: 2800, lifeGain: 20, bodyBonusDelta: 0.15, stats: { wu: 12 }, result: "千百道罡風割裂又癒合，你的仙道法體愈發堅不可摧！" },
+          { text: "於罡風核心靜觀天道風眼軌跡，推演無上御風仙術（修為、德行+8、名望+6、參悟+2）", qiDelta: 2200, scriptureUsesDelta: 2, stats: { de: 8, ming: 6 }, result: "你悟透九天風道法則，身形一晃便可瞬息萬里！" }
         ]
       },
       {
+        id: "imm_legacy_08",
+        category: "仙途",
+        earlyImmortal: false,
         title: "紫府丹室 · 九轉金丹開爐",
         desc: "洞府中溫養了整整一甲子的『紫金八卦爐』霞光萬道、異香撲鼻，爐內三枚九轉太清金丹即將成丹，卻引來山外數頭千年大妖覬覦！",
         choices: [
-          { text: "布下周天星斗大陣護丹，一劍斬退窺伺大妖並吞服主丹", qiDelta: 3200, lifeGain: 30, stats: { wu: 10, ming: 8 }, result: "金丹入腹化作滾滾仙元，大妖潰逃百里！【修為+3200，壽元+30載】" },
-          { text: "分出一枚副丹贈予山外通靈瑞獸，結下善緣共護洞天", qiDelta: 2400, lifeGain: 25, stats: { de: 12, qing: 10 }, result: "千年瑞獸俯首稱臣，銜來天材地寶回報，洞天福地靈氣倍增！【修為+2400，壽元+25載】" }
+          { text: "布下周天星斗大陣護丹，一劍斬退窺伺大妖並吞服主丹（修為、壽元+30、武力+10）", qiDelta: 3200, lifeGain: 30, stats: { wu: 10, ming: 8 }, result: "金丹入腹化作滾滾仙元，大妖潰逃百里！" },
+          { text: "分出一枚副丹贈予山外通靈瑞獸，結下善緣共護洞天（修為、壽元+25、德行+12、情義+10）", qiDelta: 2400, lifeGain: 25, stats: { de: 12, qing: 10 }, result: "千年瑞獸俯首稱臣，銜來天材地寶回報，洞天福地靈氣倍增！" }
         ]
       },
       {
+        id: "imm_legacy_09",
+        category: "大道",
+        earlyImmortal: false,
         title: "太虛星河 · 垂釣天外星精",
         desc: "百年一遇的『紫微帝星潮汐』降臨，你登臨洞天最高峰，以神念為絲、道心為鉤，向浩瀚星河垂釣天外造化。",
         choices: [
-          { text: "引落一團斗大『太古星辰精金』融入隨身本命仙兵", qiDelta: 2600, stats: { wu: 14, ming: 8 }, result: "星辰精金融入兵刃，寒芒吞吐間隱現周天星斗異象！【修為+2600】" },
-          { text: "汲取漫天帝流漿沐浴紫府元神，延壽固本", qiDelta: 3000, lifeGain: 35, stats: { de: 10 }, result: "帝流漿化作甘露洗滌元神，壽元與道基大幅延展！【修為+3000，壽元+35載】" }
+          { text: "引落一團斗大『太古星辰精金』融入隨身本命仙兵（修為、武力+14、名望+8）", qiDelta: 2600, stats: { wu: 14, ming: 8 }, result: "星辰精金融入兵刃，寒芒吞吐間隱現周天星斗異象！" },
+          { text: "汲取漫天帝流漿沐浴紫府元神，延壽固本（修為、壽元+35、德行+10）", qiDelta: 3000, lifeGain: 35, stats: { de: 10 }, result: "帝流漿化作甘露洗滌元神，壽元與道基大幅延展！" }
         ]
       },
       {
+        id: "imm_legacy_10",
+        category: "仙凡",
+        earlyImmortal: false,
         title: "紅塵旱魃 · 雲端降甘霖",
         desc: "神念掃過昔日中原大地，見赤地千里、大旱三年，無數凡間百姓跪在乾涸河床祈求蒼天開眼，地底深處更有一頭千年火魃作祟。",
         choices: [
-          { text: "隔空一指鎮殺地底火魃，施展呼風喚雨大神通澤被蒼生", qiDelta: 2800, lifeGain: 25, stats: { de: 18, ming: 12 }, result: "傾盆大雨連下三日，萬民叩謝天恩，浩瀚功德金光湧入你的紫府！【修為+2800，壽元+25載】" },
-          { text: "拘拿火魃真火精魄回洞府煉化，順手破去旱象", qiDelta: 3400, stats: { wu: 12 }, result: "你將千年火魃精魄煉為純粹修為，中原旱情亦隨之消解！【修為+3400】" }
+          { text: "隔空一指鎮殺地底火魃，施展呼風喚雨大神通澤被蒼生（修為、壽元+25、德行+18、名望+12）", qiDelta: 2800, lifeGain: 25, stats: { de: 18, ming: 12 }, result: "傾盆大雨連下三日，萬民叩謝天恩，浩瀚功德金光湧入你的紫府！" },
+          { text: "拘拿火魃真火精魄回洞府煉化，順手破去旱象（修為大增、武力+12）", qiDelta: 3400, stats: { wu: 12 }, result: "你將千年火魃精魄煉為純粹修為，中原旱情亦隨之消解！" }
+        ]
+      },
+
+      // ---- 主題 A：尋覓靈脈與洞天福地（6 則） ----
+      {
+        id: "imm_vein_01",
+        category: "靈脈",
+        earlyImmortal: true,
+        title: "青龍地脈 · 山野尋龍點穴",
+        desc: "你開啟仙眼巡視崇山峻嶺，察覺九座蒼翠山巒交匯處隱隱有青氣如龍蛇吐霧——下方竟藏著一條沉睡百年的『青龍初生靈脈』，惜脈眼被幾塊鎮山玄岩堵住！",
+        choices: [
+          { text: "以羅盤推演地氣走勢，劈開鎮山玄岩徹底引動靈脈噴湧（大幅修為，含 72% 成功率；失敗受地氣震傷）", riskRate: 0.72, qiDelta: 1800, stats: { wu: 4, ming: 4 }, result: "玄岩應聲而裂！千丈青龍靈氣沖霄而起，你趁勢大口吞吐先天木靈精華，氣海充盈如潮！", failResult: "地脈反震如雷霆炸開，你雖搶收半縷靈氣仍被震散氣血。", failQiDelta: 350, failLightInjury: 1, failLifeLoss: 4 },
+          { text: "不動脈眼，只於靈氣外溢的山泉處布下聚靈陣靜修半月（穩妥獲益、參悟+1）", qiDelta: 900, scriptureUsesDelta: 1, stats: { de: 4 }, result: "泉水甘冽蘊靈，你在清修中靜悟地脈流轉之道，進境平和而紮實。" },
+          { text: "記下龍穴方位後以石碑暗護山勢，留待地方靈氣滋養周邊萬物（壽元+12、德行+8、情義+4）", qiDelta: 550, lifeGain: 12, stats: { de: 8, qing: 4 }, result: "山水有靈感念你護脈之德，冥冥中反哺一縷純淨地氣融入你心脈。" }
+        ]
+      },
+      {
+        id: "imm_vein_02",
+        category: "靈脈",
+        earlyImmortal: true,
+        title: "鎖靈古陣 · 荒谷殘碑秘窟",
+        desc: "終南山人跡罕至的斷谷內霧氣終年不散，你神識探去，方知這並非天然毒嵐，而是上古煉氣士留下的『七星鎖靈大陣』，將整條靈脈靈氣牢牢封在谷底！",
+        choices: [
+          { text: "強行破陣吞吸百年積鬱靈霧，但陣眼殘存反噬雷紋（高修為＋洗髓靈韻+15%，68% 成功率）", riskRate: 0.68, qiDelta: 2100, rootBonusDelta: 0.15, stats: { wu: 5 }, result: "古陣應聲瓦解，積鬱百年的精純靈霧瞬間湧入你的奇經八脈，靈根彷彿也被滌淨一塵！", failResult: "你擊碎一角陣基卻觸動九霄殘雷，幸好及時退開僅得些許零散靈氣。", failQiDelta: 450, failLightInjury: 1, failLifeLoss: 4 },
+          { text: "順著陣紋縫隙細細推演古修佈陣玄理，汲取七分穩妥靈氣（修為、參悟+2、破境感悟+2%）", qiDelta: 1150, scriptureUsesDelta: 2, breakthroughBonusDelta: 0.02, stats: { de: 5 }, result: "古修陣理與你的道心共鳴，既得了靈脈溫養又參透陣法妙機！" }
+        ]
+      },
+      {
+        id: "imm_vein_03",
+        category: "靈脈",
+        earlyImmortal: true,
+        title: "東海沉淵 · 海底水眼靈潮",
+        desc: "駕舟行至東海無名暗礁外，月圓子時海水忽現幽藍光柱——潮汐之下竟藏著一處定期噴吐玄陰水元精氣的『海底靈眼』，附近更有幾頭巨型靈龜在靈眼旁吞吐月華。",
+        choices: [
+          { text: "避開巨龜潛入靈眼核心，引玄陰真水洗滌氣海（高修為＋壽元+14，70% 成功率）", riskRate: 0.70, qiDelta: 1700, lifeGain: 14, stats: { wu: 4 }, result: "海底靈眼寒而不冽，玄陰水元順著百會與丹田流轉周身，壽元生機綿綿增長！", failResult: "海底暗流突變捲飛了護身靈氣，你只得抱住礁石浮出海面調息。", failQiDelta: 400, failLightInjury: 1, failLifeLoss: 4 },
+          { text: "於海面礁石與靈龜同浴月華靈霧，相安無事共用半夜靈潮（穩妥修為、情義+6、德行+4）", qiDelta: 1050, lifeGain: 8, stats: { de: 4, qing: 6 }, result: "巨龜見你並無殺心，臨去前輕敲龜甲激起一朵清澈靈浪贈你。" }
+        ]
+      },
+      {
+        id: "imm_vein_04",
+        category: "靈脈",
+        earlyImmortal: true,
+        title: "大漠星隕 · 流沙聚靈古窟",
+        desc: "大漠深處夜半忽墜奇石，流沙塌陷露出下方埋藏千年的石窟，窟心嵌著一塊散發溫熱星輝的星隕鐵核，正源源不絕將方圓百里的遊離天地元氣匯聚至此！",
+        choices: [
+          { text: "剝取星隕核外層精氣，並以星輝淬打骨骼（修為＋淬體靈韻+15%＋武力+6）", qiDelta: 1350, bodyBonusDelta: 0.15, stats: { wu: 6 }, result: "星輝如銀砂滲入筋骨，你不僅吸納海量靈氣，筋骨抗壓之力也更上一層樓！" },
+          { text: "盤膝對星隕核感應太虛星象，推演周天運轉之道（修為＋破境感悟+3%＋名望+3）", qiDelta: 1200, breakthroughBonusDelta: 0.03, stats: { ming: 3, de: 4 }, result: "星核共鳴，你腦海中彷彿浮現出漫天星斗運轉軌跡，破境關竅漸明。" }
+        ]
+      },
+      {
+        id: "imm_vein_05",
+        category: "靈脈",
+        earlyImmortal: true,
+        title: "荒廢藥園 · 古修溫脈靈泉",
+        desc: "你在雲霧斷崖背後發現一片被藤蔓遮蔽的古修士藥園，雖大多靈草已枯敗凋零，園心處那方刻有『太乙』二字的青玉靈泉眼竟仍在緩緩湧出乳白泉霧！",
+        choices: [
+          { text: "清理枯藤疏通青玉泉眼，取初湧靈泉與殘存靈芽共煉吸收（修為＋壽元+15＋洗髓靈韻+15%）", qiDelta: 1450, lifeGain: 15, rootBonusDelta: 0.15, stats: { de: 5 }, result: "疏通後的泉水清香沁脾，喝下數口只覺經脈中的凡塵雜質都在緩緩排出！" },
+          { text: "小心移栽尚有生機的靈根幼苗，僅取半瓢泉水潤澤丹田（修為＋德行+8＋壽元+10）", qiDelta: 950, lifeGain: 10, stats: { de: 8, qing: 5 }, result: "留存下來的藥園在山風中重煥生機，你攜著一身清芬從容離去。" }
+        ]
+      },
+      {
+        id: "imm_vein_06",
+        category: "靈脈",
+        earlyImmortal: true,
+        title: "陰陽雙脈 · 冰火夾縫中的靈眼",
+        desc: "幽谷兩側截然不同——左崖寒霜蔽日、右壁地火隱現，兩股極端靈氣在谷心絞成一漩太極氣團。若能調和吞吐，勝過尋常靈脈十倍；一個不慎卻會被冰火撕裂經脈！",
+        choices: [
+          { text: "強行盤坐太極氣眼中央，左右手分納冰火修成陰陽靈流（高修為＋淬體靈韻+15%，65% 成功率）", riskRate: 0.65, qiDelta: 2300, bodyBonusDelta: 0.15, stats: { wu: 7 }, result: "極寒與熾熱在你丹田撞出耀眼星芒，竟奇蹟般融成陰陽混元靈氣，痛快非常！", failResult: "陰陽二氣失衡在體內炸開，你急退百丈嘔出一口濁血穩住經絡。", failQiDelta: 500, failLightInjury: 1, failLifeLoss: 5 },
+          { text: "守在陰陽氣團外圍調和餘波，只取溫和之氣細水長流（穩妥修為、德行+4）", qiDelta: 1100, stats: { de: 4, wu: 2 }, result: "你取其清和棄其暴烈，如沐春風般補足數載苦修之功。" }
+        ]
+      },
+
+      // ---- 主題 B：淬鍊肉身的百般法門（6 則） ----
+      {
+        id: "imm_body_01",
+        category: "煉體",
+        earlyImmortal: true,
+        title: "地火熔岩 · 赤銅金身試煉",
+        desc: "火山地裂深處沸騰著滾燙的金紅地肺熔液，岩石邊緣留有上古煉體士遺刻：『不經烈焰千鍛，焉得不壞金身？』熱浪撲面而來，連護體靈光都在滋滋作響。",
+        choices: [
+          { text: "先取岩壁耐火赤苔護住五臟，踏入熔液外沿九日熬煉筋骨（高修為＋淬體靈韻+15%＋少許直接破階機會，66% 成功率）", riskRate: 0.66, qiDelta: 1850, bodyBonusDelta: 0.15, directBodyChance: 0.25, stats: { wu: 8 }, result: "九日焚燒過後，褪去一層焦黑死皮，新生的肌膚泛起隱約古銅寶光，肉身強韌度大幅飆升！", failResult: "地肺熱毒忽然上湧，你急忙躍出岩漿池以冷水降火，幸未傷及根本。", failQiDelta: 400, failLightInjury: 1, failLifeLoss: 5 },
+          { text: "只於熔岩池畔借地熱高溫演練外門硬功，汗透如漿不傷根本（穩妥修為＋武力+5）", qiDelta: 950, stats: { wu: 5 }, result: "熱浪壓迫下你出招愈發沉猛，氣血純度在極限汗水中悄然提升。" }
+        ]
+      },
+      {
+        id: "imm_body_02",
+        category: "煉體",
+        earlyImmortal: true,
+        title: "萬載冰瀑 · 玄霜裂骨浴",
+        desc: "大雪山陰面懸著一條百丈冰瀑，夾雜細碎玄冰煞氣傾瀉而下，砸在深潭青石上竟打出陣陣金石轟鳴。傳言能頂住百息不倒者，筋骨可如寒鐵百煉！",
+        choices: [
+          { text: "脫去外袍立於瀑布正心石上，硬扛冰煞砸擊打熬骨髓（修為＋壽元+12＋淬體靈韻+15%，70% 成功率）", riskRate: 0.70, qiDelta: 1700, lifeGain: 12, bodyBonusDelta: 0.15, stats: { wu: 6 }, result: "玄冰砸得全身骨節劈啪作響，熬過寒痛後，週身氣血反如岩漿般滾燙奔騰！", failResult: "冰煞貫入肩頭險些僵直，你咬牙躍出寒潭生火驅寒。", failQiDelta: 380, failLightInjury: 1, failLifeLoss: 4 },
+          { text: "立於瀑布濺霧外圍運功抵抗寒風，磨礪閉氣與護體罡氣（穩妥修為＋德行+5＋武力+3）", qiDelta: 1000, stats: { wu: 3, de: 5 }, result: "冰霧如針卻難透你的護體罡氣，定力與耐寒之能皆見長進。" }
+        ]
+      },
+      {
+        id: "imm_body_03",
+        category: "煉體",
+        earlyImmortal: true,
+        title: "引雷淬脈 · 烏雲孤峰納散雷",
+        desc: "荒野雷公嶺正值暴雨將臨，鉛灰烏雲壓在山頂不足三十丈，無數銀白電蛇在雲隙遊走！修真典籍載：以秘法引散雷細絲入體，最能轟開淤塞的隱脈與雜質！",
+        choices: [
+          { text: "高舉精鐵陣旗立於孤峰引下一縷散雷洗脈（極高淬體靈韻+15%＋少許直接破階機會，62% 成功率）", riskRate: 0.62, qiDelta: 2100, bodyBonusDelta: 0.15, directBodyChance: 0.30, stats: { wu: 9, ming: 4 }, result: "轟——！銀雷貫頂而下，酥麻劇痛直透百骸，卻將經脈陳年濁垢瞬間劈碎化作生機！", failResult: "雷勁比預想猛烈三分，震得你雙臂發黑倒飛下崖，所幸心脈無恙。", failQiDelta: 420, failLightInjury: 1, failLifeLoss: 5 },
+          { text: "只盤坐半山腰吸納雷後激盪的新鮮天地電芒靈氣，不冒天雷風險（穩妥修為＋破境感悟+2%）", qiDelta: 1050, breakthroughBonusDelta: 0.02, stats: { de: 4 }, result: "雷過天晴，萬物生發，你在清新雷韻中靜坐收穫甚豐。" }
+        ]
+      },
+      {
+        id: "imm_body_04",
+        category: "煉體",
+        earlyImmortal: false,
+        title: "荒妖血池 · 霸烈獸元淬骨",
+        desc: "你在古戰場洞穴深處發現一方千年不乾的暗紅血池——據壁刻記載，乃是上古化形大妖隕落後精血匯聚所化，血氣霸道異常，足以助煉體修士脫胎換骨，卻也最易令人狂性攻心！",
+        choices: [
+          { text: "守住清明靈台入血池，強行鎮壓妖氣煉化精華（修為＋武力+10＋淬體靈韻+15%＋30% 直接破階，64% 成功率）", riskRate: 0.64, qiDelta: 2600, bodyBonusDelta: 0.15, directBodyChance: 0.30, stats: { wu: 10 }, result: "血池翻湧成漩，大妖殘吼被你的無上道心碾碎，精純氣血盡歸己身！", failResult: "妖氣險些擾亂識海，你當機立斷破池而出，以清心咒鎮壓氣血。", failQiDelta: 550, failLightInjury: 1, failLifeLoss: 5 },
+          { text: "以仙火隔空淨化血池煞氣，再引純淨氣血溫養筋肉（穩妥修為＋壽元+15＋德行+6）", qiDelta: 1400, lifeGain: 15, stats: { de: 6, wu: 4 }, result: "血池煞氣散作青煙，剩下的溫和元氣令你的體魄圓潤飽滿。" }
+        ]
+      },
+      {
+        id: "imm_body_05",
+        category: "煉體",
+        earlyImmortal: false,
+        title: "星辰重力秘境 · 舉重若輕之道",
+        desc: "你無意間步入一處被太古磁石環繞的星辰秘境——愈往中心踏步，周身承受的地肺吸力便愈沉重，尋常武夫在十步外即會被壓碎膝骨！",
+        choices: [
+          { text: "在十倍重力區咬牙演練完整套路至力竭（修為＋武力+9＋淬體靈韻+15%）", qiDelta: 2200, bodyBonusDelta: 0.15, stats: { wu: 9, ming: 4 }, result: "走出秘境的瞬間，你只覺身輕如羽、隨意舉手皆帶百斤神力，道軀堅凝許多！" },
+          { text: "停在三倍重力區打磨身法騰挪與發力技巧（穩妥修為＋武力+6＋參悟+1）", qiDelta: 1500, scriptureUsesDelta: 1, stats: { wu: 6 }, result: "舉重若輕之間，你對氣血與力道收發的掌握更加純熟。" }
+        ]
+      },
+      {
+        id: "imm_body_06",
+        category: "煉體",
+        earlyImmortal: true,
+        title: "玄武古碑 · 搬山煉體殘訣",
+        desc: "大江渡口斷崖上有座背負玄龜雕紋的無字古碑，你以仙識掃過石碑內部，赫然顯出密密麻麻行氣運筋的上古殘訣『玄武搬山功』！",
+        choices: [
+          { text: "照殘訣搬運江邊千斤青石十日十夜，以巨力熬煉皮膜（修為＋武力+7＋淬體靈韻+15%）", qiDelta: 1350, bodyBonusDelta: 0.15, stats: { wu: 7 }, result: "十日負重苦修後，雙臂肌腱發出弓弦般的沉響，淬鍊肉身的把握大增！" },
+          { text: "以神念臨摹碑上龜紋龜息吐納法，延壽穩心（穩妥修為＋壽元+16＋德行+5）", qiDelta: 1100, lifeGain: 16, stats: { de: 5 }, result: "如靈龜潛息、龜壽綿長，你只覺五臟生機沉穩悠遠。" }
+        ]
+      },
+
+      // ---- 主題 C：尋求天材地寶升級靈根（6 則） ----
+      {
+        id: "imm_root_01",
+        category: "靈根",
+        earlyImmortal: true,
+        title: "毒沼百花 · 九竅洗髓蓮盛放",
+        desc: "南荒迷霧沼澤深處百年方綻一次的『九竅洗髓青蓮』今日將熟，蓮瓣隱現九道天然丹紋，惜沼下潛伏一頭即將化蛟的三眼碧鱗蟒正虎視眈眈！",
+        choices: [
+          { text: "聲東擊西引開碧鱗蟒，凌空摘下整株九竅青蓮吞服（高修為＋洗髓靈韻+15%＋25% 靈根直接洗髓，68% 成功率）", riskRate: 0.68, qiDelta: 1950, rootBonusDelta: 0.15, directRootChance: 0.25, stats: { wu: 5, ming: 4 }, result: "青蓮入口化作甘冽清氣直衝百會與靈脈！濁氣由指尖逼出，靈根感應天地頓時敏感數倍！", failResult: "巨蟒尾掃震碎泥沼，你只摘得半片蓮瓣迫不得已退走。", failQiDelta: 450, failLightInjury: 1, failLifeLoss: 4 },
+          { text: "待蟒獸吞蓮後收集散落池面的青蓮朝露（穩妥修為＋壽元+10＋德行+4）", qiDelta: 1050, lifeGain: 10, stats: { de: 4 }, result: "朝露雖少卻純淨無毒，你安穩吸收後自覺經脈輕快了不少。" }
+        ]
+      },
+      {
+        id: "imm_root_02",
+        category: "靈根",
+        earlyImmortal: true,
+        title: "雷擊老桃 · 萬年雷火桃木心",
+        desc: "荒山古壇邊立著一株遭天雷劈成兩半的千年老桃樹，焦黑樹心裡卻藏著一截泛著紫金電光的『雷火桃木心』——既有木之長生生機，又裹天雷破障之力！",
+        choices: [
+          { text: "取出桃木心於掌心煉化其中雷霆生機（修為＋洗髓靈韻+15%＋德行+5，72% 成功率）", riskRate: 0.72, qiDelta: 1650, rootBonusDelta: 0.15, stats: { de: 5, wu: 4 }, result: "木生火、雷破暗！雷木真元流過靈脈，令原本滯澀的經絡開闊不少！", failResult: "殘餘雷弧反噬燒焦袖袍，幸虧木之生機護住經脈未成重創。", failQiDelta: 400, failLightInjury: 1, failLifeLoss: 4 },
+          { text: "將桃木心雕成清心木符隨身佩帶，日日溫養神念（修為＋破境感悟+3%＋參悟+1）", qiDelta: 1000, breakthroughBonusDelta: 0.03, scriptureUsesDelta: 1, stats: { de: 5 }, result: "清心木符淡淡散發寧神木香，今後衝關破境自覺心中更加踏實。" }
+        ]
+      },
+      {
+        id: "imm_root_03",
+        category: "靈根",
+        earlyImmortal: true,
+        title: "仙鶴銜露 · 晨霧太乙青玉露",
+        desc: "破曉山巔云海間，一群通靈白鶴正盤旋收集千年松針上的『太乙青露』。為首一隻頭頂赤冠的老鶴認出你身上若有似無的清淨仙韻，竟落於你肩側發出清越鶴唳。",
+        choices: [
+          { text: "以一縷純淨靈氣交換三滴太乙青露，現場引藥洗滌靈脈（修為＋洗髓靈韻+15%＋情義+6）", qiDelta: 1400, rootBonusDelta: 0.15, stats: { qing: 6, de: 5 }, result: "老鶴展翅長鳴欣然應允，青露入脈清涼透頂，感應天地靈氣豁然敏銳！" },
+          { text: "不貪靈露，僅伴群鶴看一次東海日出共鳴吐納（修為＋壽元+14＋情義+6）", qiDelta: 1000, lifeGain: 14, stats: { qing: 6, de: 6 }, result: "鶴鳴與日出共振，你心情澄澈空靈，不覺生機綿長一分。" }
+        ]
+      },
+      {
+        id: "imm_root_04",
+        category: "靈根",
+        earlyImmortal: false,
+        title: "歸墟鬼市 · 混沌靈卵奇石辨寶",
+        desc: "海中歸墟深處三十年才開一次的散修黑市上，一個啞巴石販攤角滾著塊灰撲撲的蛋形石胚。外人皆當凡石嘲笑，你的靈脈卻隔空與石芯生出一絲悸動！",
+        choices: [
+          { text: "耗些靈氣助石販治好舊創以換此石，當場剖石取混沌髓（修為大增＋洗髓靈韻+15%＋28% 直接洗髓破階，65% 成功率）", riskRate: 0.65, qiDelta: 2500, rootBonusDelta: 0.15, directRootChance: 0.28, stats: { ming: 6, qing: 4 }, result: "石殼脆裂露出半汪五色混沌髓！吞下後靈根彷彿獲天地重塑，吞納速度大進！", failResult: "剖開後靈髓竟已大半風化為空殼，只收回幾縷殘餘清氣。", failQiDelta: 550, failStats: { cai: -2 } },
+          { text: "暗記鬼市門路，轉向攤位買下兩張殘缺上古養魂丹方（修為＋參悟+2＋破境感悟+2%）", qiDelta: 1500, scriptureUsesDelta: 2, breakthroughBonusDelta: 0.02, stats: { ming: 4 }, result: "古方雖殘卻字字珠璣，省去你數十載自己摸索丹理的彎路。" }
+        ]
+      },
+      {
+        id: "imm_root_05",
+        category: "靈根",
+        earlyImmortal: true,
+        title: "五行靈果 · 靈獸看守的造化樹",
+        desc: "深谷秘崖上竟奇異地長著一株五色斑斕的古樹，同時結著赤、青、金、藍、黃五枚『五行靈果』！樹下蹲伏著一頭通體雪白的四爪石猊獸，見你靠近豎起鬃毛低吼。",
+        choices: [
+          { text: "正面與石猊獸過招交鋒奪取最成熟的兩枚五行果（修為＋洗髓靈韻+15%＋武力+6，66% 成功率）", riskRate: 0.66, qiDelta: 1850, rootBonusDelta: 0.15, stats: { wu: 6 }, result: "一番驚險搏殺震退石猊獸，你摘下五行靈果服食，周身五行靈氣頓時平衡圓轉！", failResult: "石猊獸力大無窮一爪掃開石壁，你搶得半枚跌落的青果速速退離。", failQiDelta: 450, failLightInjury: 1, failLifeLoss: 4 },
+          { text: "拋去一枚隨身丹丸交好石猊獸，禮讓三果換其首肯共食一枚（穩妥修為＋德行+8＋情義+8）", qiDelta: 1200, stats: { de: 8, qing: 8 }, result: "石猊獸嗅出你的善意，用爪子推來一枚熟透的金果，一人一獸各自滿意。" }
+        ]
+      },
+      {
+        id: "imm_root_06",
+        category: "靈根",
+        earlyImmortal: false,
+        title: "丹鼎遺跡 · 千年未涸的天靈玉液",
+        desc: "你尋得一處崩塌的中古煉丹宗遺址，大多宮殿已成瓦礫，唯獨主鼎『天乙紫銅爐』仍保持封印未開，神識探入能感覺鼎底留有半盞凝為玉膏的天靈液！",
+        choices: [
+          { text: "強運靈氣融開丹爐古封印，將半盞天靈玉膏一飲而盡（修為大進＋壽元+20＋洗髓靈韻+15%）", qiDelta: 2700, lifeGain: 20, rootBonusDelta: 0.15, stats: { wu: 5, de: 5 }, result: "封印化解之際異香彌漫百里！天靈玉膏化為九轉仙氣流貫靈脈，洗髓大機緣已成！" },
+          { text: "謹慎查閱殿壁殘留煉丹手札後再取少量玉膏（穩妥修為＋參悟+3＋破境感悟+2%）", qiDelta: 1800, scriptureUsesDelta: 3, breakthroughBonusDelta: 0.02, stats: { de: 7 }, result: "古煉丹宗對火候與丹理的筆記令你大開眼界，獲益匪淺。" }
+        ]
+      },
+
+      // ---- 主題 D：遭遇其他修仙者（6 則） ----
+      {
+        id: "imm_cult_01",
+        category: "修士",
+        earlyImmortal: true,
+        title: "雲霧坊市 · 仙凡交界的散修集會",
+        desc: "你順著一道隱晦靈符氣機，竟誤入深藏於山腹雲霧中的隱世修士小坊市！街道兩側青燈幽幽，數十名氣息迥異的煉氣散修盤坐在石攤後，交換著凡人難見的靈石與靈草。",
+        choices: [
+          { text: "出價換取一位老散修手中的『聚靈洗髓散』（修為＋洗髓靈韻+15%，財富-6）", qiDelta: 1100, rootBonusDelta: 0.15, stats: { cai: -6, ming: 4 }, result: "你交出銀寶與靈材換得那包泛藍藥粉，服下後只覺靈根感應天地清亮許多！" },
+          { text: "擺開武道見解與一名年老體修以法門換法門（修為＋淬體靈韻+15%＋武力+5）", qiDelta: 1200, bodyBonusDelta: 0.15, stats: { wu: 5, qing: 4 }, result: "那名煉體散修極讚嘆凡俗武學的發力精巧，回贈你一套上古鍛筋秘方！" },
+          { text: "低調在茶寮打聽近年各地靈氣異動與險地消息（穩妥修為＋破境感悟+2%＋名望+3）", qiDelta: 900, breakthroughBonusDelta: 0.02, stats: { ming: 3, qing: 3 }, result: "坊市見聞徹底刷新了你對修行界的眼界，道心更明方向。" }
+        ]
+      },
+      {
+        id: "imm_cult_02",
+        category: "修士",
+        earlyImmortal: true,
+        title: "魔道截殺 · 血煞修士夜襲奪寶",
+        desc: "星夜禦氣返程途中，前方虛空忽然炸開一道血色烏網！兩名身披骷髏黑袍的魔道修士踏骨幡現身冷笑：『嘿嘿，好精純的先天底蘊，剛好拿來替本座練骨煉魂！』",
+        choices: [
+          { text: "毫不退讓正面搏殺！以絕世武威斬殺魔修奪其納戒（高修為＋武力+8，65% 成功率）", riskRate: 0.65, qiDelta: 2200, stats: { wu: 8, ming: 6 }, result: "你仙武並施一劍斬碎血幡，反殺二人並從納戒內搜出數枚上等靈石與丹丸！", failResult: "魔修臨走反撲祭出嗜血陰雷，你硬劈開血網帶傷突圍。", failQiDelta: 450, failLightInjury: 1, failLifeLoss: 5 },
+          { text: "以玄妙身法化作清風遁影遠去，不與魔修無謂糾纏（保全無損＋德行+4）", qiDelta: 750, stats: { de: 4, wu: 2 }, result: "你飄然穿雲而逝，把嗜血魔修遠遠甩在後方迷霧中。" }
+        ]
+      },
+      {
+        id: "imm_cult_03",
+        category: "修士",
+        earlyImmortal: true,
+        title: "蒼山劍修 · 絕壁之上的仙武切磋",
+        desc: "蒼山絕巔偶遇一位青衫背劍的同階散修『顧清風』。他望穿你體內兼修凡武與仙靈的奇特道氣，眼前一亮拱手相邀：『道友這等仙武雙修之路實屬罕見，可願切磋三招印證大道？』",
+        choices: [
+          { text: "拔兵應戰，以畢生武意結合靈氣對撞三十餘合（大量修為＋武力+8＋情義+8）", qiDelta: 1650, stats: { wu: 8, qing: 8, ming: 6 }, result: "劍氣縱橫百丈，三十合後二人同時收勢大笑！他佩服贈你一枚自煉清靈劍丸！" },
+          { text: "不比勝敗，對坐烹雪煮茶論道一整晝夜（穩妥修為＋破境感悟+3%＋參悟+2）", qiDelta: 1250, scriptureUsesDelta: 2, breakthroughBonusDelta: 0.03, stats: { de: 6, qing: 6 }, result: "煮茶間彼此吐露修行誤區與感悟，兩人皆有茅塞頓開之感！" }
+        ]
+      },
+      {
+        id: "imm_cult_04",
+        category: "修士",
+        earlyImmortal: true,
+        title: "劍修託孤 · 重傷同道求護法渡劫",
+        desc: "你巡山時見一名白衣女劍修倒在古松下，氣海破裂卻強提本命劍意準備強衝小境界！她見你身上無邪煞之氣，苦笑請託：『道友若肯替我護法半日阻住山外妖獸，這份因果我定當厚報！』",
+        choices: [
+          { text: "仗義拔刃守在松外連斬數波妖獸，護她成功破境（修為＋德行+10＋情義+10＋洗髓靈韻+15%）", qiDelta: 1600, rootBonusDelta: 0.15, stats: { de: 10, qing: 10, ming: 5 }, result: "女修破境後傷勢半復，感激涕零之下將唯一珍藏的『靈泉洗髓露』雙手奉上報恩！" },
+          { text: "先贈以護心草藥穩住其元神，勸她來日根基穩固再行衝關（穩妥修為＋德行+8＋壽元+10）", qiDelta: 1100, lifeGain: 10, stats: { de: 8, qing: 6 }, result: "她收劍嘆服你的穩重，回贈一卷《寒泉吐納心得》作謝。" }
+        ]
+      },
+      {
+        id: "imm_cult_05",
+        category: "修士",
+        earlyImmortal: false,
+        title: "秘境同探 · 古修洞府前的合作與防備",
+        desc: "荒海絕壁上顯露一處中古金丹洞府石門，門前已有兩名氣息陰沉的同道先至。其中一人微笑邀你同行：『此門需三人真元同時灌注方能打開，所得寶物大家見者有份，道友意下如何？』",
+        choices: [
+          { text: "表面點頭合擊開門，暗地留三成真元提防背後暗算（極高修為＋淬體或洗髓靈韻，68% 成功率）", riskRate: 0.68, qiDelta: 2900, rootBonusDelta: 0.15, stats: { wu: 8, ming: 6 }, result: "石門開剎那對方果真突襲！早有防備的你反手制敵，獨攬洞府內的上等靈髓丹瓶！", failResult: "混戰中禁制崩裂砸落巨石，你擊傷一名對手後搶了隻玉簡迅速撤離。", failQiDelta: 750, failLightInjury: 1, failLifeLoss: 4 },
+          { text: "見對方神色不善果斷轉身離開，另在後崖覓得外圍靈草（穩妥無傷＋德行+5）", qiDelta: 1200, stats: { de: 5 }, result: "數個時辰後後方洞府傳來劇烈崩響，你慶幸自己未踏入虎口。" }
+        ]
+      },
+      {
+        id: "imm_cult_06",
+        category: "修士",
+        earlyImmortal: false,
+        title: "百草丹宗 · 隱世煉丹師求採險藥",
+        desc: "你在雲夢山秘林遇見一位腰懸藥葫蘆的清癯老者，竟是隱世百草丹宗長老。他看重你身手矯健，開出條件：『老夫正煉一爐鍛骨補脈仙丹，唯缺懸崖毒霧內的百歲金芝，道友願助我摘來嗎？』",
+        choices: [
+          { text: "冒毒霧險入懸崖採得雙株金芝交給丹宗，換取成丹分潤（修為大進＋淬體靈韻+15%＋壽元+18）", qiDelta: 2400, lifeGain: 18, bodyBonusDelta: 0.15, stats: { de: 6, qing: 6 }, result: "七日後丹香徹谷！丹宗長老信守承諾奉上一枚上品金紋鍛骨丹，藥力滾滾融進筋脈！" },
+          { text: "請丹宗長老順手替你診治經脈並借觀丹道秘錄（修為＋破境感悟+3%＋參悟+2）", qiDelta: 1500, scriptureUsesDelta: 2, breakthroughBonusDelta: 0.03, stats: { de: 5, qing: 5 }, result: "丹宗對氣海溫養與衝關丹理的點撥令你受益無窮。" }
+        ]
+      },
+
+      // ---- 主題 E：仙凡交錯、心魔與大道歷險（6 則，全洞天專屬） ----
+      {
+        id: "imm_dao_01",
+        category: "大道",
+        earlyImmortal: false,
+        title: "問心魔劫 · 幻境中的舊日江湖",
+        desc: "閉關極深處，紫府識海忽生濃霧，整片洞天化回數十年前燈火微暖的江湖小鎮——昔年早逝的師長與舊友正笑著立在茶寮前招手，勸你放下枯燥的萬載長生，留下陪伴大家。",
+        choices: [
+          { text: "向幻境深揖一禮道明去志，以無垢道心輕輕拂散心魔（大漲修為＋破境感悟+4%＋德行+10）", qiDelta: 3200, breakthroughBonusDelta: 0.04, stats: { de: 10, qing: 6 }, result: "故人身影化作點點金芒散去，你心懷念想卻不沉溺其中，元神通透得一塵不染！" },
+          { text: "執劍強斬一切情念幻象，以無情劍意強破心魔關卡（暴漲修為＋武力+12，情義-6，74% 成功率）", riskRate: 0.74, qiDelta: 3800, stats: { wu: 12, qing: -6 }, result: "劍光裂空破除萬千幻影，心魔在震懾下不敢再擾你紫府半步！", failResult: "劍氣誤傷識海引來反噬，你強行運轉真元方穩住道基。", failQiDelta: 900, failLifeLoss: 6 }
+        ]
+      },
+      {
+        id: "imm_dao_02",
+        category: "大道",
+        earlyImmortal: false,
+        title: "界隙流光 · 誤入太古小千界殘片",
+        desc: "雲海遊歷之時空間忽現褶皺，你隨靈風捲入一方漂浮在虛空中的破碎小千界！這裡草木高達千丈、靈氣濃郁如液，天空懸著半輪永不西沉的紫月。",
+        choices: [
+          { text: "趁界域尚未閉合，深入古殿遺跡帶出太古傳承玉碟（大幅修為＋參悟+4＋洗髓靈韻+15%）", qiDelta: 3500, scriptureUsesDelta: 4, rootBonusDelta: 0.15, stats: { ming: 8 }, result: "玉碟化流光沒入識海，不僅補全你多處經義盲點，靈根竟也被紫月靈氣洗練一番！" },
+          { text: "不貪古殿秘寶，僅於太古巨樹下靜觀一週天日月交替規律（穩健修為＋壽元+30＋德行+8）", qiDelta: 2400, lifeGain: 30, stats: { de: 8 }, result: "觀天之道，執天之行，你在時間靜謐中獲壽元大益。" }
+        ]
+      },
+      {
+        id: "imm_dao_03",
+        category: "仙凡",
+        earlyImmortal: false,
+        title: "千年妖王 · 山神廟前化形討封",
+        desc: "大雪紛飛的深山古道上，一頭修煉了千餘載、已褪盡野氣的青丘白狐化作白衣少女，對著在雲端行走的你盈盈拜下，聲帶顫音問道：『敢問上仙，你看我……像人還是像仙？』",
+        choices: [
+          { text: "微笑揮袖賜下正氣道號：『心存善念，便是山中清靈散仙！』助其正果（修為＋壽元+25＋德行+15＋情義+12）", qiDelta: 2600, lifeGain: 25, stats: { de: 15, qing: 12 }, result: "白狐周身妖霧盡數化作祥雲，叩謝三大拜後獻上一株守護千年的紫雪參回報！" },
+          { text: "冷聲點醒其妖性未除仍須再修三百年苦功，贈丹助其穩基（高修為＋破境感悟+3%＋德行+6）", qiDelta: 3100, breakthroughBonusDelta: 0.03, stats: { de: 6, ming: 6 }, result: "白狐雖失卻當場捷徑，卻免遭三百年後化形天劫，誠心對你記下這份警醒大恩。" }
+        ]
+      },
+      {
+        id: "imm_dao_04",
+        category: "仙凡",
+        earlyImmortal: false,
+        title: "凡間劫數 · 皇城國師夜叩仙山求援",
+        desc: "人世間已是全新朝代更迭，這日一名身著紫袍的當朝老國師竟捧著上古傳承的『鎮國青銅小鼎』跪在你的洞天外圍大哭：『京畿之下幽冥怨氣翻湧，人間百萬黎民恐遭殃及，求隱世仙長救世！』",
+        choices: [
+          { text: "駕祥雲親臨皇城鎮殺地下鬼窟妖煞，收斂功德而不留姓名（高修為＋壽元+30＋德行+18＋名望+10）", qiDelta: 3000, lifeGain: 30, stats: { de: 18, ming: 10 }, result: "三道劍氣貫穿地脈邪窟，天下昇平之氣騰起化作厚重功德直灌入你的紫府！" },
+          { text: "賜予一枚護身道符與鎮邪經文交給國師自行破厄，自身不入紅塵因果（大量修為＋參悟+3）", qiDelta: 3300, scriptureUsesDelta: 3, stats: { de: 6 }, result: "你不沾染俗世皇朝氣運反噬，靜室參玄進境更是暢通。" }
+        ]
+      },
+      {
+        id: "imm_dao_05",
+        category: "大道",
+        earlyImmortal: false,
+        title: "天機星盤 · 古觀推演太虛飛昇路",
+        desc: "你行經海外孤島一處廢棄的上古觀星台，見中央玄鐵星盤竟能感應你的靈力自行旋轉，映照出九重天闕與未來渡劫的重重殺機！",
+        choices: [
+          { text: "傾注大量真元強催天機星盤，窺探下一境界天劫與大道破綻（高修為＋破境感悟+5%＋參悟+2，70% 成功率）", riskRate: 0.70, qiDelta: 3400, breakthroughBonusDelta: 0.05, scriptureUsesDelta: 2, stats: { ming: 6 }, result: "星盤映出一抹清明破劫之線，今後突破瓶頸時對大道天威已了然於胸！", failResult: "天機反噬震傷識海，你匆忙切斷真元退出觀星台。", failQiDelta: 900, failLifeLoss: 5 },
+          { text: "僅取星盤邊緣殘留的一道先天太極紫氣溫養自身元神（穩妥修為＋壽元+20＋德行+8）", qiDelta: 2300, lifeGain: 20, stats: { de: 8 }, result: "紫氣溫潤護住心脈，道心平靜如太古深潭。" }
+        ]
+      },
+      {
+        id: "imm_dao_06",
+        category: "仙途",
+        earlyImmortal: false,
+        title: "太古玉簡 · 殘缺功法換取真元之道",
+        desc: "九天大仙城五年一度的大型交換會上，攤主亮出半截字跡模糊的遠古金字玉簡——只認得以『純淨先天道氣』換取，拒絕一切世俗財寶！",
+        choices: [
+          { text: "分出一縷精純靈力作為交換，帶回破譯此半部金字古簡（修為大增＋參悟+5＋洗髓靈韻+15%）", qiDelta: 2900, scriptureUsesDelta: 5, rootBonusDelta: 0.15, stats: { ming: 8 }, result: "歸來破譯玉簡後驚覺竟然藏著古修洗髓秘法與周天妙要，可謂滿載而歸！" },
+          { text: "不換古簡，趁機會觀察各路高階修士交易奇珍增長閱歷（修為＋淬體靈韻+15%＋武力+6）", qiDelta: 2200, bodyBonusDelta: 0.15, stats: { wu: 6, qing: 4 }, result: "你從別位散仙手中交換了一瓶荒古淬體獸油，雖無古簡卻也不虛此行。" }
         ]
       }
     ]
