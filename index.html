@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.21.1351</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.23.0806</span>
       </div>
 
       <div class="debug-row">
@@ -1148,7 +1148,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611211351"></script>
+  <script src="data.js?v=202611230806"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1161,7 +1161,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611211351"></script>
+  <script src="patches.js?v=202611230806"></script>
   <script>
 
   (function() {
@@ -2011,7 +2011,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.21.1351";
+    const GAME_VERSION = "v2026.11.23.0806";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -3249,6 +3249,131 @@
         xinfaName: xinfaSk ? xinfaSk.name : "",
         qinggongName: qinggongSk ? qinggongSk.name : "",
         missingCategories
+      };
+    }
+
+    // 重大戰役最終 BOSS 三系底氣權重計分：以招式／內功／身法各自最高一門為骨幹，輔以助陣同伴／肉身／佩兵加權（上限+1.5），依戰役時期分級評估
+    function evaluateBossReadiness(battle, aidedBond = null) {
+      const round1 = (v) => Math.round(v * 10) / 10;
+      const mastered = getMasteredSkillsList();
+      const scoreSkill = (sk) => {
+        const rawTier = (sk.tier || "").replace("絕學", "");
+        const isPerfect = sk.masteryStage === "臻至圓滿";
+        if (["曠世", "傳奇", "自創曠世", "仙道經典"].includes(rawTier) || sk.isScripture || sk.isSelfCreated) {
+          return { score: 3.0, label: `${rawTier || "曠世"}《${sk.name}》` };
+        }
+        if (rawTier === "鎮派") {
+          return { score: 2.5, label: `鎮派《${sk.name}》` };
+        }
+        if (rawTier === "上乘") {
+          return { score: 1.5, label: `上乘《${sk.name}》` };
+        }
+        if (rawTier === "進階") {
+          return {
+            score: isPerfect ? 1.0 : 0.5,
+            label: `${isPerfect ? "進階圓滿" : "進階"}《${sk.name}》`
+          };
+        }
+        return {
+          score: isPerfect ? 0.5 : 0.2,
+          label: `${isPerfect ? "一般圓滿" : (rawTier || "一般")}《${sk.name}》`
+        };
+      };
+
+      const pickBetter = (cur, cand, sk) => {
+        if (!cur) return { score: cand.score, label: cand.label, skill: sk };
+        if (cand.score > cur.score) return { score: cand.score, label: cand.label, skill: sk };
+        if (cand.score === cur.score) {
+          const curPrio = getSkillTierPriority(cur.skill?.tier);
+          const skPrio = getSkillTierPriority(sk?.tier);
+          if (skPrio > curPrio || (skPrio === curPrio && sk.masteryStage === "臻至圓滿" && cur.skill?.masteryStage !== "臻至圓滿")) {
+            return { score: cand.score, label: cand.label, skill: sk };
+          }
+        }
+        return cur;
+      };
+
+      let bestZhaoshi = null;
+      let bestXinfa = null;
+      let bestQinggong = null;
+
+      mastered.forEach(sk => {
+        if (!sk) return;
+        const type = sk.type || "";
+        const weapon = sk.weapon || "";
+        const scored = scoreSkill(sk);
+        if (type === "內功" || type === "心法" || weapon === "心法") {
+          bestXinfa = pickBetter(bestXinfa, scored, sk);
+        } else if (type === "輕功" || type === "身法" || weapon === "身法" || weapon === "輕功") {
+          bestQinggong = pickBetter(bestQinggong, scored, sk);
+        } else if (type === "招式" || ["拳掌", "劍法", "刀法", "槍棍"].includes(weapon)) {
+          bestZhaoshi = pickBetter(bestZhaoshi, scored, sk);
+        }
+      });
+
+      const zRes = bestZhaoshi || { score: 0, label: "無", skill: null };
+      const xRes = bestXinfa || { score: 0, label: "無", skill: null };
+      const qRes = bestQinggong || { score: 0, label: "無", skill: null };
+      const martialScore = round1(zRes.score + xRes.score + qRes.score);
+
+      const aidBonus = aidedBond ? 0.8 : 0;
+      const bodyIdx = (player && player.bodyTierIndex) || 0;
+      const bodyBonus = bodyIdx >= 2 ? 0.8 : (bodyIdx === 1 ? 0.4 : 0);
+      let weaponBonus = 0;
+      if (player && player.equippedWeapon) {
+        const wObj = resolveWeaponObject(player.equippedWeapon);
+        const wTier = (wObj && wObj.tier) || 0;
+        weaponBonus = wTier >= 5 ? 0.6 : (wTier === 4 ? 0.4 : (wTier === 3 ? 0.2 : 0));
+      }
+      const extraScore = Math.min(1.5, round1(aidBonus + bodyBonus + weaponBonus));
+      const totalScore = round1(martialScore + extraScore);
+
+      const bid = (battle && battle.id) || "";
+      const btitle = (battle && battle.title) || "";
+      let targetScore = 5.0;
+      let minMartialScore = 4.0;
+      let tierLabel = "終局魔主";
+      if (bid === "hengshan_crisis" || bid === "battle_hengshan" || bid === "cangzhou_tieshidu" || /雲夢澤|滄州鐵獅渡/.test(btitle)) {
+        targetScore = 3.5;
+        minMartialScore = 2.5;
+        tierLabel = "前期強敵";
+      } else if (bid === "huashan_dahui" || /太白論劍/.test(btitle)) {
+        targetScore = 4.5;
+        minMartialScore = 3.5;
+        tierLabel = "中期絕頂";
+      }
+
+      const totalGap = Math.max(0, round1(targetScore - totalScore));
+      const martialGap = Math.max(0, round1(minMartialScore - martialScore));
+      const effectiveGap = round1(Math.max(totalGap, martialGap));
+      const isReady = effectiveGap <= 0;
+
+      const summaryText = `招式：${zRes.label}、內功：${xRes.label}、身法：${qRes.label}`;
+      let statusText = "";
+      if (isReady) {
+        statusText = `底氣十足（${totalScore}/${targetScore} 分，可憑臨陣武力正面決戰）`;
+      } else if (effectiveGap <= 1.5) {
+        statusText = `尚堪一戰（${totalScore}/${targetScore} 分，強戰勝算仍高，但恐須承擔輕傷或重傷+1 代價）`;
+      } else {
+        statusText = `底氣薄弱（${totalScore}/${targetScore} 分，強闖魔頭九死一生，即便險勝亦必遭重傷+1～+2！）`;
+      }
+
+      return {
+        martialScore,
+        extraScore,
+        totalScore,
+        targetScore,
+        minMartialScore,
+        tierLabel,
+        totalGap,
+        martialGap,
+        effectiveGap,
+        isReady,
+        summaryText,
+        statusText,
+        zhaoshi: zRes,
+        xinfa: xRes,
+        qinggong: qRes
       };
     }
 
@@ -10398,6 +10523,14 @@ ${targetW.desc}
         return;
       }
 
+      const isBossStage = (
+        (isWushendian && stageNum === 5) ||
+        (isHengshan && stageNum === 5) ||
+        (battle.id === "huashan_dahui" && stageNum === 4) ||
+        (isCangzhou && stageNum === 4) ||
+        (!isWushendian && !isHengshan && !isCangzhou && battle.id !== "huashan_dahui" && stageNum >= 5)
+      );
+
       // 對本幕所有選項套用 ±33% 浮動檢定值
       const floatedStageChoices = (stage.choices || []).map(ch => applyFloatingReqToChoice(ch));
 
@@ -10493,31 +10626,42 @@ ${targetW.desc}
               : "";
             const baseChoiceStats = Object.keys(c.stats || {}).length > 0 ? c.stats : { wu: 4, ming: 4 };
 
-            const isFinalBossFight = (
-              (isWushendian && stageNum === 5) ||
-              (isHengshan && stageNum === 5) ||
-              (battle.id === "huashan_dahui" && stageNum === 4) ||
-              (isCangzhou && stageNum === 4) ||
-              (battle.id === "battle_wushendian") ||
-              (!isWushendian && !isHengshan && !isCangzhou && battle.id !== "huashan_dahui" && stageNum >= 5)
-            );
-            const bossZpStatus = isFinalBossFight ? getSanHuaZhenpaiStatus(false) : null;
-            const bossZpCount = bossZpStatus
-              ? [bossZpStatus.hasZhaoshi, bossZpStatus.hasXinfa, bossZpStatus.hasQinggong].filter(Boolean).length
-              : 3;
+            const isFinalBossFight = isBossStage;
+            const bossEval = isFinalBossFight ? evaluateBossReadiness(battle, aidedBond) : null;
 
-            // 0. 最終 BOSS 鎮派三系檢定：面對最終 BOSS 至少需具備「鎮派以上招式、內功、身法」其中 2 種，方有機會輕傷或無傷過關！
-            if (isFinalBossFight && bossZpCount < 2) {
-              const zpMissingNote = `（鎮派以上招式／內功／身法僅修得 ${bossZpCount}/3 種，底氣不足）`;
-              const deathProb = bossZpCount === 0
-                ? (effWu < reqWu ? 0.75 : 0.70)
-                : (effWu < reqWu ? 0.65 : 0.25);
-              if (Math.random() < deathProb) {
+            // 0. 最終 BOSS 三系底氣權重檢定（未達分齡基準時改走平滑險勝機率與重傷代價曲線，達標則進正常武力決戰）
+            if (isFinalBossFight && bossEval && !bossEval.isReady) {
+              const scoreNote = `（${bossEval.tierLabel} · 三系底氣 ${bossEval.totalScore}/${bossEval.targetScore} 分）`;
+              const wuBonus = effWu >= reqWu * 1.2
+                ? 0.15
+                : (effWu >= reqWu ? 0.05 : (effWu >= reqWu * 0.8 ? -0.15 : -0.30));
+              const rawSurvive = 0.92 - bossEval.effectiveGap * 0.14 + wuBonus;
+              const surviveProb = bossEval.effectiveGap <= 1.5
+                ? Math.max(0.55, Math.min(0.94, rawSurvive))
+                : Math.max(0.22, Math.min(0.65, rawSurvive));
+
+              if (Math.random() < surviveProb) {
+                if (battle.id === "huashan_dahui" && isBlockOption && effWu >= reqWu) player.huashanBlockedSword = true;
+                if (bossEval.effectiveGap <= 1.0 && bossEval.martialGap <= 0 && effWu >= reqWu * 1.1 && Math.random() < 0.40) {
+                  const chg = modifyStats(rollBattleStats(baseChoiceStats));
+                  addLog(`⚔️【底氣微缺 · 浴血險勝】${aidNote}${scoreNote} 你三系根基尚差一線，幸憑渾厚臨陣武力硬扛過最終強敵殺招突圍，僅受些許皮肉輕傷！（輕傷+1${chg.length ? "、" + chg.join("、") : ""}）`, "milestone");
+                  addLightInjury(1);
+                } else {
+                  const heavyAdd = bossEval.effectiveGap <= 1.5
+                    ? ((effWu < reqWu || Math.random() < 0.25) ? 2 : 1)
+                    : ((bossEval.effectiveGap >= 3.0 || effWu < reqWu || Math.random() < 0.55) ? 2 : 1);
+                  const chg = modifyStats(rollBattleStats(effWu >= reqWu ? baseChoiceStats : { wu: 2, ming: 2 }));
+                  addLog(`🩸【底氣未足 · 血戰險勝】${aidNote}${scoreNote} 面對最終 BOSS 絕世威壓，你招式、內功與身法積累尚嫌不足，雖死戰撐過此劫仍被狂暴氣勁震裂經脈，身受 ${heavyAdd} 處重傷！（重傷+${heavyAdd}${chg.length ? "、" + chg.join("、") : ""}）`, "danger-log");
+                  addHeavyInjury(heavyAdd);
+                }
+                if (player.isDead) return;
+                customOutcomeHandled = true;
+              } else {
                 if (battle.id === "huashan_dahui" && stageNum === 4) player.huashanBlockedSword = false;
                 if (consumeTaixuArmor()) {
-                  addLog(`🛡️【神器護主】${aidNote}${zpMissingNote} 面對最終強敵狂暴殺招，太虛神甲替你擋下致命一擊碎裂成齏粉！你借力暴退保住一命！`, "good-log");
+                  addLog(`🛡️【神器護主】${aidNote}${scoreNote} 面對最終強敵狂暴殺招，太虛神甲替你擋下致命一擊碎裂成齏粉！你借力暴退保住一命！`, "good-log");
                   customOutcomeHandled = true;
-                } else if (effWu >= reqWu && tryMiracleRescueFromDeath(`於【${battle.title} · ${stage.subtitle}】鎮派武學火候不足卻死戰最終強敵，`, !!aidedBond)) {
+                } else if (effWu >= reqWu && tryMiracleRescueFromDeath(`於【${battle.title} · ${stage.subtitle}】武道三系底氣未足卻死戰最終強敵，`, !!aidedBond)) {
                   customOutcomeHandled = true;
                 } else {
                   if (aidedBond) {
@@ -10527,23 +10671,15 @@ ${targetW.desc}
                     aidedBond.status = `於【${battle.title}】與你並肩死戰最終強敵而亡`;
                   }
                   const fd = c.failDeath || (stageFatalChoice && stageFatalChoice.failDeath) || {
-                    reason: `於【${battle.title} · ${stage.subtitle}】因鎮派三系武學底氣不足（僅 ${bossZpCount}/3 種），難敵最終魔頭絕世殺招，血戰力竭隕落。`,
+                    reason: `於【${battle.title} · ${stage.subtitle}】因三系武學底氣不足${scoreNote}，難敵最終魔頭絕世殺招，血戰力竭隕落。`,
                     seal: { name: "決戰隕落", quote: "未成三花聚頂功，血染魔鋒不低頭。" }
                   };
-                  const deathMsg = `於【${battle.title} · ${stage.subtitle}】死戰最終強敵${zpMissingNote}${aidNote}，護體真氣被魔威徹底震潰，最終${aidedBond ? `與【${aidedBond.name}】雙雙` : ""}戰敗殞落。`;
-                  addLog(`🩸【鎮派未足 · 戰敗殞落】${deathMsg}`, "danger-log");
+                  const deathMsg = `於【${battle.title} · ${stage.subtitle}】死戰最終強敵${scoreNote}${aidNote}，護體真氣被魔威徹底震潰，最終${aidedBond ? `與【${aidedBond.name}】雙雙` : ""}戰敗殞落。`;
+                  addLog(`🩸【底氣不繼 · 戰敗殞落】${deathMsg}`, "danger-log");
                   player.customDeathSeal = fd.seal;
                   triggerDeathOrAscension(deathMsg);
                   return;
                 }
-              } else {
-                const heavyAdd = (bossZpCount === 0 || effWu < reqWu || Math.random() < 0.45) ? 2 : 1;
-                if (battle.id === "huashan_dahui" && isBlockOption && effWu >= reqWu) player.huashanBlockedSword = true;
-                const chg = modifyStats(rollBattleStats(effWu >= reqWu ? baseChoiceStats : { wu: 2, ming: 2 }));
-                addLog(`🩸【底氣不足 · 慘烈重創】${aidNote}${zpMissingNote} 面對最終 BOSS 絕世威壓，你招式、內功與身法未能相輔相成，雖死戰撐過此劫仍被狂暴氣勁震裂經脈，身受 ${heavyAdd} 處重傷！（重傷+${heavyAdd}${chg.length ? "、" + chg.join("、") : ""}）`, "danger-log");
-                addHeavyInjury(heavyAdd);
-                if (player.isDead) return;
-                customOutcomeHandled = true;
               }
             }
             // 1. 武力不足 (effWu < reqWu)：強行硬闖有 50% 機率慘遭重創（重傷+2），50% 機率當場斃命 GG！
@@ -10686,13 +10822,15 @@ ${targetW.desc}
         stageNarrative = "數日後，關中大雨初歇。長安、洛陽乃至華陰各處茶館酒肆，說書先生一拍驚堂木，開始說起雨夜凌霄崖那場驚心動魄的正邪血戰……";
         stageGuide = "【戰況導引】：凌霄崖血戰落幕，你可以選擇撫卹陣亡同道遺孤，或於絕壁靜坐參悟生死極意！（註：【名揚關中】需於前幕選擇捨命擋劍並成功擋下殺招方能解鎖）";
       }
-      const isBossStage = (isWushendian && stageNum === 5) || (isHengshan && stageNum === 5) || (battle.id === "huashan_dahui" && stageNum === 4) || (isCangzhou && stageNum === 4);
       let bossZhenpaiNote = "";
       if (isBossStage) {
-        const zpSt = getSanHuaZhenpaiStatus(false);
-        const zpCnt = [zpSt.hasZhaoshi, zpSt.hasXinfa, zpSt.hasQinggong].filter(Boolean).length;
-        const haveList = [zpSt.hasZhaoshi ? "招式" : "", zpSt.hasXinfa ? "內功" : "", zpSt.hasQinggong ? "身法" : ""].filter(Boolean);
-        bossZhenpaiNote = `\n⚠️ 【最終 BOSS 鎮派三系檢定】：面對最終頭目需具備「鎮派以上招式、內功、身法」至少 2 種才有機會輕傷或無傷過關（當前已參悟 ${zpCnt}/3：${haveList.length ? haveList.join("、") : "無"}；不足 2 種強戰將面臨重傷+1～+2 甚至戰敗殞落！）`;
+        const canAidPreview = (b) => b && !b.isDead && (!player.fakedDeath || b.isImmortal) && (!player.inImmortalPhase || b.isImmortal);
+        const previewAidedBond = Array.isArray(player.bonds)
+          ? player.bonds.find(b => canAidPreview(b) && (b.intimacyIndex >= 4 || b.relationTag === "紅塵伴侶" || b.relationTag === "義結金蘭" || b.isImmortal))
+          : null;
+        const ev = evaluateBossReadiness(battle, previewAidedBond);
+        const aidStr = previewAidedBond ? `＋同伴【${previewAidedBond.name}】助陣` : "";
+        bossZhenpaiNote = `\n⚔️ 【最終 BOSS 三系底氣評估 · ${ev.tierLabel}】：${ev.summaryText}（武學 ${ev.martialScore} / 下限 ${ev.minMartialScore}、實戰助威${aidStr} +${ev.extraScore} → 總評 ${ev.statusText}）`;
       }
       const formattedGuide = formatFloatingStageGuide(stageGuide);
       const lightCnt = player.lightInjuries || 0;
