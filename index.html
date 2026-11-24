@@ -1100,7 +1100,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.23.1204</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.25.0045</span>
       </div>
 
       <div class="debug-row">
@@ -1148,7 +1148,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611231204"></script>
+  <script src="data.js?v=202611250045"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1161,7 +1161,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611231204"></script>
+  <script src="patches.js?v=202611250045"></script>
   <script>
 
   (function() {
@@ -2011,7 +2011,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.23.1204";
+    const GAME_VERSION = "v2026.11.25.0045";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -2848,6 +2848,8 @@
       return 1;
     }
 
+    // ⚠️【已被執行期覆寫】本函式於檔案末段 applyV20261113Patch 中被整體替換（pickLearnedSkill = window.pickLearnedSkill = function...），
+    //    此處原始版本不會被呼叫；修改武學挑選邏輯請改編輯 applyV20261113Patch 內的新版實作。
     // 從玩家已學會的武學中挑選（優先挑選高階武學與契合佩兵之招式，一旦學會進階以上武學便不再出現太祖長拳/羅漢拳等基礎拳腳）
     function pickLearnedSkill(preferCategory = "", weaponHint = "", allowRandom = true) {
       let mastered = getMasteredSkillsList();
@@ -8456,6 +8458,8 @@ ${targetW.desc}
       return false;
     }
 
+    // ⚠️【已被執行期覆寫】本函式於檔案末段 applyV20261113Patch 中被整體替換（triggerCompanionRescueModal = window.triggerCompanionRescueModal = function...），
+    //    此處原始版本不會被呼叫；修改「故人危殆 · 千里馳援」請改編輯 applyV20261113Patch 內的新版實作。
     // 同伴遭遇「天妒英才 · 故人喋血」危機時，主角有機率趕往馳援的前因後果劇本
     function triggerCompanionRescueModal(bond, scriptObj) {
       if (!player || !bond) return false;
@@ -16721,6 +16725,8 @@ ${targetW.desc}
       return true;
     }
 
+    // ⚠️【已被執行期覆寫】本函式於檔案末段 applyV20261113Patch 中被整體替換（triggerFamilyAndDiscipleEvent = window.triggerFamilyAndDiscipleEvent = function...），
+    //    此處原始版本不會被呼叫；修改家室／師門劇本請改編輯 applyV20261113Patch 內的新版實作。
     // 家庭天倫、子女成長、以及「子女 × 親傳弟子」攜手闖江湖豐富劇本池！
     function triggerFamilyAndDiscipleEvent(forceDebug = false) {
       if (!player) return false;
