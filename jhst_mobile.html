@@ -578,10 +578,15 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 62%;
+        max-width: 46%;
       }
       #ui-lifespan-hint {
         white-space: nowrap;
+        font-size: 0.72rem !important;
+      }
+      #btn-export-log-txt {
+        padding: 2px 6px !important;
+        font-size: 0.72rem !important;
       }
 
       #log-container {
@@ -939,7 +944,10 @@
     <section class="life-stream-panel">
       <div class="panel-header">
         <span id="ui-life-stage-title">📜 紅塵生平卷</span>
-        <span id="ui-lifespan-hint" style="font-family:var(--font-sans);font-size:0.8rem;color:var(--text-muted);">壽元：--</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          <span id="ui-lifespan-hint" style="font-family:var(--font-sans);font-size:0.8rem;color:var(--text-muted);">壽元：--</span>
+          <button class="ctrl-btn" id="btn-export-log-txt" title="匯出完整生平紀事 (.txt)" style="padding:2px 8px;font-size:0.76rem;white-space:nowrap;">📥 匯出生平</button>
+        </div>
       </div>
 
       <div id="log-container"></div>
@@ -976,6 +984,9 @@
         <div style="font-size:0.8rem;color:var(--gold);margin-bottom:3px;">🌱 輪迴宿慧（消耗道種強化歷世起點）</div>
         <div class="talent-grid" id="talent-grid"></div>
       </div>
+
+      <!-- 自動存檔續玩橫幅（若有上次未完或可查閱之進度時顯示） -->
+      <div id="resume-save-banner" style="display:none;margin-bottom:8px;padding:8px 10px;border:1px solid rgba(212,175,55,0.55);background:rgba(212,175,55,0.1);border-radius:6px;"></div>
 
       <!-- 控制按鈕列（轉生 / 選擇名俠 / 踏入紅塵） -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
@@ -1084,7 +1095,8 @@
 
           <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(140,123,101,0.3);padding-top:14px;margin-top:14px;flex-wrap:wrap;gap:10px;">
             <span id="ep-seed-reward" style="font-weight:bold;color:#8b261d;font-size:0.9rem;">結算凝聚道種：+0</span>
-            <div style="display:flex;gap:8px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="ctrl-btn" id="btn-ep-export-txt" style="background:#3e5348;color:#f7f3eb;border-color:#2b3b33;">📥 匯出完整生平 (.txt)</button>
               <button class="ctrl-btn" id="btn-ep-save-png" style="background:#5c4e3c;color:#f7f3eb;border-color:#3d3328;">📸 保存此生碑帖 (PNG)</button>
               <button class="ctrl-btn primary" id="btn-ep-restart">再入輪迴 ☸️</button>
             </div>
@@ -1100,7 +1112,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.26.2310</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.26.2330</span>
       </div>
 
       <div class="debug-row">
@@ -18211,7 +18223,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.26.2310";
+    const GAME_VERSION = "v2026.11.26.2330";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -18231,6 +18243,441 @@ addGameData({
     let userManualPaused = false;
     let isAutoFate = false;
     let weaponsListExpanded = false;
+
+    /* =========================================================================
+     * 五之二、 自動存檔與續玩 (localStorage + Set 安全序列化) ＆ 完整生平匯出 (.txt)
+     * ========================================================================= */
+    const AUTO_SAVE_KEY = "JHST_AUTOSAVE_V1";
+    const META_SAVE_KEY = "JHST_META_V1";
+    let lastAutoSaveTs = 0;
+
+    function serializeState(obj) {
+      return JSON.stringify(obj, (_, val) => {
+        if (val instanceof Set) return { __jhstSet: Array.from(val) };
+        if (typeof val === "function") return undefined;
+        return val;
+      });
+    }
+
+    function deserializeState(raw) {
+      return JSON.parse(raw, (_, val) => {
+        if (val && typeof val === "object" && !Array.isArray(val) && Array.isArray(val.__jhstSet)) {
+          return new Set(val.__jhstSet);
+        }
+        return val;
+      });
+    }
+
+    function saveMetaState() {
+      try {
+        if (typeof localStorage === "undefined") return false;
+        const talentLevels = {};
+        Object.keys(MetaState.talents || {}).forEach(k => {
+          talentLevels[k] = Number(MetaState.talents[k]?.level) || 0;
+        });
+        const payload = {
+          version: GAME_VERSION,
+          daoSeeds: Math.max(0, Number(MetaState.daoSeeds) || 0),
+          talentLevels,
+          unlockedBaixiao: MetaState.unlockedBaixiao instanceof Set ? MetaState.unlockedBaixiao : new Set(),
+          unlockedAchievements: MetaState.unlockedAchievements instanceof Set ? MetaState.unlockedAchievements : new Set()
+        };
+        localStorage.setItem(META_SAVE_KEY, serializeState(payload));
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function loadMetaState() {
+      try {
+        if (typeof localStorage === "undefined") return false;
+        const raw = localStorage.getItem(META_SAVE_KEY);
+        if (!raw) return false;
+        const data = deserializeState(raw);
+        if (!data || typeof data !== "object") return false;
+        if (typeof data.daoSeeds === "number" && Number.isFinite(data.daoSeeds) && data.daoSeeds >= 0) {
+          MetaState.daoSeeds = data.daoSeeds;
+        }
+        if (data.talentLevels && typeof data.talentLevels === "object") {
+          Object.keys(MetaState.talents || {}).forEach(k => {
+            const t = MetaState.talents[k];
+            if (!t) return;
+            const lv = Number(data.talentLevels[k]);
+            if (Number.isFinite(lv) && lv >= 0) {
+              t.level = lv;
+              t.cost = getTalentUpgradeCost(lv);
+            }
+          });
+        }
+        if (data.unlockedBaixiao instanceof Set) {
+          data.unlockedBaixiao.forEach(item => MetaState.unlockedBaixiao.add(item));
+        } else if (Array.isArray(data.unlockedBaixiao)) {
+          data.unlockedBaixiao.forEach(item => MetaState.unlockedBaixiao.add(item));
+        }
+        if (data.unlockedAchievements instanceof Set) {
+          data.unlockedAchievements.forEach(item => MetaState.unlockedAchievements.add(item));
+        } else if (Array.isArray(data.unlockedAchievements)) {
+          data.unlockedAchievements.forEach(item => MetaState.unlockedAchievements.add(item));
+        }
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function ensurePlayerIntegrity(p) {
+      if (!p || typeof p !== "object") return p;
+      const arrFields = [
+        "skills", "bonds", "children", "disciples", "mounts", "logs",
+        "badges", "titles", "artifacts", "ownedWeapons", "sealedWeapons",
+        "collectedManuals", "worldHistory", "injuryHistory", "titleHistory",
+        "innateTalents", "scriptureLogs"
+      ];
+      arrFields.forEach(k => {
+        if (!Array.isArray(p[k])) p[k] = [];
+      });
+      const setFields = [
+        "usedEvents", "usedEpochEvents", "usedImmortalEvents", "triggeredBattles",
+        "triggeredAllianceLeaderEvents", "weaponHistoryFlags",
+        "thisLifeBaixiao", "thisLifeAchievements"
+      ];
+      setFields.forEach(k => {
+        if (!(p[k] instanceof Set)) {
+          p[k] = new Set(Array.isArray(p[k]) ? p[k] : []);
+        }
+      });
+      if (!p.stats || typeof p.stats !== "object") {
+        p.stats = { wu: 10, de: 10, ming: 0, cai: 10, qing: 10 };
+      } else {
+        ["wu", "de", "ming", "cai", "qing"].forEach(k => {
+          p.stats[k] = Number(p.stats[k]) || 0;
+        });
+      }
+      return p;
+    }
+
+    function saveAutoGame(options = {}) {
+      if (!player || typeof localStorage === "undefined") return false;
+      const modalOpen = document.getElementById("modal-event")?.classList.contains("show");
+      if (modalOpen && !options.allowDuringModal) return false;
+
+      const now = Date.now();
+      if (!options.force && (now - lastAutoSaveTs) < 1200) return false;
+
+      const epSnap = player.isDead
+        ? { reasonText: player.deathReason || "", seedReward: Number(player._lastSeedReward) || 0 }
+        : null;
+      const payload = {
+        version: GAME_VERSION,
+        savedAt: now,
+        player,
+        epilogueSnapshot: epSnap
+      };
+
+      try {
+        localStorage.setItem(AUTO_SAVE_KEY, serializeState(payload));
+        lastAutoSaveTs = now;
+        return true;
+      } catch (err) {
+        try {
+          const trimmedPlayer = Object.assign({}, player);
+          const rawLogs = Array.isArray(player.logs) ? player.logs : [];
+          trimmedPlayer.logs = [
+            { time: "[系統提示]", text: "存檔空間受限，本地快取僅保留最近 1,200 條生平紀事。", type: "" },
+            ...rawLogs.slice(-1200)
+          ];
+          const fallbackPayload = {
+            version: GAME_VERSION,
+            savedAt: now,
+            player: trimmedPlayer,
+            epilogueSnapshot: epSnap
+          };
+          localStorage.setItem(AUTO_SAVE_KEY, serializeState(fallbackPayload));
+          lastAutoSaveTs = now;
+          return true;
+        } catch (err2) {
+          return false;
+        }
+      }
+    }
+
+    function getAutoSaveSummary() {
+      try {
+        if (typeof localStorage === "undefined") return null;
+        const raw = localStorage.getItem(AUTO_SAVE_KEY);
+        if (!raw) return null;
+        const data = deserializeState(raw);
+        if (!data || !data.player || !data.player.name) return null;
+        const p = data.player;
+        return {
+          name: p.name,
+          gender: p.gender || "男",
+          age: Number(p.age) || 0,
+          month: Number(p.month) || 1,
+          maxLifespan: Number(p.maxLifespan) || 80,
+          sect: p.sect || "無門無派",
+          title: p.title || "",
+          inImmortalPhase: !!p.inImmortalPhase,
+          isImmortalUnlocked: !!p.isImmortalUnlocked,
+          immortalStage: Number(p.immortalStage) || 0,
+          isDead: !!p.isDead,
+          savedAt: Number(data.savedAt) || 0,
+          logCount: Array.isArray(p.logs) ? p.logs.length : 0
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function clearAutoSave() {
+      try {
+        if (typeof localStorage !== "undefined") localStorage.removeItem(AUTO_SAVE_KEY);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function formatSaveClock(ts) {
+      if (!ts) return "";
+      const d = new Date(ts);
+      const pad = n => String(n).padStart(2, "0");
+      return `${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function renderResumeBanner() {
+      const box = document.getElementById("resume-save-banner");
+      if (!box) return;
+      const summary = getAutoSaveSummary();
+      if (!summary) {
+        box.style.display = "none";
+        box.innerHTML = "";
+        return;
+      }
+      const ageLabel = summary.inImmortalPhase ? `${summary.age} 歲` : `${summary.age} 歲 ${summary.month} 月`;
+      const realmLabel = (summary.isImmortalUnlocked && typeof IMMORTAL_REALMS !== "undefined" && IMMORTAL_REALMS[summary.immortalStage])
+        ? IMMORTAL_REALMS[summary.immortalStage].name
+        : summary.sect;
+      const statusBadge = summary.isDead
+        ? `<span style="color:#ff9e9e;">已謝世 · 可查閱碑帖與匯出生平</span>`
+        : `<span style="color:#5ce0c0;">進行中</span>`;
+      const timeStr = formatSaveClock(summary.savedAt);
+      box.style.display = "block";
+      box.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div style="font-size:0.84rem;line-height:1.45;color:#e6e2d8;">
+            <strong style="color:var(--gold-bright);">💾 上次仙途存檔</strong>
+            <span style="margin-left:6px;">【${summary.name}】${ageLabel} · ${realmLabel}</span>
+            <span style="margin-left:6px;font-size:0.78rem;">（${statusBadge}${timeStr ? ` · ${timeStr}` : ""}）</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="ctrl-btn primary" id="btn-resume-save" style="padding:4px 10px;font-size:0.8rem;">▶ 繼續上次仙途</button>
+            <button class="ctrl-btn" id="btn-clear-save" style="padding:4px 8px;font-size:0.78rem;">🗑️ 清除</button>
+          </div>
+        </div>
+      `;
+      document.getElementById("btn-resume-save")?.addEventListener("click", () => {
+        resumeFromAutoSave();
+      });
+      document.getElementById("btn-clear-save")?.addEventListener("click", () => {
+        if (typeof confirm !== "function" || confirm("確定要清除上次自動存檔嗎？（輪迴道種與永久天機不受影響）")) {
+          clearAutoSave();
+          renderResumeBanner();
+        }
+      });
+    }
+
+    function resumeFromAutoSave() {
+      try {
+        if (typeof localStorage === "undefined") return false;
+        const raw = localStorage.getItem(AUTO_SAVE_KEY);
+        if (!raw) return false;
+        const saved = deserializeState(raw);
+        if (!saved || !saved.player || !saved.player.name) return false;
+
+        ensurePlayerIntegrity(saved.player);
+        player = saved.player;
+
+        const container = document.getElementById("log-container");
+        if (container) {
+          container.innerHTML = "";
+          const frag = typeof document.createDocumentFragment === "function"
+            ? document.createDocumentFragment()
+            : container;
+          (player.logs || []).forEach(entry => {
+            if (!entry) return;
+            const div = document.createElement("div");
+            div.className = `log-entry ${entry.type || ""}`;
+            div.innerHTML = `<span class="log-age-tag">${entry.time || ""}</span><span>${entry.text || ""}</span>`;
+            frag.appendChild(div);
+          });
+          if (frag !== container) container.appendChild(frag);
+          container.scrollTop = container.scrollHeight;
+        }
+
+        document.getElementById("modal-start")?.classList.remove("show");
+        document.getElementById("modal-event")?.classList.remove("show");
+        document.getElementById("modal-epilogue")?.classList.remove("show");
+
+        const showImmortal = !!(player.isImmortalUnlocked || player.inImmortalPhase);
+        const tabBtnImmortal = document.getElementById("tab-btn-immortal");
+        const tabImmortal = document.getElementById("tab-immortal");
+        const mNavImmortal = document.getElementById("m-nav-immortal");
+        if (tabBtnImmortal) {
+          tabBtnImmortal.classList.toggle("hidden", !showImmortal);
+          if (!showImmortal) tabBtnImmortal.classList.remove("active");
+        }
+        if (tabImmortal && !showImmortal) {
+          tabImmortal.classList.remove("active");
+        }
+        if (mNavImmortal) {
+          mNavImmortal.style.display = showImmortal ? "flex" : "none";
+          if (!showImmortal) mNavImmortal.classList.remove("active");
+        }
+
+        const stageTitleEl = document.getElementById("ui-life-stage-title");
+        if (stageTitleEl) {
+          stageTitleEl.textContent = player.inImmortalPhase ? "🌌 洞天修真卷" : "📜 紅塵生平卷";
+        }
+
+        const leaveSectBtn = document.getElementById("btn-leave-sect");
+        if (leaveSectBtn) {
+          const canLeave = !player.isDead && !player.inImmortalPhase && player.age >= 8 && player.age < 80 && player.sect && player.sect !== "無門無派";
+          leaveSectBtn.style.display = canLeave ? "inline-block" : "none";
+        }
+
+        document.body.classList.remove("mobile-mode-side");
+        document.body.classList.add("mobile-mode-log");
+        document.querySelectorAll(".mobile-tab-btn").forEach(b => {
+          b.classList.toggle("active", b.getAttribute("data-m-tab") === "log");
+        });
+
+        const epBtn = document.getElementById("btn-open-epilogue");
+        if (epBtn) epBtn.style.display = player.isDead ? "inline-block" : "none";
+
+        updateAllUI();
+
+        if (player.isDead) {
+          const seals = evaluatePosthumousSeals();
+          const reasonText = (saved.epilogueSnapshot && saved.epilogueSnapshot.reasonText) || player.deathReason || "";
+          const seedReward = (saved.epilogueSnapshot && saved.epilogueSnapshot.seedReward) || Number(player._lastSeedReward) || 0;
+          renderEpilogueModalView(reasonText, seals, seedReward, { appendLogPrompt: true });
+          userManualPaused = true;
+          setPauseState(true, true);
+        } else {
+          if (container) {
+            const noticeDiv = document.createElement("div");
+            noticeDiv.className = "log-entry milestone";
+            noticeDiv.innerHTML = `<span class="log-age-tag">[續前緣]</span><span>💾【續前緣 · 已讀取自動存檔】當前進度：${player.name}（${player.age}歲），已先為你暫停時間，點擊「▶ 繼續 (P)」即可接續行程。</span>`;
+            container.appendChild(noticeDiv);
+            container.scrollTop = container.scrollHeight;
+          }
+          userManualPaused = true;
+          setPauseState(true, true);
+        }
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function formatLocalFileTimestamp(date = new Date()) {
+      const pad = n => String(n).padStart(2, "0");
+      return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}_${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+    }
+
+    function stripHtmlTags(s) {
+      return String(s || "").replace(/<[^>]+>/g, "");
+    }
+
+    function buildFullLifeLogTxt() {
+      if (!player) return null;
+      const entries = [];
+      if (Array.isArray(player.logs) && player.logs.length > 0) {
+        player.logs.forEach(e => {
+          if (!e) return;
+          entries.push(`${e.time || ""}${stripHtmlTags(e.text)}`);
+        });
+      } else {
+        const logEl = document.getElementById("log-container");
+        if (logEl && Array.isArray(logEl.children)) {
+          Array.from(logEl.children).forEach(ch => {
+            const txt = stripHtmlTags(ch.textContent || ch.innerHTML).trim();
+            if (txt) entries.push(txt);
+          });
+        }
+      }
+
+      const ageText = player.inImmortalPhase ? `${player.age} 歲（洞天修真）` : `${player.age} 歲 ${player.month || 1} 月`;
+      const lifeStatus = player.isDead ? `已謝世（${stripHtmlTags(player.deathReason || "塵緣落幕")}）` : "仍在世間歷練";
+      const stats = player.stats || {};
+      const lines = [
+        `《江湖仙途 · 雙生天命》完整生平卷（${GAME_VERSION}）`,
+        `==================================================`,
+        `俠名：${player.name}（${player.gender || "男"}）｜稱號：${player.title || "無"}｜門派：${player.sect || "無門無派"}`,
+        `年歲：${ageText}（壽元上限：${player.maxLifespan} 歲）｜狀態：${lifeStatus}`,
+        `五維：武力 ${stats.wu || 0}｜德行 ${stats.de || 0}｜名望 ${stats.ming || 0}｜財富 ${stats.cai || 0}｜情義 ${stats.qing || 0}`
+      ];
+
+      if (player.isImmortalUnlocked) {
+        const realmName = (typeof IMMORTAL_REALMS !== "undefined" && IMMORTAL_REALMS[player.immortalStage || 0]?.name) || "練氣期";
+        const bodyName = (typeof BODY_TIERS !== "undefined" && BODY_TIERS[player.bodyTierIndex || 0]?.name) || "凡胎肉身";
+        const rootName = (typeof ROOT_TIERS !== "undefined" && ROOT_TIERS[player.rootTierIndex || 0]?.name) || "凡品雜靈根";
+        lines.push(`修真：${realmName}（修為 ${player.qi || 0}）｜肉身：${bodyName}｜靈根：${rootName}`);
+      }
+
+      const skillList = (player.skills || []).map(sk => {
+        const tierLabel = sk.tier ? `[${sk.tier}]` : "";
+        return `${tierLabel}${sk.name}${sk.pendingEnlightenment ? "(參悟中)" : ""}`;
+      });
+      lines.push(`武學（${skillList.length} 門）：${skillList.length > 0 ? skillList.join("、") : "無"}`);
+
+      const bondList = (player.bonds || []).map(b => {
+        const rel = b.relationTag || (typeof INTIMACY_LEVELS !== "undefined" ? INTIMACY_LEVELS[b.intimacyIndex || 0] : "") || "相識";
+        const st = b.isDead ? `已故(${b.deathAge || "?"}歲)` : "在世";
+        return `${b.name}[${rel}/${st}]`;
+      });
+      lines.push(`羈絆（${bondList.length} 人）：${bondList.length > 0 ? bondList.join("、") : "無"}`);
+      lines.push(`==================================================`);
+      lines.push(`【生平紀事（共 ${entries.length} 條）】`);
+      lines.push(...entries);
+
+      const safeName = String(player.name || "無名").replace(/[\\/:*?"<>|\s]+/g, "_");
+      const filename = `${formatLocalFileTimestamp()}_江湖仙途_${safeName}_${player.age || 0}歲.txt`;
+      return { filename, content: lines.join("\n"), lineCount: entries.length };
+    }
+
+    function exportFullLifeLogTxt() {
+      const res = buildFullLifeLogTxt();
+      if (!res) {
+        if (typeof alert === "function") alert("目前尚未展開生平旅程，暫無紀錄可匯出！");
+        return null;
+      }
+      if (typeof Blob === "function" && typeof URL !== "undefined" && typeof URL.createObjectURL === "function") {
+        const blob = new Blob([res.content], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = res.filename;
+        a.click();
+        setTimeout(() => {
+          try { URL.revokeObjectURL(url); } catch (e) {}
+        }, 1000);
+      }
+      return res;
+    }
+
+    window.JHST_PERSIST = {
+      saveAutoGame,
+      loadAutoSave: resumeFromAutoSave,
+      getAutoSaveSummary,
+      clearAutoSave,
+      saveMetaState,
+      loadMetaState,
+      buildFullLifeLogTxt,
+      exportFullLifeLogTxt
+    };
 
     /* =========================================================================
      * 六、 開局輪迴司（0~2 個天賦隨機 + 性別判定 + 頂部錨定按鈕絕對不跳動）
@@ -18460,12 +18907,14 @@ addGameData({
               else if (key === "virtueHeart") candidateDraft.stats.de = (candidateDraft.stats.de || 0) + 4;
               else if (key === "wealthLuck") candidateDraft.stats.cai = (candidateDraft.stats.cai || 0) + 5;
             }
+            saveMetaState();
             renderStartModal();
           }
         });
       });
 
       refreshCharacterDropdowns();
+      renderResumeBanner();
     }
 
     /* =========================================================================
@@ -18815,7 +19264,8 @@ addGameData({
         isAllianceLeader: false,
         triggeredAllianceLeaderEvents: new Set(),
         thisLifeBaixiao: new Set(),
-        thisLifeAchievements: new Set()
+        thisLifeAchievements: new Set(),
+        logs: []
       };
 
       (candidateDraft.presetSkills || []).forEach(skName => gainMartialArt(skName, true));
@@ -18863,6 +19313,8 @@ addGameData({
       updateAllUI();
       userManualPaused = false;
       setPauseState(false);
+      saveMetaState();
+      saveAutoGame({ force: true });
     }
 
     /* =========================================================================
@@ -29390,6 +29842,7 @@ ${targetW.desc}
         tickImmortalYear();
       }
       updateAllUI();
+      if (!isPaused && !player.isDead) saveAutoGame();
     }
 
     function tickMortalMonth() {
@@ -32267,7 +32720,15 @@ ${targetW.desc}
         + (player.isImmortalUnlocked ? 15 : 0);
       const seedReward = Math.max(3, Math.round(rawSeedReward * 0.6));
       MetaState.daoSeeds += seedReward;
+      player._lastSeedReward = seedReward;
 
+      renderEpilogueModalView(reasonText, seals, seedReward, { appendLogPrompt: true });
+      saveMetaState();
+      saveAutoGame({ force: true, allowDuringModal: true });
+    }
+
+    function renderEpilogueModalView(reasonText, seals, seedReward, opts = {}) {
+      if (!player) return;
       const mData = buildEpilogueMonumentData(reasonText, seals);
       lastEpilogueMonumentData = mData;
 
@@ -32369,23 +32830,25 @@ ${targetW.desc}
       const epBtn = document.getElementById("btn-open-epilogue");
       if (epBtn) epBtn.style.display = "inline-block";
 
-      const logContainer = document.getElementById("log-container");
-      if (logContainer) {
-        const promptDiv = document.createElement("div");
-        promptDiv.className = "log-entry milestone";
-        promptDiv.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:12px;border-left:4px solid var(--gold-bright);background:rgba(212,175,55,0.16);padding:12px 16px;margin-top:6px;";
-        promptDiv.innerHTML = `
-          <div>
-            <strong style="color:var(--gold-bright);font-size:1rem;">📜 【塵緣落幕 · 到此一遊】</strong>
-            <div style="font-size:0.88rem;color:#e6e2d8;margin-top:2px;">${reasonText}此生故事已畫下句點，看完上方最後劇本後，請點擊右側按鈕展開身後名畫卷。</div>
-          </div>
-          <button class="ctrl-btn primary" style="white-space:nowrap;padding:8px 16px;font-size:0.9rem;box-shadow:0 0 12px rgba(212,175,55,0.5);">📜 到此一遊 · 身後名畫卷</button>
-        `;
-        promptDiv.querySelector("button").addEventListener("click", () => {
-          document.getElementById("modal-epilogue").classList.add("show");
-        });
-        logContainer.appendChild(promptDiv);
-        logContainer.scrollTop = logContainer.scrollHeight;
+      if (opts.appendLogPrompt !== false) {
+        const logContainer = document.getElementById("log-container");
+        if (logContainer) {
+          const promptDiv = document.createElement("div");
+          promptDiv.className = "log-entry milestone";
+          promptDiv.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:12px;border-left:4px solid var(--gold-bright);background:rgba(212,175,55,0.16);padding:12px 16px;margin-top:6px;";
+          promptDiv.innerHTML = `
+            <div>
+              <strong style="color:var(--gold-bright);font-size:1rem;">📜 【塵緣落幕 · 到此一遊】</strong>
+              <div style="font-size:0.88rem;color:#e6e2d8;margin-top:2px;">${reasonText}此生故事已畫下句點，看完上方最後劇本後，請點擊右側按鈕展開身後名畫卷。</div>
+            </div>
+            <button class="ctrl-btn primary" style="white-space:nowrap;padding:8px 16px;font-size:0.9rem;box-shadow:0 0 12px rgba(212,175,55,0.5);">📜 到此一遊 · 身後名畫卷</button>
+          `;
+          promptDiv.querySelector("button").addEventListener("click", () => {
+            document.getElementById("modal-epilogue").classList.add("show");
+          });
+          logContainer.appendChild(promptDiv);
+          logContainer.scrollTop = logContainer.scrollHeight;
+        }
       }
     }
 
@@ -32401,6 +32864,8 @@ ${targetW.desc}
         ? `[${getCurrentGanzhi()}年 · ${player.age}歲]`
         : `[${getCurrentGanzhi()}年 · ${player.age}歲${player.month}月]`;
       const cleanLogText = String(text || "").replace(/《+/g, "《").replace(/》+/g, "》");
+      if (!Array.isArray(player.logs)) player.logs = [];
+      player.logs.push({ time: timeLabel, text: cleanLogText, type: type || "" });
       div.innerHTML = `<span class="log-age-tag">${timeLabel}</span><span>${cleanLogText}</span>`;
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
@@ -34453,6 +34918,10 @@ ${targetW.desc}
         clearTimeout(window.autoFateTimer);
       }
       resetTimer();
+      if (player && ((!pause && !eventOpen) || (isManualClick && pause && !eventOpen))) {
+        saveAutoGame({ force: true });
+        saveMetaState();
+      }
     }
 
     function setSpeed(mult) {
@@ -34564,6 +35033,7 @@ ${targetW.desc}
         const stopScriptureHolding = () => {
           clearInterval(scriptureTimer);
           scriptureTimer = null;
+          saveAutoGame({ force: true });
         };
         btnScripture.addEventListener("mousedown", startScriptureHolding);
         btnScripture.addEventListener("mouseup", stopScriptureHolding);
@@ -34622,6 +35092,14 @@ ${targetW.desc}
         document.getElementById("modal-epilogue").classList.add("show");
       });
 
+      const btnExportTxt = document.getElementById("btn-export-log-txt");
+      if (btnExportTxt) {
+        btnExportTxt.addEventListener("click", () => exportFullLifeLogTxt());
+      }
+      const btnEpExportTxt = document.getElementById("btn-ep-export-txt");
+      if (btnEpExportTxt) {
+        btnEpExportTxt.addEventListener("click", () => exportFullLifeLogTxt());
+      }
       const btnSavePng = document.getElementById("btn-ep-save-png");
       if (btnSavePng) {
         btnSavePng.addEventListener("click", () => exportEpilogueCardPNG());
@@ -34649,6 +35127,7 @@ ${targetW.desc}
         const stopHolding = () => {
           clearInterval(cultivateTimer);
           cultivateTimer = null;
+          saveAutoGame({ force: true });
         };
 
         btnCultivate.addEventListener("mousedown", startHolding);
@@ -34659,9 +35138,21 @@ ${targetW.desc}
         btnCultivate.addEventListener("touchend", stopHolding);
         btnCultivate.addEventListener("touchcancel", stopHolding);
       }
-      document.getElementById("btn-breakthrough").addEventListener("click", attemptBreakthrough);
-      document.getElementById("btn-temper-body").addEventListener("click", attemptBodyTemper);
-      document.getElementById("btn-cleanse-root").addEventListener("click", attemptRootCleanse);
+      document.getElementById("btn-breakthrough").addEventListener("click", () => { attemptBreakthrough(); saveAutoGame({ force: true }); });
+      document.getElementById("btn-temper-body").addEventListener("click", () => { attemptBodyTemper(); saveAutoGame({ force: true }); });
+      document.getElementById("btn-cleanse-root").addEventListener("click", () => { attemptRootCleanse(); saveAutoGame({ force: true }); });
+
+      if (typeof window.addEventListener === "function") {
+        window.addEventListener("pagehide", () => { saveAutoGame({ force: true }); saveMetaState(); });
+      }
+      if (typeof document.addEventListener === "function") {
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "hidden") {
+            saveAutoGame({ force: true });
+            saveMetaState();
+          }
+        });
+      }
 
       // 🛠️ 封測調試抽屜與熱更新按鈕
       const dbgDrawer = document.getElementById("debug-drawer");
@@ -34860,6 +35351,7 @@ ${targetW.desc}
 
     // 啟動初始化
     window.addEventListener("DOMContentLoaded", () => {
+      loadMetaState();
       initEventListeners();
       candidateDraft = generateCandidate();
       renderStartModal();
