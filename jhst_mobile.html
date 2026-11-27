@@ -1112,7 +1112,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.26.2330</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.28.0015</span>
       </div>
 
       <div class="debug-row">
@@ -7932,7 +7932,7 @@
               },
               "intimacyDelta": 1,
               "tacitDelta": 0,
-              "reply": "阿史那嵐順利取膽，與你击掌相慶。"
+              "reply": "阿史那嵐順利取膽，與你擊掌相慶。"
             },
             {
               "text": "見毒蠍密密麻麻，退回泉邊不願涉險",
@@ -18223,7 +18223,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.26.2330";
+    const GAME_VERSION = "v2026.11.28.0015";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -20338,6 +20338,12 @@ addGameData({
         if (!silent) {
           const wuBoost = (sk.tier === "曠世" || sk.tier === "鎮派") ? 3 : (sk.tier === "上乘" ? 2 : 1);
           const chg = modifyStats({ wu: wuBoost });
+          const mergedChg = [...chg];
+          if (Array.isArray(options.extraStatsList)) {
+            options.extraStatsList.forEach(item => {
+              if (item && !mergedChg.includes(item)) mergedChg.push(item);
+            });
+          }
           const directNarratives = {
             "劍法": [
               `青鋒長吟，你於電光石火間悟透《${sk.name}》劍意精髓，手腕輕抖間劍氣縱橫，當場將這門劍學融會貫通！`,
@@ -20369,7 +20375,7 @@ addGameData({
           };
           const nPool = directNarratives[sk.weapon] || directNarratives[sk.type] || directNarratives["default"];
           const pickedLine = nPool[Math.floor(Math.random() * nPool.length)];
-          addLog(`📘【當下領悟 · 《${sk.name}》】${pickedLine}${getSkillBadgeText(sk)} (${chg.join("、")})`, "milestone");
+          addLog(`📘【當下領悟 · 《${sk.name}》】${pickedLine}${getSkillBadgeText(sk)} (${mergedChg.join("、")})`, "milestone");
         }
       }
       unlockBaixiao(`武學：${sk.name}`);
@@ -20827,7 +20833,7 @@ addGameData({
           if (!player.sealedWeapons.some(w => (w.name || w) === targetW.name)) {
             player.sealedWeapons.push(Object.assign({}, targetW));
           }
-          addLog(`匣【古煞未消 · 收入古兵匣收藏】你欲收取${targetW.tierName}【${targetW.name}】，奈何此兵塵封日久、器靈古煞尚未甦醒，暫無法直接配戴發揮威力，已先收入左欄【匣 古兵匣收藏】（每年可手動溫養開鋒 1 次，有機率認主入庫；${chg.join("、")}）。`, "milestone");
+          addLog(`🗝️【古煞未消 · 收入古兵匣收藏】你欲收取${targetW.tierName}【${targetW.name}】，奈何此兵塵封日久、器靈古煞尚未甦醒，暫無法直接配戴發揮威力，已先收入左欄【🗝️ 古兵匣收藏】（每年可手動溫養開鋒 1 次，有機率認主入庫；${chg.join("、")}）。`, "milestone");
           updateAllUI();
           setPauseState(false);
           return;
@@ -21280,8 +21286,7 @@ ${targetW.desc}
         }
 
         if (canTryImmediate && Math.random() < immediateRate) {
-          gainMartialArt(targetSkill.name, false, { forceMaster: true });
-          addLog(`📘【當場頓悟 · 因緣際會】你福至心靈，當場將《${targetSkill.name}》精義徹底參透學會！(${chg.join("、")})`, "milestone");
+          gainMartialArt(targetSkill.name, false, { forceMaster: true, extraStatsList: chg });
         } else {
           const pendingMsg = canTryImmediate
             ? `📖【秘笈入囊 · 參悟中】你將《${targetSkill.name}》秘要仔細記下（${chg.join("、")}）。雖未能當場全部貫通，但已收錄於右方武學欄【參悟中】，待日後某個月份靈光一閃即可徹底參悟！`
@@ -21675,7 +21680,7 @@ ${targetW.desc}
       {
         id: "mount_act_deliver_letter",
         allowRegex: /雕|鸞|犬|狐|猿|馬|獅子|紫騂|踏雪|鹿/,
-        title: "✉️ 千里傳書 · 【{NAME}】飛馳寄錦書",
+        title: "✉️ 千里傳書 · {NAME}飛馳寄錦書",
         desc: "你忽然想起遠方一位生死至交近日似有劫難將臨，奈何山高水遠不及親赴。身旁的{TITLE}【{ICON} {NAME}】通曉人意，主動上前示意，願替你日夜兼程將親筆書信與保命靈丹送達故人手中！",
         opt1: "【託付親筆密信與金創靈藥】將書信與丹藥妥善繫於【{NAME}】身上，囑其星夜兼程送達故人手中 (情義+4、名望+2)",
         opt1Stats: { qing: 4, ming: 2 },
@@ -21690,7 +21695,7 @@ ${targetW.desc}
       {
         id: "mount_act_urgent_warning",
         allowRegex: /馬|獅子|紫騂|踏雪|鹿|豹|虎|麒麟/,
-        title: "🚨 急報山門 · 【{NAME}】星夜傳烽火",
+        title: "🚨 急報山門 · {NAME}星夜傳烽火",
         desc: "你在險峻山道無意間截獲魔門死士的密令，得知敵方將於今夜子時奇襲鄰近正道山門！距子時僅餘兩個時辰，山路崎嶇難行，唯靠【{ICON} {NAME}】之絕頂腳力方能及時趕達通報！",
         opt1: "【策動{NAME} · 疾馳百里報信】與【{NAME}】人獸合一全速奔馳，於子時前衝入山門敲響警鐘 (名望+5、德行+3、武力+1)",
         opt1Stats: { ming: 5, de: 3, wu: 1 },
@@ -21705,7 +21710,7 @@ ${targetW.desc}
       {
         id: "mount_act_combat_assist",
         allowRegex: /虎|豹|雕|犬|蟒|猿|麒麟|馬|獅子|紫騂|踏雪/,
-        title: "⚔️ 荒山夜戰 · 【{NAME}】撲擊協戰破重圍",
+        title: "⚔️ 荒山夜戰 · {NAME}撲擊協戰破重圍",
         desc: "夜行黑松嶺時，十餘名手持勁弩毒刃的黑衣匪徒自暗處暴起合圍！正當箭雨襲來之際，隨行的【{ICON} {NAME}】{ROAR}化作殘影衝入敵陣，直接掀翻三名弩手！",
         opt1: "【人獸合擊 · 直取匪首】趁【{NAME}】撕裂敵方側翼，你拔刃暴起一招梟首匪徒頭目 (武力+3、名望+3)",
         opt1Stats: { wu: 3, ming: 3 },
@@ -21720,7 +21725,7 @@ ${targetW.desc}
       {
         id: "mount_act_mist_pathfinder",
         allowRegex: /犬|狐|鹿|蟾|龜|蟒|鸞|雕/,
-        title: "🌫️ 迷霧毒瘴 · 【{NAME}】靈覺引路破奇陣",
+        title: "🌫️ 迷霧毒瘴 · {NAME}靈覺引路破奇陣",
         desc: "你深入雲貴深山訪友，不料山谷突起五彩奇門毒霧，四周景物顛倒迷離。危急之際，【{ICON} {NAME}】{MIST_ACTION}！",
         opt1: "【信賴{NAME}靈覺 · 緊隨踏出生門】屏息凝神跟隨【{NAME}】穿行迷霧，不僅安然出谷更發現一處古修遺洞 (武力+2、德行+2、財富+4)",
         opt1Stats: { wu: 2, de: 2, cai: 4 },
@@ -21735,7 +21740,7 @@ ${targetW.desc}
       {
         id: "mount_act_cliff_herb",
         allowRegex: /猿|雕|鸞|豹|蟒/,
-        title: "🌿 絕壁採藥 · 【{NAME}】探崖銜回千年芝",
+        title: "🌿 絕壁採藥 · {NAME}探崖銜回千年芝",
         desc: "行經萬仞斷魂崖下，你抬頭瞥見百丈高的光滑石壁裂縫間，竟生有一株紫氣氤氳的『千年紫芝』！懸崖險峻難攀，身旁的【{ICON} {NAME}】卻躍躍欲試，轉瞬掠上絕壁！",
         opt1: "【接應{NAME}銜回紫芝 · 煉化服食】待【{NAME}】將千年紫芝銜落，分一半靈芝予牠共享，一同煉化藥力 (武力+2、壽元+1、治癒1處輕傷)",
         opt1Stats: { wu: 2, qing: 2 },
@@ -21752,7 +21757,7 @@ ${targetW.desc}
       {
         id: "mount_act_night_assassin",
         allowRegex: /.*/,
-        title: "🌙 古驛守夜 · 【{NAME}】驚退暗夜刺客",
+        title: "🌙 古驛守夜 · {NAME}驚退暗夜刺客",
         desc: "夜宿荒郊古驛，三更時分萬籟俱寂。守在榻旁的【{ICON} {NAME}】{ALERT_ACTION}！下一瞬，兩道吹箭自窗紙射入，屋頂三名蒙面刺客破瓦而下！",
         opt1: "【聞警暴起 · 反手一招重創刺客】憑【{NAME}】提前半息的示警，你早有防備，出手反擊震退刺客 (武力+3、名望+2)",
         opt1Stats: { wu: 3, ming: 2 },
@@ -21767,7 +21772,7 @@ ${targetW.desc}
       {
         id: "mount_act_treasure_hunt",
         allowRegex: /蟾|龜|狐|犬|猿|蟒|鹿/,
-        title: "🪙 古塚尋幽 · 【{NAME}】感應前朝秘藏",
+        title: "🪙 古塚尋幽 · {NAME}感應前朝秘藏",
         desc: "行經一處荒蕪的前朝古戰場，隨行的【{ICON} {NAME}】忽然{DIG_ACTION}。你運勁震開泥石，底下竟露出一隻密封完好的青銅鐵匣！",
         opt1: "【開啟鐵匣 · 研讀前朝武將手札】匣內除卻數錠古銀，更有一卷前朝名將留下的實戰練氣心得 (武力+2、財富+4)",
         opt1Stats: { wu: 2, cai: 4 },
@@ -21782,7 +21787,7 @@ ${targetW.desc}
       {
         id: "mount_act_meditation_guard",
         allowRegex: /.*/,
-        title: "🧘 深山護法 · 【{NAME}】守關鎮心魔",
+        title: "🧘 深山護法 · {NAME}守關鎮心魔",
         desc: "你在深山幽谷閉關衝擊經脈時，忽逢山風驟變、體內真氣微生岔亂。守在一旁的【{ICON} {NAME}】察覺異狀，立即{GUARD_ACTION}！",
         opt1: "【借{NAME}護持定神 · 一鼓作氣貫通關竅】心神瞬間清明，引導岔亂真氣歸入丹田，功力更上一層樓 (武力+3、情義+2)",
         opt1Stats: { wu: 3, qing: 2 },
@@ -21798,7 +21803,7 @@ ${targetW.desc}
       {
         id: "mount_act_steppe_hunt",
         allowRegex: /馬|獅子|紫騂|踏雪|虎|豹|麒麟|鹿/,
-        title: "🏹 塞外縱獵 · 與【{NAME}】並馳試絕招",
+        title: "🏹 塞外縱獵 · 與{NAME}並馳試絕招",
         desc: "秋高氣爽，塞外八百里草場黃葉漫天。你與【{ICON} {NAME}】縱橫馳騁於蒼茫草場之間，驚起草叢間一頭橫衝直撞的千斤野彘王！",
         opt1: "【借{NAME}奔騰之勢 · 凌空出招試煉極速】在疾馳電掣間雷霆出擊，體會『動中取靜、人獸合一』之妙 (武力+3、名望+2)",
         opt1Stats: { wu: 3, ming: 2 },
@@ -21813,7 +21818,7 @@ ${targetW.desc}
       {
         id: "mount_act_snow_rescue",
         allowRegex: /馬|獅子|紫騂|踏雪|鹿|虎|豹|麒麟/,
-        title: "❄️ 大雪封山 · 【{NAME}】破雪救孤兒",
+        title: "❄️ 大雪封山 · {NAME}破雪救孤兒",
         desc: "臘月暴雪封山，山道積雪深達數尺。隨行的【{ICON} {NAME}】忽然對著一處被雪崩掩埋的岩凹焦急低鳴，你趕上前扒開積雪，竟發現一名凍得僵紫的採藥老翁與稚童！",
         opt1: "【讓{NAME}以溫熱身軀護住稚童 · 自己運功救醒老翁】一人一獸協力施救並護送祖孫下山 (德行+5、情義+3、名望+2)",
         opt1Stats: { de: 5, qing: 3, ming: 2 },
@@ -21828,7 +21833,7 @@ ${targetW.desc}
       {
         id: "mount_act_tea_summit",
         allowRegex: /.*/,
-        title: "🍵 名山論劍 · 【{NAME}】隨行震全場",
+        title: "🍵 名山論劍 · {NAME}隨行震全場",
         desc: "江南名山舉辦品劍茶會，各路名門弟子與江湖豪客齊聚一堂。當你攜{AURA_ADJ}的【{ICON} {NAME}】緩步踏入山門時，原本喧囂的廣場瞬間鴉雀無聲，眾人皆投來震撼羨慕的目光！",
         opt1: "【朗聲抱拳 · 與各派高手切磋論道】【{NAME}】{STAND_ACTION}，你登台演示精妙招式折服群雄 (名望+5、武力+2)",
         opt1Stats: { ming: 5, wu: 2 },
@@ -21843,7 +21848,7 @@ ${targetW.desc}
       {
         id: "mount_act_flood_rescue",
         allowRegex: /馬|獅子|紫騂|踏雪|龜|蟒|麒麟|虎|雕/,
-        title: "🌊 洪峰渡江 · 攜【{NAME}】破浪救商船",
+        title: "🌊 洪峰渡江 · 攜{NAME}破浪救商船",
         desc: "夏末暴雨連綿，大江洪峰驟至。一艘滿載商旅的渡船在湍急漩渦中斷了纖繩，眼看便要撞上暗礁傾覆！身旁的【{ICON} {NAME}】{ROAR}，毫無懼色！",
         opt1: "【攜{NAME}躍入驚濤 · 牽引斷裂纜繩靠岸】由【{NAME}】破浪將斷索帶至礁石，一人一獸合力將渡船拽回淺灘 (武力+2、德行+5、名望+4)",
         opt1Stats: { wu: 2, de: 5, ming: 4 },
@@ -21858,7 +21863,7 @@ ${targetW.desc}
       {
         id: "mount_act_poison_banquet",
         allowRegex: /蟾|蟒|龜|狐|鹿/,
-        title: "🍶 毒宴識奸 · 【{NAME}】闢毒破陰謀",
+        title: "🍶 毒宴識奸 · {NAME}闢毒破陰謀",
         desc: "你應邀赴地方豪強設下的夜宴，席間觥籌交錯，不料端上的珍饈美酒中竟暗藏無色無味的『軟筋蝕骨散』！隨行的【{ICON} {NAME}】瞬間感應異狀，張口一吸便將酒中奇毒鯨吞煉化（吐氣示警），令暗處刀斧手當場色變！",
         opt1: "【掀翻酒案 · 當場拿下設局豪強】趁敵方驚駭未定，雷霆出手制住幕後黑手並搜出解藥分予同席俠客 (武力+3、名望+4、德行+2)",
         opt1Stats: { wu: 3, ming: 4, de: 2 },
@@ -21873,7 +21878,7 @@ ${targetW.desc}
       {
         id: "mount_act_ghost_market",
         allowRegex: /蟾|龜|狐|猿|鹿|犬/,
-        title: "🏮 夜遊暗市鑑寶 · 【{NAME}】靈覺識奇珍",
+        title: "🏮 夜遊暗市鑑寶 · {NAME}靈覺識奇珍",
         desc: "你夜遊長安夜遊市古玩攤，滿地皆是真假難辨的蒙塵銅器與古玉。隨行的【{ICON} {NAME}】忽然對著角落一塊包裹黑泥的醜陋石胎連連駐足示意、吐出一縷靈氣，似感應到內裡藏有非凡寶光！",
         opt1: "【不動聲色買下石胎 · 震碎泥殼取寶】花幾枚銅錢買下石胎，運勁震開後竟露出一塊前朝千年溫玉與金餅 (財富+7、武力+1)",
         opt1Stats: { cai: 7, wu: 1 },
@@ -21888,7 +21893,7 @@ ${targetW.desc}
       {
         id: "mount_act_water_abyss",
         allowRegex: /龜|蟾|蟒/,
-        title: "🌊 寒潭探秘 · 【{NAME}】潛淵取遺珍",
+        title: "🌊 寒潭探秘 · {NAME}潛淵取遺珍",
         desc: "行經深不見底的百丈碧水寒潭，水底暗流洶湧、寒氣徹骨，隱約可見潭底前朝沉船中閃爍微光。通曉水性且無懼寒毒的【{ICON} {NAME}】主動躍入深淵，不消片刻便從沉船暗格中帶回一隻密封的防水油布包！",
         opt1: "【打開油布包 · 研讀水底古卷】包內藏有一卷前人留下的閉氣運勁心得與數枚古金 (武力+3、財富+3)",
         opt1Stats: { wu: 3, cai: 3 },
@@ -21903,7 +21908,7 @@ ${targetW.desc}
       {
         id: "mount_act_sky_scout",
         allowRegex: /雕|鸞|猿|狐|犬|豹/,
-        title: "🦅 險峽偵敵 · 【{NAME}】破伏兵救商隊",
+        title: "🦅 險峽偵敵 · {NAME}破伏兵救商隊",
         desc: "你護送一批同行商旅途經兩山夾峙的鬼愁峽，谷中寂靜得令人起疑。隨行的【{ICON} {NAME}】率先掠上高崖密林探查，隨即向你發出急促示警——原來峽谷兩側早埋伏了數十名張弓搭箭的山匪！",
         opt1: "【先發制人 · 從側翼奇襲山匪弓手】憑【{NAME}】提前鎖定伏兵位置，你從背後突襲瞬間瓦解匪陣 (武力+3、名望+4)",
         opt1Stats: { wu: 3, ming: 4 },
@@ -21959,6 +21964,7 @@ ${targetW.desc}
         .replace(/\{ICON\}/g, icon)
         .replace(/\{TITLE\}/g, m.title || "隨行靈獸");
 
+      const cleanMountLogTitle = (t) => fmt(t).replace(/^[^\u4e00-\u9fffA-Za-z0-9《]+/, "").trim();
       setPauseState(true);
       const choices = [
         {
@@ -21970,7 +21976,7 @@ ${targetW.desc}
               syncPlayerInjuries();
             }
             const chg = modifyStats(sc.opt1Stats || { wu: 2, qing: 2 });
-            addLog(`${icon}【${fmt(sc.title)}】${fmt(sc.opt1Log)} (${chg.join("、")}${sc.opt1Life ? "、壽元+" + sc.opt1Life : ""}${sc.opt1CureLight ? "、輕傷-" + sc.opt1CureLight : ""})`, "milestone");
+            addLog(`${icon}【${cleanMountLogTitle(sc.title)}】${fmt(sc.opt1Log)} (${chg.join("、")}${sc.opt1Life ? "、壽元+" + sc.opt1Life : ""}${sc.opt1CureLight ? "、輕傷-" + sc.opt1CureLight : ""})`, "milestone");
             updateAllUI();
             setPauseState(false);
           }
@@ -21983,7 +21989,7 @@ ${targetW.desc}
               syncPlayerInjuries();
             }
             const chg = modifyStats(sc.opt2Stats || { qing: 3, ming: 2 });
-            addLog(`${icon}【${fmt(sc.title)}】${fmt(sc.opt2Log)} (${chg.join("、")}${sc.opt2CureLight ? "、輕傷-" + sc.opt2CureLight : ""})`, "milestone");
+            addLog(`${icon}【${cleanMountLogTitle(sc.title)}】${fmt(sc.opt2Log)} (${chg.join("、")}${sc.opt2CureLight ? "、輕傷-" + sc.opt2CureLight : ""})`, "milestone");
             updateAllUI();
             setPauseState(false);
           }
@@ -21995,7 +22001,7 @@ ${targetW.desc}
               m.maxLifespan += 3;
             }
             const chg = modifyStats(sc.opt3Stats || { de: 3, ming: 2 });
-            addLog(`${icon}【${fmt(sc.title)}】${fmt(sc.opt3Log)} (${chg.join("、")})`, "milestone");
+            addLog(`${icon}【${cleanMountLogTitle(sc.title)}】${fmt(sc.opt3Log)} (${chg.join("、")})`, "milestone");
             updateAllUI();
             setPauseState(false);
           }
@@ -22514,12 +22520,12 @@ ${targetW.desc}
       const name = targetChar.name;
       const isFemale = targetChar.gender === "女";
       const bestAtk = getBestLearnedSkillName("招式", "看家絕學").replace(/^[《「]+|[》」]+$/g, "");
-      const callSelf = isFemale ? "咱們姊妹" : "你我";
+      const callSelf = (isFemale && player && player.gender === "女") ? "咱們姊妹" : "你我";
       return [
         {
           id: "hq_old_alley_wine",
           minQing: 100,
-          title: `🍶 舊巷溫酒 · 與【${name}】細數半生風雪`,
+          title: `🍶 舊巷溫酒 · 與${name}細數半生風雪`,
           desc: `傍晚細雨微涼，【${name}】沒去氣派酒樓，反而熟門熟路把你拖進鎮口老巷一間只擺三張舊木桌的無名小酒肆，點了兩盤滷味與一壺陳年花雕。\n\n熱酒下肚，【${name}】晃著酒杯笑得開懷：「江湖越走越大，能這樣坐下來連姓名都不用報、只管埋頭喝兩盅的人，卻反而沒幾個了。」`,
           opts: [
             {
@@ -22543,7 +22549,7 @@ ${targetW.desc}
         {
           id: "hq_peak_martial_talk",
           minQing: 120,
-          title: `⚔️ 孤峰論武 · 與【${name}】毫無保留拆解破綻`,
+          title: `⚔️ 孤峰論武 · 與${name}毫無保留拆解破綻`,
           desc: `你們同遊名山古道時停在一處平坦青岩之上。【${name}】忽然停步解下兵刃護具，神色認真地看向你：\n\n「外人切磋總愛藏著三分壓箱絕活。可${callSelf}之間還有什麼好留手的？來，我新近摸到一點瓶頸，你替我瞧瞧破綻何在——我也把自己的心得全攤開給你看！」`,
           opts: [
             {
@@ -22552,7 +22558,7 @@ ${targetW.desc}
               reply: `兩道截然不同的武學脈絡在青岩上猛烈撞擊又忽然相融！一場論武下來，你對自身《${bestAtk}》竟多了一分舉重若輕的圓融！`
             },
             {
-              text: `🛡️ 【點破【${name}】招式間一處容易傷己的暗患】寧可放慢節奏，也不讓對方強催險招損耗心脈`,
+              text: `🛡️ 【點破${name}招式間一處容易傷己的暗患】寧可放慢節奏，也不讓對方強催險招損耗心脈`,
               stats: { de: 4, qing: 9, wu: 2 },
               reply: `【${name}】收招愣神片刻，旋即鄭重拱手一揖：「若非你真把我的安危放在心上，誰會苦口婆心替我點破這處多年陋習！」`
             },
@@ -22566,7 +22572,7 @@ ${targetW.desc}
         {
           id: "hq_riverside_life_talk",
           minQing: 140,
-          title: `🌙 江畔夜談 · 與【${name}】問道紅塵與平生所求`,
+          title: `🌙 江畔夜談 · 與${name}問道紅塵與平生所求`,
           desc: `月色鋪滿大江水面，你們把舟繫在蘆葦叢邊，坐在船頭看江水流逝。夜風吹散了白日裡的喧囂，【${name}】忽然收起平日笑鬧的神氣，輕聲問你：\n\n「說起來，我們練這麼多年武、闖過那麼多生死關，最後到底想圖個什麼？是名動九州四海，還是有朝一日真的能安心過上幾年清靜日子？」`,
           opts: [
             {
@@ -22591,7 +22597,7 @@ ${targetW.desc}
         {
           id: "hq_snow_hearth_trust",
           minQing: 160,
-          title: `🍵 寒夜圍爐 · 與【${name}】推心置腹話舊物`,
+          title: `🍵 寒夜圍爐 · 與${name}推心置腹話舊物`,
           desc: `歲暮大雪封山，你們借宿在山腰草堂裡烤火。火炭劈啪作響間，【${name}】從貼身行囊深處摸出一件保存極妥帖的陳年舊物與一瓶靈藥放到你膝頭——那是對方連師門和親眷都沒透露過的秘密家珍與救命秘藥。\n\n「這東西我帶在身上十幾年了。若有一天我先走一步、或真栽在什麼風波裡，旁人我誰也信不過，唯獨交給你才放心。」`,
           opts: [
             {
@@ -22615,7 +22621,7 @@ ${targetW.desc}
         {
           id: "hq_lantern_street_elders",
           minQing: 200,
-          title: `🏮 燈火長街 · 與【${name}】並肩看人間煙火`,
+          title: `🏮 燈火長街 · 與${name}並肩看人間煙火`,
           desc: `久歷大風大浪之後，你與【${name}】褪去名號與兵器，只像兩名尋常走親訪友的路人般，趁著集鎮夜市燈火初上並肩逛在長街人潮裡。\n\n前頭糖人攤前擠滿嘰嘰喳喳的小娃娃，街角還有少年正高聲爭論你們昔年在江湖留下的傳聞。【${name}】轉頭看你一眼，眼神溫潤得像三月春水：「你看這滿街熱鬧平安的模樣——咱們當年拿命護下來的，就是這些吧。」`,
           opts: [
             {
@@ -22640,8 +22646,8 @@ ${targetW.desc}
       ];
     }
 
-    // 紅塵伴侶溫存與生死知己飛鴿傳書（不重複輪替）＋高情義雪中送炭／秘笈批註／古兵開鋒
-    const SPOUSE_WARMTH_EVENTS = [
+    // 紅塵伴侶溫存（依伴侶性別分流）與生死知己飛鴿傳書（不重複輪替）＋高情義雪中送炭／秘笈批註／古兵開鋒
+    const SPOUSE_WARMTH_EVENTS_FEMALE = [
       { text: (n) => `💖【紅塵溫存 · 燈下縫衣】夜深露重，你的紅塵伴侶【${n}】在燈下一針一線替你縫補磨損的護腕，又在衣襟內側繡了一朵平安紋樣，抬眸對你淺淺一笑。`, stats: { qing: 4, de: 2 } },
       { text: (n) => `💖【紅塵溫存 · 溫酒候歸】你冒著風雨歸家，【${n}】早已備好乾爽衣衫與一壺溫熱的桂花釀，親手替你拭去髮間雨水：「外頭風大，喝口熱酒暖暖身子。」`, stats: { qing: 5, wu: 1 } },
       { text: (n) => `💖【紅塵溫存 · 藥膳調元】【${n}】見你近日練功勞神，特地在小廚房慢火細熬了一盅百年蓮子參湯端到書房，柔聲叮囑你莫要太過操勞。`, stats: { qing: 4, de: 3 } },
@@ -22650,6 +22656,17 @@ ${targetW.desc}
       { text: (n) => `💖【紅塵溫存 · 推宮活血】練功收勢後，【${n}】走到你身後，以溫潤內息替你推拿肩井與曲池穴，將你經絡間的疲憊盡數化開。`, stats: { qing: 4, wu: 2 } },
       { text: (n) => `💖【紅塵溫存 · 變賣舊飾助囊】【${n}】見你近日行俠仗義開支頗大，悄悄將早年珍藏的一匣珠玉首飾換作紋銀塞進你行囊：「錢財乃身外物，你在外平安最要緊。」`, stats: { cai: 6, qing: 5 } },
       { text: (n) => `💖【紅塵溫存 · 月下合奏】月華如水，【${n}】在庭中撫琴吟唱，你隨意以竹枝擊節相和，琴瑟和鳴之聲引來鄰院陣陣讚嘆。`, stats: { qing: 5, ming: 2 } }
+    ];
+
+    const SPOUSE_WARMTH_EVENTS_MALE = [
+      { text: (n) => `💖【紅塵溫存 · 披氅添炭】夜深霜重，你的紅塵伴侶【${n}】見你還在燈下推演武學，一言不發將厚實狐裘大氅披上你肩頭，又往火盆添了兩塊銀霜炭：「再忙也別著了涼。」`, stats: { qing: 4, de: 2 } },
+      { text: (n) => `💖【紅塵溫存 · 溫酒候歸】你冒著風雪歸家，【${n}】早已把壁爐燒旺並溫好一壺烈酒與烤肉，接過你的披風拍去雪花：「外頭寒氣重，快喝兩口暖身。」`, stats: { qing: 5, wu: 1 } },
+      { text: (n) => `💖【紅塵溫存 · 文火燉湯】【${n}】見你近日練功耗神，特意找老獵戶換來兩隻山雞與老參慢燉了半夜，端上桌時還不忘囑咐：「別顧著看劍譜，先把湯喝完。」`, stats: { qing: 4, de: 3 } },
+      { text: (n) => `💖【紅塵溫存 · 晨起磨刃】天光微亮，【${n}】已在院中石桌前替你細心拭淨隨身兵刃、檢查護腕皮扣是否牢靠，見你醒來只爽朗一笑：「刃鋒都養好了，今日放心出門。」`, stats: { qing: 4, ming: 2 } },
+      { text: (n) => `💖【紅塵溫存 · 廊下聽雨】春雨綿綿，你與【${n}】並肩坐在木廊下燙茶聽雨，不談朝堂江湖的刀光劍影，只說來年春天該往哪片青山打馬踏青，歲月靜好。`, stats: { qing: 5, de: 2 } },
+      { text: (n) => `💖【紅塵溫存 · 運功活血】練功收勢後，【${n}】伸掌貼住你後心大穴，以渾厚沉穩的真氣替你疏通肩背滯塞經脈，將一身疲憊化於無形。`, stats: { qing: 4, wu: 2 } },
+      { text: (n) => `💖【紅塵溫存 · 典劍換銀助囊】【${n}】得知你近日濟困扶危開支吃緊，轉手將早年珍藏的一套鎏金馬鞍與玉刀墜換成銀票塞進你行囊：「銀子沒了再掙，別在外委屈了自己。」`, stats: { cai: 6, qing: 5 } },
+      { text: (n) => `💖【紅塵溫存 · 月下笛韻】月明之夜，【${n}】倚著廊柱隨興吹起塞外羌笛或江南短簫，你拔劍輕舞相和，一聲清嘯直上雲霄。`, stats: { qing: 5, ming: 2 } }
     ];
 
     const FRIEND_GIFT_EVENTS = [
@@ -22749,8 +22766,12 @@ ${targetW.desc}
         }
       }
 
-      const pool = isSpouse ? SPOUSE_WARMTH_EVENTS : FRIEND_GIFT_EVENTS;
-      const deckKey = isSpouse ? "_usedSpouseWarmth" : "_usedFriendGift";
+      const senderChar = (DB.CHARACTERS || []).find(c => c && (c.id === sender.id || c.name === sender.name));
+      const senderIsMale = (senderChar?.gender || sender.gender) === "男";
+      const pool = isSpouse
+        ? (senderIsMale ? SPOUSE_WARMTH_EVENTS_MALE : SPOUSE_WARMTH_EVENTS_FEMALE)
+        : FRIEND_GIFT_EVENTS;
+      const deckKey = isSpouse ? (senderIsMale ? "_usedSpouseWarmthMale" : "_usedSpouseWarmth") : "_usedFriendGift";
       player[deckKey] = player[deckKey] || [];
       let avail = pool.map((_, i) => i).filter(i => !player[deckKey].includes(i));
       if (avail.length === 0) {
@@ -22823,7 +22844,8 @@ ${targetW.desc}
             if (typeof syncPlayerInjuries === "function") syncPlayerInjuries();
           }
           chosenBond.tacit = Math.min(3, (chosenBond.tacit || 0) + 1);
-          addLog(`💖【${picked.title}】${o.reply}（${chg.join("、")}）`, "milestone");
+          const cleanHangTitle = String(picked.title || "").replace(/^[^\u4e00-\u9fffA-Za-z0-9《]+/, "").trim();
+          addLog(`💖【${cleanHangTitle}】${o.reply}（${chg.join("、")}）`, "milestone");
           renderBondsTab();
           updateAllUI();
           setPauseState(false);
@@ -22881,16 +22903,16 @@ ${targetW.desc}
 
         return {
           isSwornReunion: true,
-          title: isFemale ? `🩹 燈下包紮 · 【${name}】的刀子嘴豆腐心` : `🔥 風雪守哨 · 【${name}】的生死後背`,
+          title: isFemale ? `🩹 燈下包紮 · ${name}的刀子嘴豆腐心` : `🔥 風雪守哨 · ${name}的生死後背`,
           desc: injuryDesc,
           options: injuryOptions
         };
       }
 
-      // 豐富的人間煙火氣日常劇本池（區分伴侶與金蘭知己、男女語氣）
-      const partnerScenes = [
+      // 豐富的人間煙火氣日常劇本池（嚴格區分伴侶性別與金蘭知己）
+      const partnerScenesFemale = [
         {
-          title: `🍚 灶台溫飯 · 【${name}】留給你的那尾魚`,
+          title: `🍚 灶台溫飯 · ${name}留給你的那尾魚`,
           desc: `外頭下著淅瀝冷雨，你收劍歸來推開小院木門，屋裡飄來陣陣飯菜香。灶上永遠溫著一碗熱湯，桌上的紅燒鮮魚誰也不准先動。
 【${name}】聽見腳步聲迎了出來，自然地接過你的斗笠與佩兵：
 「外頭風大吧？快去洗手，他們都吃過了，唯獨這條魚肚子上最嫩的肉我一直替你溫在鍋裡，誰也不准動。」`,
@@ -22901,7 +22923,7 @@ ${targetW.desc}
           ]
         },
         {
-          title: `🪡 燈下縫符 · 與【${name}】拌嘴後的第三個平安符`,
+          title: `🪡 燈下縫符 · 與${name}拌嘴後的第三個平安符`,
           desc: `白日裡你們因一樁江湖瑣事拌了兩句嘴。【${name}】沒有跟你大吵，只是悶頭坐在油燈下，紅著眼眶一針一線地縫著平安符。
 縫到第三個時，針尖不小心扎破了指尖，【${name}】吸了口氣卻還是倔強地背對著你不肯先開口。`,
           opts: [
@@ -22911,7 +22933,7 @@ ${targetW.desc}
           ]
         },
         {
-          title: `🏮 夜市看燈 · 【${name}】數了三遍的荷包`,
+          title: `🏮 夜市看燈 · ${name}數了三遍的荷包`,
           desc: `元宵花燈如晝，【${name}】拉著你的袖子在長街夜市東看西逛。路過一處精緻攤位時，【${name}】的目光停在一件雕工極巧的佩飾上看了又看，又低頭數了數自己的荷包，數了三遍，才小聲道：
 「這家店賣得太貴啦，咱們去前頭吃糖葫蘆吧！」`,
           opts: [
@@ -22922,9 +22944,44 @@ ${targetW.desc}
         }
       ];
 
+      const partnerScenesMale = [
+        {
+          title: `🔥 灶火燉湯 · ${name}替你溫著的那鍋熱湯`,
+          desc: `外頭寒風呼嘯，你收劍歸來推開院門，屋裡爐火正旺，鐵鍋裡正咕嘟咕嘟燉著濃白的羊骨清湯。
+【${name}】捲著袖子從灶邊迎上來，順手接過你沾著風霜的佩兵靠在門框邊：
+「回來了？外頭冷得很，快把手烘一烘。剛燉好的熱湯，特意沒撒你最不愛吃的蔥花，趁熱喝一大碗暖身！」`,
+          opts: [
+            { text: `🥣 【連喝兩大碗 · 並肩向火】坐在火盆邊把滾燙熱湯喝得乾乾淨淨，靠在【${name}】肩頭歇口氣`, stats: { qing: 6, de: 2 }, reply: `【${name}】往火盆裡添了塊炭火，看你暖和過來便咧嘴一笑：「喝飽了就早些歇著，這幾日江湖上什麼風浪有我頂著。」` },
+            { text: `🎁 【取出新買的酒壺／刀穗】把白日市集捎來的一壺陳釀塞進【${name}】手裡`, stats: { qing: 7, cai: -1 }, reply: `【${name}】掂了掂酒壺嘴角上揚，眼底滿是藏不住的笑意：「算你有心，明晚咱們就開封對飲！」` },
+            { text: `⚔️ 【湯後演武 · 月下過招】渾身暖透後拉著【${name}】在院裡空手拆解近日所悟`, stats: { wu: 2, qing: 4 }, reply: `勁風捲落簷上殘雪，你們拳腳相交聲如悶雷，暢快收勢時相視而笑。` }
+          ]
+        },
+        {
+          title: `🛡️ 燈下修甲 · 與${name}拌嘴後默默修好的護腕`,
+          desc: `白日裡你們為了一步冒險決策拌了幾句嘴。【${name}】當時嘴硬扭頭就走，可入夜後卻獨自坐在院石桌前，點起牛油燈用牛筋細線把你白天裂開的護腕與肩甲皮扣一針針重新綁緊。
+見到你走出來，他手上一頓，咳了一聲別開視線：「……明日還要趕山路，護具鬆了容易吃暗虧。」`,
+          opts: [
+            { text: `🤝 【笑著走近按住對方手背】搶過他手裡的革針道「我認錯行了吧」，替他揉揉粗糙指節`, stats: { qing: 7, de: 2 }, reply: `【${name}】神色一下子柔和下來，反手把修好的護腕親自扣回你腕上：「下回別這麼逞強，有我在旁看著呢。」` },
+            { text: `🍵 【端兩碗薑茶並肩坐下】去灶房端來兩碗熱茶遞過去，不提白天的別扭`, stats: { qing: 5, de: 3 }, reply: `【${name}】接過熱茶一飲而盡，長舒口氣拍拍你的手背，白天那點彆扭煙消雲散。` },
+            { text: `🌙 【同躍屋簷看夜色】拉著【${name}】躍上高簷吹風散氣，並肩俯瞰寂靜長街`, stats: { qing: 6, wu: 1 }, reply: `夜風爽冽，【${name}】替你擋住迎面寒風，兩人並肩坐到星斗偏西才下屋頂。` }
+          ]
+        },
+        {
+          title: `🏮 夜市看燈 · ${name}替你贏回來的頭彩玉佩`,
+          desc: `元宵花燈如晝，你與【${name}】並肩擠在熱鬧的長街人群裡。路過城中武館擺下的『連挑三關燈謎擂台』時，台上正掛著一塊雕工通透的白玉佩飾當作頭彩。
+【${name}】瞥見你多看了那塊白玉兩眼，什麼也沒說，摸了摸下巴就闊步往擂台石階走去：「你在台下拿好糖葫蘆等著。」`,
+          opts: [
+            { text: `👏 【台下喝彩助威 · 親手收下頭彩】看著【${name}】乾脆俐落拿下三場頭彩把玉佩遞過來`, stats: { qing: 8, ming: 2 }, reply: `滿街喝彩聲中，【${name}】大步走下台把玉佩掛在你腰間，神氣得像贏了天下一般：「配你這身俠氣正好！」` },
+            { text: `🍡 【買兩串冰糖葫蘆並肩壓長街】拉住準備上台的【${name}】笑說不要這些虛名，只要兩人安靜逛街`, stats: { qing: 6, de: 2 }, reply: `【${name}】哈哈一笑任由你拉走，咬著糖葫蘆道：「成，都聽你的！往後每年元宵咱們都在人堆裡這麼晃蕩。」` },
+            { text: `🗡️ 【雙人上陣聯手奪彩】你也不甘旁觀，躍上台與【${name}】並肩拆謎應對把彩禮贏回家`, stats: { wu: 2, ming: 3, qing: 4 }, reply: `夫妻同心其利斷金，你們聯手拿下頭彩，提著花燈一路說笑著踩過石板街。` }
+          ]
+        }
+      ];
+      const partnerScenes = isFemale ? partnerScenesFemale : partnerScenesMale;
+
       const swornScenes = [
         {
-          title: `🍶 屋頂對坐 · 與【${name}】不需客套的一夜`,
+          title: `🍶 屋頂對坐 · 與${name}不需客套的一夜`,
           desc: `秋夜微涼，【${name}】拎著兩罈你最愛喝的烈酒直接推門進來，連招呼都不打便拉你翻上屋頂。
 你們在屋脊上坐了一整夜，誰也沒說幾句客套話，【${name}】仰頭飲了一口酒，望著遠處燈火嘆道：
 「外頭那些人見了我不是敬畏就是算計，唯有坐在你身邊，我才覺得自己還是個活生生的人。」`,
@@ -22935,7 +22992,7 @@ ${targetW.desc}
           ]
         },
         {
-          title: `🌧️ 簷下聽雨 · 【${name}】記掛著你的喜好`,
+          title: `🌧️ 簷下聽雨 · ${name}記掛著你的喜好`,
           desc: `大雨傾盆，你在臨江茶寮歇腳，忽見【${name}】撐著一把油紙傘快步走來，懷裡還揣著一包用油紙裹了三層、依然熱乎的茶點與好酒。
 【${name}】抖落傘上雨水，笑著把油紙包推到你面前：
 「方才路過老字號，想起你最愛吃這一口，便順手帶了過來。怎麼樣，沒淋濕吧？」`,
@@ -22947,13 +23004,34 @@ ${targetW.desc}
         }
       ];
 
-      const chosenPool = isPartner ? [...partnerScenes] : [...swornScenes];
+      const basePool = isPartner ? [...partnerScenes] : [...swornScenes];
+      bond.usedReunionTitles = Array.isArray(bond.usedReunionTitles) ? bond.usedReunionTitles : [];
+      player.usedHighQingHangouts = Array.isArray(player.usedHighQingHangouts) ? player.usedHighQingHangouts : [];
+
+      let unusedBase = basePool.filter(s => !bond.usedReunionTitles.includes(s.title));
       const curQing = (player && player.stats) ? (player.stats.qing || 0) : 0;
+      let unusedHangouts = [];
       if (curQing >= 100 && typeof buildHighQingHangoutScenarios === "function") {
-        const unlockedHangouts = buildHighQingHangoutScenarios(targetChar, bond).filter(s => curQing >= s.minQing);
-        unlockedHangouts.forEach(s => chosenPool.push(s));
+        unusedHangouts = buildHighQingHangoutScenarios(targetChar, bond)
+          .filter(s => curQing >= s.minQing && !player.usedHighQingHangouts.includes(s.id));
       }
-      const pickedScene = chosenPool[Math.floor(Math.random() * chosenPool.length)];
+
+      let candidatePool = [...unusedBase, ...unusedHangouts];
+      if (candidatePool.length === 0) {
+        bond.usedReunionTitles = [];
+        candidatePool = [...basePool];
+      }
+      const pickedScene = candidatePool[Math.floor(Math.random() * candidatePool.length)];
+      if (pickedScene.id && pickedScene.id.startsWith("hq_")) {
+        if (!player.usedHighQingHangouts.includes(pickedScene.id)) {
+          player.usedHighQingHangouts.push(pickedScene.id);
+        }
+        player.lastHighQingHangoutAge = player.age;
+      } else {
+        if (!bond.usedReunionTitles.includes(pickedScene.title)) {
+          bond.usedReunionTitles.push(pickedScene.title);
+        }
+      }
       const options = pickedScene.opts.map(o => ({
         text: o.text,
         cost: o.cost,
@@ -23279,6 +23357,11 @@ ${targetW.desc}
             const statChanges = modifyStats(normStats);
             bond.intimacyIndex = Math.min(INTIMACY_LEVELS.length - 1, Math.max(0, bond.intimacyIndex + dInt));
             bond.tacit = Math.max(0, (bond.tacit || 0) + dTac);
+            if (dInt < 0 && bond.farewellTriggered && !bond.relationTag) {
+              bond.hadRiftAfterFarewell = true;
+            } else if (dInt > 0 && bond.intimacyIndex >= 5 && bond.hadRiftAfterFarewell) {
+              bond.hadRiftAfterFarewell = false;
+            }
 
             if (dInt > 0 && dTac > 0) {
               bond.resonance = (bond.resonance || 0) + 1;
@@ -23335,7 +23418,10 @@ ${targetW.desc}
             if (opt.heavyInjury && opt.heavyInjury > 0) {
               statChanges.push(`重傷+${opt.heavyInjury}`);
             }
-            addLog(`🤝【${scenario.title}】${opt.reply || "兩人相視一笑，默契更深。"}（${logRelationText}，${statChanges.join("、")}）`, opt.grantCompanionImmortal ? "immortal-log" : "milestone");
+            const logTitleText = scenario.isSwornReunion
+              ? String(scenario.title || "").replace(/^[^\u4e00-\u9fffA-Za-z0-9《]+/, "").trim()
+              : scenario.title;
+            addLog(`🤝【${logTitleText}】${opt.reply || "兩人相視一笑，默契更深。"}（${logRelationText}，${statChanges.join("、")}）`, opt.grantCompanionImmortal ? "immortal-log" : "milestone");
             if (opt.heavyInjury && opt.heavyInjury > 0) {
               addHeavyInjury(opt.heavyInjury);
               if (player.isDead) {
@@ -23445,6 +23531,8 @@ ${targetW.desc}
     // 第一階段：友好度達親密無間（含）以上且默契滿 3 點以上時，先觸發各角色專屬「回眸離別劇情」，並設置隨機 1～7 年（12～84 個月）計時器
     function triggerBondFarewellScene(charData, bond) {
       bond.farewellTriggered = true;
+      bond.intimacyAtFarewell = bond.intimacyIndex || 4;
+      bond.hadRiftAfterFarewell = false;
       const waitMonths = Math.floor(Math.random() * 73) + 12; // 12 ~ 84 個月 (1年 ~ 7年)
       bond.pendingConfessionMonths = waitMonths;
 
@@ -23633,12 +23721,14 @@ ${targetW.desc}
       return player && player.artifacts.some(a => a.id === artId);
     }
 
-    function consumeTaixuArmor() {
+    function consumeTaixuArmor(options = {}) {
       if (!player) return false;
       const idx = player.artifacts.findIndex(a => a.id === "taixu_armor" || a.name === "太虛神甲");
       if (idx >= 0) {
         player.artifacts.splice(idx, 1);
-        addLog("🛡️【太虛神甲替死護主】生死一線間，你身上的【太虛神甲】轟然碎裂化作萬道金光，硬生生替你擋下必死之劫！", "immortal-log");
+        if (!options.silent) {
+          addLog("🛡️【太虛神甲替死護主】生死一線間，你身上的【太虛神甲】轟然碎裂化作萬道金光，硬生生替你擋下必死之劫！", "immortal-log");
+        }
         renderSkillsTab();
         return true;
       }
@@ -24498,9 +24588,9 @@ ${targetW.desc}
             log: "轟然巨響中石陣迷霧散開，你霸氣拉出受困同門，深厚功力令聞訊趕來的執事刮目相看！"
           },
           {
-            text: "【請出陣圖 · 偕執法師兄共解】速赴執法堂請出陣盤令旗，穩妥關閉石陣救人並替小師妹求情免罰 (德行+4、情義+2)",
+            text: "【請出陣圖 · 偕執法同門共解】速赴執法堂請出陣盤令旗，穩妥關閉石陣救人並替小師妹求情免罰 (德行+4、情義+2)",
             stats: { de: 4, qing: 2 },
-            log: "你處事周全穩健，不僅平安救出同門，更主動替其分擔責罰，門內上下皆稱你有長兄風範。"
+            log: "你處事周全穩健，不僅平安救出同門，更主動替其分擔責罰，門內上下皆稱你有{elderTitle}風範。"
           }
         ]
       },
@@ -24651,7 +24741,8 @@ ${targetW.desc}
       player.usedSectEvents.add(ev.id);
 
       const sectName = player.sect || "本門";
-      const fmt = (str) => (str || "").replace(/\{sect\}/g, sectName);
+      const elderTitle = player.gender === "女" ? "長姊" : "長兄";
+      const fmt = (str) => (str || "").replace(/\{sect\}/g, sectName).replace(/\{elderTitle\}/g, elderTitle);
 
       setPauseState(true);
       openEventModal(
@@ -27468,7 +27559,7 @@ ${targetW.desc}
                 customOutcomeHandled = true;
               } else {
                 if (battle.id === "huashan_dahui" && stageNum === 4) player.huashanBlockedSword = false;
-                if (consumeTaixuArmor()) {
+                if (consumeTaixuArmor({ silent: true })) {
                   addLog(`🛡️【神器護主】${aidNote}${scoreNote} 面對最終強敵狂暴殺招，太虛神甲替你擋下致命一擊碎裂成齏粉！你借力暴退保住一命！`, "good-log");
                   customOutcomeHandled = true;
                 } else if (effWu >= reqWu && tryMiracleRescueFromDeath(`於【${battle.title} · ${stage.subtitle}】武道三系底氣未足卻死戰最終強敵，`, !!aidedBond)) {
@@ -27495,7 +27586,7 @@ ${targetW.desc}
             // 1. 武力不足 (effWu < reqWu)：強行硬闖有 50% 機率慘遭重創（重傷+2），50% 機率當場斃命 GG！
             else if (effWu < reqWu) {
               if (battle.id === "huashan_dahui" && stageNum === 4) player.huashanBlockedSword = false;
-              if (consumeTaixuArmor()) {
+              if (consumeTaixuArmor({ silent: true })) {
                 addLog(`🛡️【神器護主】${aidNote} 太虛神甲替你擋下致命狂暴一擊碎裂成齏粉！你借力後撤撿回一條性命！`, "good-log");
               } else if (Math.random() < 0.50) {
                 const chg = modifyStats(rollBattleStats({ wu: 1 }));
@@ -27535,7 +27626,7 @@ ${targetW.desc}
                 customOutcomeHandled = true;
               } else if (roll < 2 / 3) {
                 if (battle.id === "huashan_dahui" && stageNum === 4) player.huashanBlockedSword = false;
-                if (consumeTaixuArmor()) {
+                if (consumeTaixuArmor({ silent: true })) {
                   addLog(`🛡️【神器護主】${aidNote} 激戰中強敵突施殺招，太虛神甲替你擋下致命一擊碎裂成齏粉！`, "good-log");
                   customOutcomeHandled = true;
                 } else if (tryMiracleRescueFromDeath(`於【${battle.title} · ${stage.subtitle}】與強敵勢均力敵卻遭暗算，`, !!aidedBond)) {
@@ -27956,18 +28047,19 @@ ${targetW.desc}
             recordKarmicSeed(c.plantKarmicSeed || `早年你在【${ev.title}】中仗義援手救下的那名受困旅人`);
           }
           const chg = modifyStats(rawSt);
+          const resStr = String(c.result || c.reply || "");
           let injNotice = "";
           if (c.heavyInjury) {
             addHeavyInjury(c.heavyInjury);
-            injNotice = `【受創留下重傷+${c.heavyInjury}】`;
+            if (!/重傷\+/.test(resStr)) injNotice = `【受創留下重傷+${c.heavyInjury}】`;
           } else if (c.lightInjury) {
             addLightInjury(c.lightInjury);
-            injNotice = `【擦傷留下輕傷+${c.lightInjury}】`;
+            if (!/輕傷\+/.test(resStr)) injNotice = `【擦傷留下輕傷+${c.lightInjury}】`;
           } else if (c.riskInjury && Math.random() < c.riskInjury) {
             addLightInjury(1);
-            injNotice = `【激戰負傷，留下輕傷+1】`;
+            if (!/輕傷\+/.test(resStr)) injNotice = `【激戰負傷，留下輕傷+1】`;
           }
-          addLog(`⚖️【${ev.title}】${c.result || c.reply} ${injNotice} ${chg.length ? "(" + chg.join("、") + ")" : ""}`, injNotice ? "danger-log" : "milestone");
+          addLog(`⚖️【${ev.title}】${resStr} ${injNotice} ${chg.length ? "(" + chg.join("、") + ")" : ""}`, (c.heavyInjury || c.lightInjury || injNotice) ? "danger-log" : "milestone");
           if (player && player.isDead) return;
           updateAllUI();
           setPauseState(false);
@@ -28990,14 +29082,15 @@ ${targetW.desc}
     }
 
     function attemptBreakthrough() {
-      if (!player || player.isDead) return;
-      const realmObj = IMMORTAL_REALMS[player.immortalStage] || IMMORTAL_REALMS[0];
-      if (player.qi < realmObj.maxQi) return;
+      if (!player || player.isDead) return false;
+      const stageIdx = player.immortalStage || 0;
+      if (stageIdx >= IMMORTAL_REALMS.length - 1) return false;
+      const realmObj = IMMORTAL_REALMS[stageIdx] || IMMORTAL_REALMS[0];
+      if ((player.qi || 0) < realmObj.maxQi) return false;
 
       player.qi = Math.max(0, player.qi - realmObj.maxQi);
       // 進一步下調各期破境機率，並讓高階境界受天道威壓折減加成，防止輕易一路突破至大乘期
       const baseRates = [0.40, 0.25, 0.15, 0.09, 0.06, 0.04, 0.028, 0.018, 0.012, 0.008];
-      const stageIdx = player.immortalStage || 0;
       const baseRate = baseRates[stageIdx] !== undefined ? baseRates[stageIdx] : 0.01;
       const stageDamping = Math.max(0.22, 1 - stageIdx * 0.095);
       const rawBonus =
@@ -29020,6 +29113,7 @@ ${targetW.desc}
         player.title = nextRealm.title;
         player.maxLifespan = Math.max(player.maxLifespan, nextRealm.lifespan);
         modifyStats({ wu: 20, de: 10, ming: 15 });
+        addLog(`⚡【破境功成】九天祥雲匯聚，你成功突破至【${nextRealm.name}】（${nextRealm.title}），壽元大限延展至 ${player.maxLifespan} 歲！`, "immortal-log");
         player.scriptureLogs.unshift({
           isCrit: true,
           html: `<span style="color:var(--gold-bright);font-weight:bold;">${timeTag}⚡【破境功成】</span>九天祥雲匯聚，你成功突破至<strong style="color:var(--jade-bright);">【${nextRealm.name}】</strong>，獲尊號「${nextRealm.title}」，壽元大限延展至 ${player.maxLifespan} 歲！`
@@ -29028,19 +29122,33 @@ ${targetW.desc}
 
         if (player.immortalStage >= 9) {
           triggerDeathOrAscension("渡劫圓滿，破碎虛空，白日飛昇仙界！");
-          return;
+          return true;
         }
       } else {
-        if (!consumeTaixuArmor()) {
+        const wouldBeLethal = (player.maxLifespan - 15) <= player.age;
+        if (wouldBeLethal && consumeTaixuArmor()) {
+          player.scriptureLogs.unshift({
+            isCrit: false,
+            html: `<span style="color:var(--jade-bright);font-weight:bold;">${timeTag}🛡️【神甲擋劫】</span>破境天劫反噬本將傷及性命，太虛神甲替你硬抗一劫保住壽元！`
+          });
+          if (player.scriptureLogs.length > 50) player.scriptureLogs.length = 50;
+        } else {
           player.maxLifespan -= 15;
+          addLog(`💥【破境受挫】衝擊更高仙階遭天劫雷火反噬，你吐血出關，折損 15 載壽元。`, "danger-log");
           player.scriptureLogs.unshift({
             isCrit: false,
             html: `<span style="color:#ff8e8e;font-weight:bold;">${timeTag}💥【破境受挫】</span>天劫雷火反噬，你吐血出關，折損 15 載壽元。`
           });
           if (player.scriptureLogs.length > 50) player.scriptureLogs.length = 50;
+          if (player.maxLifespan <= player.age) {
+            player.maxLifespan = player.age;
+            triggerDeathOrAscension(`衝擊仙階遭遇天劫反噬，壽元耗盡坐化，享壽 ${player.age} 歲。`);
+            return true;
+          }
         }
       }
       updateAllUI();
+      return true;
     }
 
     function getBodyTemperRate() {
@@ -29150,6 +29258,41 @@ ${targetW.desc}
       if (player.scriptureLogs.length > 50) player.scriptureLogs.length = 50;
       if (!player.isDead) updateAllUI();
       return true;
+    }
+
+    function runAutoFateImmortalCultivation() {
+      if (!player || player.isDead || !player.isImmortalUnlocked) return false;
+      if (document.getElementById("modal-event")?.classList.contains("show")) return false;
+
+      const stageIdx = player.immortalStage || 0;
+      if (stageIdx < IMMORTAL_REALMS.length - 1) {
+        const curRealm = IMMORTAL_REALMS[stageIdx] || IMMORTAL_REALMS[0];
+        if ((player.qi || 0) >= curRealm.maxQi) {
+          const lifeMargin = (player.maxLifespan || 80) - (player.age || 0);
+          if (!player.inImmortalPhase || lifeMargin > 20 || lifeMargin <= 12) {
+            attemptBreakthrough();
+            return true;
+          }
+        }
+      }
+
+      const safeForBodyRoot = player.inImmortalPhase
+        ? ((player.maxLifespan - player.age) >= 25)
+        : ((player.heavyInjuries || 0) === 0 && (player.lightInjuries || 0) <= 2);
+      if (!safeForBodyRoot) return false;
+
+      const nextBody = BODY_TIERS[(player.bodyTierIndex || 0) + 1];
+      if (nextBody && (player.qi || 0) >= nextBody.cost && getBodyTemperRate() >= 0.65) {
+        attemptBodyTemper();
+        return true;
+      }
+
+      const nextRoot = ROOT_TIERS[(player.rootTierIndex || 0) + 1];
+      if (nextRoot && (player.qi || 0) >= nextRoot.cost && getRootCleanseRate() >= 0.65) {
+        attemptRootCleanse();
+        return true;
+      }
+      return false;
     }
 
 
@@ -29841,6 +29984,9 @@ ${targetW.desc}
       } else {
         tickImmortalYear();
       }
+      if (isAutoFate && !isPaused && player && !player.isDead && player.isImmortalUnlocked) {
+        runAutoFateImmortalCultivation();
+      }
       updateAllUI();
       if (!isPaused && !player.isDead) saveAutoGame();
     }
@@ -30203,11 +30349,13 @@ ${targetW.desc}
               b.pendingFarewellDelayMonths--;
               if (b.pendingFarewellDelayMonths <= 0) {
                 delete b.pendingFarewellDelayMonths;
-                const charObj = (DB.CHARACTERS || []).find(c => c && (c.id === b.id || c.name === b.name));
-                if (charObj) {
-                  setPauseState(true);
-                  triggerBondFarewellScene(charObj, b);
-                  return;
+                if ((b.intimacyIndex || 0) >= 4) {
+                  const charObj = (DB.CHARACTERS || []).find(c => c && (c.id === b.id || c.name === b.name));
+                  if (charObj) {
+                    setPauseState(true);
+                    triggerBondFarewellScene(charObj, b);
+                    return;
+                  }
                 }
               }
             }
@@ -30216,11 +30364,19 @@ ${targetW.desc}
             if (!player.fakedDeath || b.isImmortal) {
               b.pendingConfessionMonths--;
               if (b.pendingConfessionMonths <= 0) {
-                const charObj = (DB.CHARACTERS || []).find(c => c && (c.id === b.id || c.name === b.name));
-                if (charObj) {
-                  setPauseState(true);
-                  promptBondAscension(charObj, b);
-                  return;
+                const stillIntimate = (b.intimacyIndex || 0) >= 4 && !b.hadRiftAfterFarewell && (b.intimacyIndex || 0) >= Math.min(5, b.intimacyAtFarewell || 4);
+                if (!stillIntimate) {
+                  b.pendingConfessionMonths = 0;
+                  b.farewellTriggered = false;
+                  b.hadRiftAfterFarewell = false;
+                  addLog(`🍂【重逢已逝 · 舊約成空】歲月流轉，昔年與【${b.name}】的臨別之約終因期間嫌隙未解而無疾而終，再相見時唯有淡淡一揖。`, "good-log");
+                } else {
+                  const charObj = (DB.CHARACTERS || []).find(c => c && (c.id === b.id || c.name === b.name));
+                  if (charObj) {
+                    setPauseState(true);
+                    promptBondAscension(charObj, b);
+                    return;
+                  }
                 }
               }
             }
@@ -30547,11 +30703,11 @@ ${targetW.desc}
         return;
       }
 
-      // 【生平自發墓前祭奠】：若有好感達標之已故同伴，低機率（每月約 1.2%）於生平卷自動前往故人墓前探望祭奠（排除仇視／芥蒂者）
+      // 【生平自發墓前祭奠】：若有好感達標之已故同伴，低機率（每月約 1.2%，每年至多 1 次）於生平卷自動前往故人墓前探望祭奠（排除仇視／芥蒂者）
       const deadCompanions = (player.bonds || []).filter(b =>
-        b && (b.isDead || (b.status && b.status.includes("長眠"))) && ((b.intimacyIndex || 0) >= 2 || !!b.relationTag)
+        b && (b.isDead || (b.status && b.status.includes("長眠"))) && ((b.intimacyIndex || 0) >= 2 || !!b.relationTag) && b.lastAutoGraveVisitAge !== player.age
       );
-      if (deadCompanions.length > 0 && Math.random() < 0.012) {
+      if (player.lastAutoGraveVisitAge !== player.age && deadCompanions.length > 0 && Math.random() < 0.012) {
         // 優先探望伴侶/金蘭或探望次數較少的故人
         const sortedDead = [...deadCompanions].sort((a, b) => {
           const aPrio = (a.relationTag === "神仙眷侶" || a.relationTag === "紅塵伴侶") ? 10 : (a.relationTag ? 5 : 0);
@@ -30560,6 +30716,8 @@ ${targetW.desc}
           return (a.visitedGraveCount || 0) - (b.visitedGraveCount || 0);
         });
         const targetDead = sortedDead[0];
+        player.lastAutoGraveVisitAge = player.age;
+        targetDead.lastAutoGraveVisitAge = player.age;
         targetDead.visitedGraveCount = (targetDead.visitedGraveCount || 0) + 1;
         unlockBaixiao(`故人墓前：${targetDead.name}`);
         const chg = modifyStats({ qing: 2, de: 1 });
@@ -31068,13 +31226,20 @@ ${targetW.desc}
       if (typeof updateFamilyMemberLifespans === "function") updateFamilyMemberLifespans();
       if (Array.isArray(player.mounts) && player.mounts.length > 0) {
         const mountAgeStep = Math.max(0, player.age - prevAge);
+        let mountUpgradedLog = false;
         player.mounts.forEach(m => {
           if (!m || m.isDead) return;
           assignMountLifespan(m);
           m.age = (m.age || 4) + mountAgeStep;
           m.yearsOwned = (m.yearsOwned || 0) + mountAgeStep;
           m.maxLifespan = Math.max(99999, m.age + 1000);
+          if (!m.immortalized) {
+            m.immortalized = true;
+            addLog(`✨【靈獸蛻凡 · 護道長生】長年相伴的${m.title || "靈獸"}【${m.name}】隨你踏入洞天福地、沐浴九天靈霧，打破凡獸壽限蛻變為護道仙靈，自此與你共參長生！`, "immortal-log");
+            mountUpgradedLog = true;
+          }
         });
+        if (mountUpgradedLog) renderBondsTab();
       }
 
       // 共修仙途的同伴（b.isImmortal）隨主角一同增長歲數；若未透過洞天共修延壽，約於 600 歲左右遭遇仙途天劫或壽元大限坐化，確保享年顯示為 ~600 歲而非 77 歲！
@@ -31210,6 +31375,14 @@ ${targetW.desc}
         `將百年前所記前人手札重新展讀 ${actualStep} 載，昔年不解的晦澀關竅忽如冰釋春融。`,
         `棲身西域荒原古石林打坐 ${actualStep} 載，風沙雕刻石柱而你不為所動，道胎愈發堅凝。`
       ];
+      const activeImmMounts = getActiveMounts();
+      if (activeImmMounts.length > 0) {
+        const leadM = activeImmMounts[0];
+        microPool.push(
+          `閉關吐納 ${actualStep} 載，已化仙靈的【${leadM.name}】靜臥洞府靈泉畔替你護法，靈息彼此相融更見通透。`,
+          `乘雲巡遊九州蒼穹 ${actualStep} 春秋，與【${leadM.name}】並肩俯瞰人間桑田滄海，長生路上不覺孤單。`
+        );
+      }
       let pickIdx = Math.floor(Math.random() * microPool.length);
       if (microPool.length > 1 && pickIdx === player.lastImmortalMicroIdx) {
         pickIdx = (pickIdx + 1) % microPool.length;
@@ -32978,6 +33151,12 @@ ${targetW.desc}
         }
         return `<span class="status-badge ${(b.includes("輕傷") || b.includes("重傷") || b.includes("舊傷") || b.includes("道傷") || b.includes("輕損") || b.includes("重創")) ? "injury" : "good"}">${b}</span>`;
       }).join("");
+
+      const leaveSectBtn = document.getElementById("btn-leave-sect");
+      if (leaveSectBtn) {
+        const canLeave = !player.isDead && !player.inImmortalPhase && player.age >= 8 && player.age < 80 && !!player.sect && player.sect !== "無門無派";
+        leaveSectBtn.style.display = canLeave ? "inline-block" : "none";
+      }
 
       const fakeDeathBtn = document.getElementById("btn-fake-death");
       if (fakeDeathBtn) {
