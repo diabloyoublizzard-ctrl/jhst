@@ -1112,7 +1112,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.28.0015</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.28.0055</span>
       </div>
 
       <div class="debug-row">
@@ -1160,7 +1160,7 @@
   </div>
 
   <!-- 1. 讀取外部基底資料庫 data.js -->
-  <script src="data.js?v=202611280015"></script>
+  <script src="data.js?v=202611280055"></script>
   <script>
     window.PENDING_PATCHES_QUEUE = window.PENDING_PATCHES_QUEUE || [];
     window.LOADED_PATCHES = window.LOADED_PATCHES || [];
@@ -1173,7 +1173,7 @@
     }
   
 </script>
-  <script src="patches.js?v=202611280015"></script>
+  <script src="patches.js?v=202611280055"></script>
   <script>
 
   (function() {
@@ -1616,9 +1616,9 @@
           { text: "青年游歷南疆蒼洱城古道，漫山紅海棠隨風飄落，一陣清脆銀鈴與竹笛聲自竹林深處傳來，令人心曠神怡。", stats: { qing: 2, wu: 1 } },
           { text: "在洛陽茶攤歇腳，聽聞幾個鏢師吹噓當年一刀斷瀑布的豪勇，你低頭喝茶淡然一笑。", stats: { ming: 1 } },
           { text: "寒冬朔風起時，經脈深處早年與強敵對決殘留的真氣舊痕便隨之震顫，你不得不購置靈丹壓制翻湧氣血。", stats: { wu: -2, cai: -1 } },
-          { text: "雨夜投宿荒山破廟，見殘壁上留有前人刻下的槍法殘痕，你枯坐推演至天明，福至心靈習得一門槍術！", stats: { wu: 4 }, gainSkill: "破陣十三槍" },
+          { text: "雨夜投宿荒山破廟，見殘壁上留有前人刻下的槍法殘痕，你枯坐推演至天明，福至心靈習得一門槍術！", noSkillText: "雨夜投宿荒山破廟，見殘壁上留有前人刻下的槍法殘痕，你枯坐推演至天明，對槍勢變化大有所得！", stats: { wu: 4 }, gainSkill: "破陣十三槍" },
           { text: "你在赤霞鎮老鐵匠鋪淘到一柄百煉精鋼刃，隨身佩帶演練，外功殺傷大增！", stats: { wu: 4, cai: -2 }, gainBadge: "佩兵：百煉精鋼刃" },
-          { text: "深山採藥時失足跌入極寒靈潭，你咬牙運功抵禦寒毒三日，潭底地煞靈液竟將你的肉身生生淬鍊了一番！", stats: { wu: 5 }, bodyUpgrade: true }
+          { text: "深山採藥時失足跌入極寒靈潭，你咬牙運功抵禦寒毒三日，潭底地煞靈液竟將你的肉身生生淬鍊了一番！", noUpgradeText: "深山採藥時失足跌入極寒靈潭，你咬牙運功抵禦寒毒三日方才脫險，氣血經寒氣激盪更見凝實！", stats: { wu: 5 }, bodyUpgrade: true }
         ],
         major_events: [],
         dynamic_dilemmas: [
@@ -2023,7 +2023,7 @@
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.28.0015";
+    const GAME_VERSION = "v2026.11.28.0055";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -2138,7 +2138,8 @@
         if (!Array.isArray(p[k])) p[k] = [];
       });
       const setFields = [
-        "usedEvents", "usedEpochEvents", "usedImmortalEvents", "triggeredBattles",
+        "usedEvents", "usedEpochEvents", "usedImmortalEvents", "usedMythicEncounters",
+        "usedSectEvents", "usedDiscipleEvents", "triggeredBattles",
         "triggeredAllianceLeaderEvents", "weaponHistoryFlags",
         "thisLifeBaixiao", "thisLifeAchievements"
       ];
@@ -3036,6 +3037,7 @@
         worldHistory: [],
         usedEvents: new Set(),
         usedEpochEvents: new Set(),
+        usedMythicEncounters: new Set(),
         triggeredBattles: new Set(),
         sectPromoStage: 0,
         childhoodTargetMonth: Math.floor(Math.random() * 10) + 2,
@@ -4239,9 +4241,9 @@
 
       let narrative = "";
       if (sk.weapon === "刀法") {
-        narrative = `夜半風雷激盪，你取出昔日收錄的《${sk.name}》刀譜反覆推演。隨著一聲春雷炸響，你過往積累的雄渾刀勁豁然貫通，拔刀連劈三十六式，刀氣如匹練撕裂夜空！`;
+        narrative = `夜半風雷激盪，你取出昔日收錄的《${sk.name}》刀譜反覆推演。隨著一聲驚雷炸響，你過往積累的雄渾刀勁豁然貫通，拔刀連劈三十六式，刀氣如匹練撕裂夜空！`;
       } else if (sk.weapon === "劍法") {
-        narrative = `秋夜月華如水，你靜立庭院中回想《${sk.name}》劍訣精要。一片落葉飄落劍鋒的剎那，你福至心靈、劍心通明，體內真氣如江河奔涌貫通周身劍穴！`;
+        narrative = `靜夜月華如水，你靜立庭院中回想《${sk.name}》劍訣精要。一片落葉飄落劍鋒的剎那，你福至心靈、劍心通明，體內真氣如江河奔涌貫通周身劍穴！`;
       } else if (sk.weapon === "槍棍") {
         narrative = `破曉時分，你於山林間演練昔年所得《${sk.name}》圖譜。如今你氣血充盈、臂力雄渾，長槍抖動間如怒龍出海，百般滯澀一朝盡去！`;
       } else if (sk.type === "內功") {
@@ -6573,10 +6575,13 @@ ${targetW.desc}
         : FRIEND_GIFT_EVENTS;
       const deckKey = isSpouse ? (senderIsMale ? "_usedSpouseWarmthMale" : "_usedSpouseWarmth") : "_usedFriendGift";
       player[deckKey] = player[deckKey] || [];
-      let avail = pool.map((_, i) => i).filter(i => !player[deckKey].includes(i));
+      const seasonValid = pool.map((_, i) => i).filter(i => isEventSeasonallyValid(pool[i], player?.month));
+      const baseIndices = seasonValid.length > 0 ? seasonValid : pool.map((_, i) => i);
+      let avail = baseIndices.filter(i => !player[deckKey].includes(i));
       if (avail.length === 0) {
-        player[deckKey] = [];
-        avail = pool.map((_, i) => i);
+        const baseSet = new Set(baseIndices);
+        player[deckKey] = player[deckKey].filter(i => !baseSet.has(i));
+        avail = [...baseIndices];
       }
       const idx = avail[Math.floor(Math.random() * avail.length)];
       player[deckKey].push(idx);
@@ -6614,11 +6619,14 @@ ${targetW.desc}
       } else {
         const unlocked = allHangouts.filter(s => curQing >= s.minQing);
         if (unlocked.length === 0) return false;
+        const seasonUnlocked = unlocked.filter(s => isEventSeasonallyValid(s, player?.month));
+        const baseHangouts = seasonUnlocked.length > 0 ? seasonUnlocked : unlocked;
         player.usedHighQingHangouts = Array.isArray(player.usedHighQingHangouts) ? player.usedHighQingHangouts : [];
-        let avail = unlocked.filter(s => !player.usedHighQingHangouts.includes(s.id));
+        let avail = baseHangouts.filter(s => !player.usedHighQingHangouts.includes(s.id));
         if (avail.length === 0) {
-          player.usedHighQingHangouts = [];
-          avail = unlocked;
+          const baseIds = new Set(baseHangouts.map(s => s.id));
+          player.usedHighQingHangouts = player.usedHighQingHangouts.filter(id => !baseIds.has(id));
+          avail = [...baseHangouts];
         }
         picked = avail[Math.floor(Math.random() * avail.length)];
         player.usedHighQingHangouts.push(picked.id);
@@ -6817,11 +6825,14 @@ ${targetW.desc}
       }
 
       let candidatePool = [...unusedBase, ...unusedHangouts];
-      if (candidatePool.length === 0) {
+      let seasonCandPool = candidatePool.filter(s => isEventSeasonallyValid(s, player?.month));
+      if (seasonCandPool.length === 0) {
         bond.usedReunionTitles = [];
         candidatePool = [...basePool];
+        seasonCandPool = candidatePool.filter(s => isEventSeasonallyValid(s, player?.month));
       }
-      const pickedScene = candidatePool[Math.floor(Math.random() * candidatePool.length)];
+      const finalCandPool = seasonCandPool.length > 0 ? seasonCandPool : candidatePool;
+      const pickedScene = finalCandPool[Math.floor(Math.random() * finalCandPool.length)];
       if (pickedScene.id && pickedScene.id.startsWith("hq_")) {
         if (!player.usedHighQingHangouts.includes(pickedScene.id)) {
           player.usedHighQingHangouts.push(pickedScene.id);
@@ -7579,11 +7590,22 @@ ${targetW.desc}
       );
     }
 
-    function triggerMythicEncounter() {
-      setPauseState(true);
+    function triggerMythicEncounter(allowRepeat = false) {
+      if (!player || player.isDead) return false;
       const pool = DB.MYTHIC_ENCOUNTERS;
-      if (!pool || pool.length === 0) { setPauseState(false); return; }
-      const ev = pool[Math.floor(Math.random() * pool.length)];
+      if (!pool || pool.length === 0) return false;
+      if (!(player.usedMythicEncounters instanceof Set)) {
+        player.usedMythicEncounters = new Set(Array.isArray(player.usedMythicEncounters) ? player.usedMythicEncounters : []);
+      }
+      const getMythicKey = (e) => e.charId || e.id || e.title;
+      let avail = pool.filter(e => e && !player.usedMythicEncounters.has(getMythicKey(e)));
+      if (avail.length === 0) {
+        if (!allowRepeat) return false;
+        avail = pool;
+      }
+      const ev = avail[Math.floor(Math.random() * avail.length)];
+      player.usedMythicEncounters.add(getMythicKey(ev));
+      setPauseState(true);
 
       const choices = (ev.choices || []).map(c => {
         let dynamicHint = "";
@@ -7661,6 +7683,7 @@ ${targetW.desc}
       });
 
       openEventModal(ev.title, "0.5% 傳奇人物", ev.desc, choices);
+      return true;
     }
 
     // 機率檢定與多樣化求醫劇本
@@ -8536,8 +8559,10 @@ ${targetW.desc}
       player.usedSectEvents = player.usedSectEvents || new Set();
       let avail = SECT_INTERNAL_EVENTS_POOL.filter(e => !player.usedSectEvents.has(e.id));
       if (avail.length === 0) return false;
+      const seasonAvail = avail.filter(e => isEventSeasonallyValid(e, player?.month));
+      if (seasonAvail.length === 0) return false;
 
-      const ev = avail[Math.floor(Math.random() * avail.length)];
+      const ev = seasonAvail[Math.floor(Math.random() * seasonAvail.length)];
       player.usedSectEvents.add(ev.id);
 
       const sectName = player.sect || "本門";
@@ -8950,7 +8975,9 @@ ${targetW.desc}
       let avail = pool.filter(e => !player.usedEvents.has(e.id));
       // 每個行當專屬劇本（如孤身獨闖黑水山寨救人質）一生僅觸發一次，絕不重複刷出！
       if (avail.length === 0) return false;
-      const ev = avail[Math.floor(Math.random() * avail.length)];
+      const seasonAvail = avail.filter(e => isEventSeasonallyValid(e, player?.month));
+      if (seasonAvail.length === 0) return false;
+      const ev = seasonAvail[Math.floor(Math.random() * seasonAvail.length)];
       player.usedEvents.add(ev.id);
       player.lastProfEventAge = player.age;
 
@@ -9360,7 +9387,9 @@ ${targetW.desc}
       player.usedDiscipleEvents = player.usedDiscipleEvents || new Set();
       const avail = DISCIPLE_EVENTS_POOL.filter(e => !player.usedDiscipleEvents.has(e.id));
       if (avail.length === 0) return false;
-      const ev = avail[Math.floor(Math.random() * avail.length)];
+      const seasonAvail = avail.filter(e => isEventSeasonallyValid(e, player?.month));
+      if (seasonAvail.length === 0) return false;
+      const ev = seasonAvail[Math.floor(Math.random() * seasonAvail.length)];
       player.usedDiscipleEvents.add(ev.id);
       setPauseState(true);
 
@@ -11808,8 +11837,16 @@ ${targetW.desc}
         pool.forEach(ev => player.usedEvents.delete(`dilemma_${ev.id || ev.title}`));
         available = [...pool];
       }
+      const seasonCheck = typeof isEventSeasonallyValid === "function" ? isEventSeasonallyValid : (() => true);
+      let seasonAvail = available.filter(ev => seasonCheck(ev, player?.month));
+      if (seasonAvail.length === 0) {
+        pool.forEach(ev => player.usedEvents.delete(`dilemma_${ev.id || ev.title}`));
+        available = [...pool];
+        seasonAvail = available.filter(ev => seasonCheck(ev, player?.month));
+      }
+      const pickPool = seasonAvail.length > 0 ? seasonAvail : available;
 
-      const ev = available[Math.floor(Math.random() * available.length)];
+      const ev = pickPool[Math.floor(Math.random() * pickPool.length)];
       player.usedEvents.add(`dilemma_${ev.id || ev.title}`);
       setPauseState(true);
 
@@ -14360,9 +14397,8 @@ ${targetW.desc}
         return;
       }
 
-      // 每月 0.5% 獨立傳奇奇遇
-      if (player.age >= 12 && Math.random() < (CFG.mythicEncounterRate * oldAgeCalmMult)) {
-        triggerMythicEncounter();
+      // 每月 0.5% 獨立傳奇奇遇（每位武林神話同局僅觸發一次）
+      if (player.age >= 12 && Math.random() < (CFG.mythicEncounterRate * oldAgeCalmMult) && triggerMythicEncounter()) {
         return;
       }
 
@@ -14571,7 +14607,6 @@ ${targetW.desc}
           triggerDynamicDilemma();
         } else {
           const ev = pickNonRepeatingEvent(DB.EVENTS.mortal_adventures, "mortal");
-          const isSpecialGain = !!(ev.gainSkill || ev.gainWeapon || ev.gainBadge || ev.bodyUpgrade);
           const cappedStats = Object.assign({}, ev.stats || {});
           // 一般事件：有條件但隨機決定武力增加數 (+0 ~ +1)
           if (cappedStats.wu && cappedStats.wu > 0) {
@@ -14585,13 +14620,43 @@ ${targetW.desc}
           const getHeavy = ev.heavyInjury && Math.random() < 0.40 ? ev.heavyInjury : 0;
           if (getLight) addLightInjury(getLight);
           if (getHeavy) addHeavyInjury(getHeavy);
+
+          let willGrantSkill = false;
+          if (ev.gainSkill) {
+            const alreadyHasSkill = (player.skills || []).some(s => s && s.name === ev.gainSkill) ||
+              (player.collectedManuals || []).some(m => (m && (m.name || m)) === ev.gainSkill);
+            if (!alreadyHasSkill) {
+              const curMasteredCount = getMasteredSkillsList().length;
+              willGrantSkill = curMasteredCount < 5 ? true : (curMasteredCount < 8 ? Math.random() < 0.25 : Math.random() < 0.08);
+            }
+          }
+          const willTriggerBodyUpgrade = !!(ev.bodyUpgrade && player.bodyTierIndex < BODY_TIERS.length - 1 && Math.random() < 0.50);
+
+          let logBody = ev.text || "";
+          if (ev.gainSkill && !willGrantSkill) {
+            if (ev.noSkillText) {
+              logBody = ev.noSkillText;
+            } else {
+              logBody = logBody
+                .replace(/(?:福至心靈|豁然)?(?:悟出|領悟|自悟|習得|修成)[^，。！]*(?:！|。)/g, "心中大有觸動，對武道根基頗有裨益！")
+                .replace(/終將其融會貫通！/g, "連日揣摩之下，招式眼界與底蘊大有精進！");
+            }
+          }
+          if (ev.bodyUpgrade && !willTriggerBodyUpgrade && ev.noUpgradeText) {
+            logBody = ev.noUpgradeText;
+          }
+          if (ev.lightInjury && !getLight) {
+            logBody = logBody.replace(/【留下輕傷】/g, "所幸護體真氣穩固，並未留下內傷。");
+          }
+          if (ev.heavyInjury && !getHeavy) {
+            logBody = logBody.replace(/【留下重傷】/g, "所幸你強提一口真氣護住心脈，險之又險未釀成重創。");
+          }
+
           const injTag = getHeavy ? `、重傷+${getHeavy}` : (getLight ? `、輕傷+${getLight}` : "");
           const statSummary = (chg.length || injTag) ? `(${chg.join("、")}${injTag.replace(/^、/, chg.length ? "、" : "")})` : "";
-          addLog(`${ev.text} ${statSummary}`, (getLight || getHeavy) ? "danger-log" : "");
-          if (ev.gainSkill) {
-            const curMasteredCount = getMasteredSkillsList().length;
-            const allowRoutineSkill = curMasteredCount < 5 ? true : (curMasteredCount < 8 ? Math.random() < 0.25 : Math.random() < 0.08);
-            if (allowRoutineSkill) gainMartialArt(ev.gainSkill);
+          addLog(`${logBody} ${statSummary}`, (getLight || getHeavy) ? "danger-log" : "");
+          if (willGrantSkill) {
+            gainMartialArt(ev.gainSkill);
           }
           if (ev.gainWeapon) {
             gainWeapon(ev.gainWeapon);
@@ -14603,7 +14668,7 @@ ${targetW.desc}
               player.badges.push(ev.gainBadge);
             }
           }
-          if (ev.bodyUpgrade && player.bodyTierIndex < BODY_TIERS.length - 1 && Math.random() < 0.50) {
+          if (willTriggerBodyUpgrade) {
             triggerBodyTemperEncounter(ev.text);
           }
         }
@@ -15191,6 +15256,37 @@ ${targetW.desc}
       addLog(`🧘 ${microPool[pickIdx]}`, "immortal-log");
     }
 
+    function isEventSeasonallyValid(evOrText, month) {
+      if (!month) return true;
+      if (typeof player !== "undefined" && player && player.inImmortalPhase) return true;
+      if (evOrText && typeof evOrText === "object" && Array.isArray(evOrText.allowedMonths)) {
+        return evOrText.allowedMonths.includes(month);
+      }
+      let str = "";
+      if (typeof evOrText === "string") {
+        str = evOrText;
+      } else if (evOrText && typeof evOrText === "object") {
+        const t = typeof evOrText.text === "function" ? evOrText.text("") : (evOrText.text || "");
+        str = [evOrText.title || "", t, evOrText.desc || ""].join(" ");
+      }
+      if (!str) return true;
+      if (/除夕|歲末守夜|歲末師門大考|抄寫春聯|壓歲銅錢/.test(str)) return month === 12;
+      if (/元宵/.test(str)) return month === 1 || month === 2;
+      if (/清明/.test(str)) return month === 3 || month === 4;
+      if (/端午/.test(str)) return month === 5 || month === 6;
+      if (/梅雨/.test(str)) return month === 5 || month === 6;
+      if (/中秋/.test(str)) return month === 8 || month === 9;
+      if (/重陽/.test(str)) return month === 9 || month === 10;
+      if (/冬至/.test(str)) return month === 11 || month === 12;
+      if (/寒冬|冬日|冬夜|臘月|大雪封山|大雪紛飛|大雪壓彎|歲末大雪|歲暮大雪|寒夜圍爐|下了好大的一場雪|雪窩|風雪交加|冒著風雪|踏雪尋梅|煮雪烹茶|天寒多添衣|凝結成百丈冰凌/.test(str)) {
+        return month === 11 || month === 12 || month === 1 || month === 2;
+      }
+      if (/盛夏|酷暑|夏日|夏夜|炎夏|避暑/.test(str)) return month === 6 || month === 7 || month === 8;
+      if (/秋日|秋夜|秋收|秋風|秋深|秋高氣爽|秋獵|桂花糕/.test(str)) return month === 8 || month === 9 || month === 10;
+      if (/春日|春雨|春夜|春獵|明前龍井|春潮/.test(str)) return month === 2 || month === 3 || month === 4 || month === 5;
+      return true;
+    }
+
     function pickNonRepeatingEvent(pool, prefix) {
       if (!pool || pool.length === 0) return { text: "歲月靜好，平淡度日。", stats: { qing: 1 } };
       const curWu = player ? (player.stats.wu || 0) : 0;
@@ -15226,7 +15322,9 @@ ${targetW.desc}
         return true;
       });
 
-      const targetPool = fitPool.length > 0 ? fitPool : basePool;
+      const curMonth = player ? (player.month || 0) : 0;
+      const seasonPool = fitPool.filter(ev => isEventSeasonallyValid(ev, curMonth));
+      const targetPool = seasonPool.length > 0 ? seasonPool : (fitPool.length > 0 ? fitPool : basePool);
       MetaState.usedRoutineDeck = MetaState.usedRoutineDeck || {};
       if (!(MetaState.usedRoutineDeck[prefix] instanceof Set)) {
         MetaState.usedRoutineDeck[prefix] = new Set();
@@ -19149,7 +19247,7 @@ ${targetW.desc}
       });
       document.getElementById("dbg-btn-mythic").addEventListener("click", () => {
         if (!player) startNewLife();
-        triggerMythicEncounter();
+        triggerMythicEncounter(true);
       });
       document.getElementById("dbg-btn-skill").addEventListener("click", () => {
         if (!player) startNewLife();

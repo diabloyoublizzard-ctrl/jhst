@@ -1112,7 +1112,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.28.0015</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.28.0055</span>
       </div>
 
       <div class="debug-row">
@@ -10594,8 +10594,8 @@
       { minAge: 16, maxAge: 24, text: "你聽信游方道人吹噓買下一枚『千年避水珠』，下河試珠時嗆了幾口河水，卻意外在河床暗流裡練出了綿長閉氣功夫。", stats: { cai: -2, wu: 1 }, maxWu: 80 },
       { minAge: 16, maxAge: 24, text: "你在嶺南山林誤食一株形似靈芝的紫斑野菇，眼前浮現漫天彩蝶幻影，幸得路過的老藥農以甘草湯替你化開餘毒。", stats: { cai: -2, wu: -1 } },
       { minAge: 16, maxAge: 24, text: "你在洛陽擂台上初試啼聲卻大意輕敵，被對手一腳踹落台下，引得滿堂圍觀者倒彩連連，卻也磨去了幾分少年浮躁。", stats: { ming: -5, wu: 1 }, maxWu: 80 },
-      { minAge: 16, maxAge: 24, text: "秋日於終南山古觀借宿，見老道士掃落葉時步履暗合先天方位，你靜心摹仿數日，悟出一套精妙步法！", stats: { wu: 2, de: 2 }, gainSkill: "四象步法" },
-      { minAge: 16, maxAge: 24, text: "你在太白舊棧道避雨時，見山澗白猿踏枝借力、凌空飛渡，心中大有所感，反覆演練後悟出上乘輕功！", stats: { wu: 2, qing: 2 }, gainSkill: "梯雲縱" },
+      { minAge: 16, maxAge: 24, text: "秋日於終南山古觀借宿，見老道士掃落葉時步履暗合先天方位，你靜心摹仿數日，悟出一套精妙步法！", noSkillText: "秋日於終南山古觀借宿，見老道士掃落葉時步履暗合先天方位，你靜心摹仿數日，足下騰挪愈發沉穩靈動！", stats: { wu: 2, de: 2 }, gainSkill: "四象步法" },
+      { minAge: 16, maxAge: 24, text: "你在太白舊棧道避雨時，見山澗白猿踏枝借力、凌空飛渡，心中大有所感，反覆演練後悟出上乘輕功！", noSkillText: "你在太白舊棧道避雨時，見山澗白猿踏枝借力、凌空飛渡，心中大有所感，提氣縱躍的火候精進了幾分！", stats: { wu: 2, qing: 2 }, gainSkill: "梯雲縱" },
       { minAge: 16, maxAge: 24, text: "初入洛陽見識神都繁華，你在天津橋畔與幾名同齡游俠切磋劍術、暢談天下英雄，少年意氣揮斥方遒。", stats: { ming: 2, qing: 2, wu: 1 } },
       { minAge: 16, maxAge: 24, text: "山村秋收時遭野豬群襲擾，你仗劍守在田埂三日，替村民驅散凶獸，村長硬往你行囊裡塞滿了臘肉與乾糧。", stats: { de: 3, wu: 1, qing: 1 } },
       { minAge: 16, maxAge: 24, text: "渡黃河時風浪大作，你幫年邁的老船夫穩住船舵並撐篙破浪，從水流湍急的借力之道中領悟了幾分卸力巧勁。", stats: { wu: 2, de: 1 } },
@@ -10617,17 +10617,17 @@
       { minAge: 25, maxAge: 50, text: "你在流沙城拍賣會上慧眼識珠，從一塊包裹萬年玄鐵的石胎中煉出四品傳世名刃『鳴鴻赤血刀』！", stats: { wu: 2, cai: -4, ming: 4 }, gainWeapon: "鳴鴻赤血刀", minWu: 65 },
       { minAge: 25, maxAge: 50, text: "你在龍泉古劍池畔靜坐聽劍七日，池底傳世名刃『龍泉太阿劍』感應到你的浩然劍氣，破水飛出認你為主！", stats: { wu: 2, ming: 6, de: 3 }, gainWeapon: "龍泉太阿劍", minWu: 70 },
       { minAge: 25, maxAge: 50, text: "你在塞外天山絕壁的萬載寒冰中，拔出了昔年槍神遺留的『瀝泉盤龍神槍』，槍鳴如雷震動群山！", stats: { wu: 2, ming: 6 }, gainWeapon: "瀝泉盤龍神槍", minWu: 70 },
-      { minAge: 25, maxAge: 50, text: "雨夜投宿破廟，見石壁上刻滿前人留下的散亂槍痕，你枯坐推演至天明，福至心靈悟出一路古樸槍法！", stats: { wu: 2, de: 2 }, gainSkill: "破陣十三槍" },
-      { minAge: 25, maxAge: 50, text: "你於東海懸崖觀驚濤拍岸七日七夜，聽海潮起落之聲與體內氣血共鳴，豁然領悟出剛猛無匹的刀法！", stats: { wu: 2, ming: 2 }, gainSkill: "覆海刀法" },
-      { minAge: 25, maxAge: 50, text: "夜宿荒原古塚，你在殘破石碑背面拓下一篇道家吐納古文，潛心參悟月餘，修成一門綿密上乘內功！", stats: { wu: 2, de: 3 }, gainSkill: "兩儀玄元功" },
-      { minAge: 25, maxAge: 50, text: "你在塞外孤峰頂上偶遇頭狼對月長嘯，其吞吐風雲之勢觸動你的氣海，你盤膝閉關三日，自悟一門霸道內功！", stats: { wu: 2, ming: 2 }, gainSkill: "嘯狼心訣" },
-      { minAge: 25, maxAge: 50, text: "你在洛陽古董鋪淘到一卷生鏽的鐵簡，用火烤去蠟封後竟顯出前朝劍客留下的星象劍圖，苦練之下劍術大成！", stats: { wu: 2, cai: -2 }, gainSkill: "星雲劍法" },
-      { minAge: 25, maxAge: 50, text: "行經天池雪山風口，你在漫天狂風暴雪中拔刃獨舞，以風勢淬煉身法，雙足輕靈如御清風！", stats: { wu: 2, qing: 2 }, gainSkill: "疾風步" },
-      { minAge: 25, maxAge: 50, text: "你在古戰場遺址掘出一柄斷折的百斤重槍與半部殘譜，日夜演練殺伐破陣之術，終將其融會貫通！", stats: { wu: 2, ming: 3 }, gainSkill: "碎岳槍法" },
-      { minAge: 25, maxAge: 50, text: "你在靈鷲山古林見蒼鷹搏兔、踏七星方位俯衝側擊，福至心靈間將鷹爪撲擊化入掌法，悟出上乘拳術！", stats: { wu: 2, de: 2 }, gainSkill: "偏花七星拳" },
-      { minAge: 25, maxAge: 50, text: "你在赤霞山萬仞古壁下靜觀殘月刀痕，體悟有進無退之霸烈刀意，刀道修為一朝破境！", stats: { wu: 2, ming: 3 }, gainSkill: "霸刀殘月刀法" },
-      { minAge: 25, maxAge: 50, text: "你在雲澤湖孤島石洞中避風，見洞頂鐘乳石滴水穿石、劍氣暗藏，靜坐參悟十日，領悟凌厲劍氣法門！", stats: { wu: 2, de: 2 }, gainSkill: "七絕劍氣" },
-      { minAge: 25, maxAge: 50, text: "深山採藥時失足跌入隱秘寒潭，冰刺骨髓，你咬牙運功抵禦三日，潭中地煞寒氣竟將你的凡胎肉身生生淬鍊了一番！", stats: { wu: 2 }, bodyUpgrade: true },
+      { minAge: 25, maxAge: 50, text: "雨夜投宿破廟，見石壁上刻滿前人留下的散亂槍痕，你枯坐推演至天明，福至心靈悟出一路古樸槍法！", noSkillText: "雨夜投宿破廟，見石壁上刻滿前人留下的散亂槍痕，你枯坐推演至天明，對古樸槍意頗有所得！", stats: { wu: 2, de: 2 }, gainSkill: "破陣十三槍" },
+      { minAge: 25, maxAge: 50, text: "你於東海懸崖觀驚濤拍岸七日七夜，聽海潮起落之聲與體內氣血共鳴，豁然領悟出剛猛無匹的刀法！", noSkillText: "你於東海懸崖觀驚濤拍岸七日七夜，聽海潮起落之聲與體內氣血共鳴，胸中剛猛刀意與武道底蘊愈發渾厚！", stats: { wu: 2, ming: 2 }, gainSkill: "覆海刀法" },
+      { minAge: 25, maxAge: 50, text: "夜宿荒原古塚，你在殘破石碑背面拓下一篇道家吐納古文，潛心參悟月餘，修成一門綿密上乘內功！", noSkillText: "夜宿荒原古塚，你在殘破石碑背面拓下一篇道家吐納古文，潛心揣摩月餘，只覺丹田內息愈發綿密純厚！", stats: { wu: 2, de: 3 }, gainSkill: "兩儀玄元功" },
+      { minAge: 25, maxAge: 50, text: "你在塞外孤峰頂上偶遇頭狼對月長嘯，其吞吐風雲之勢觸動你的氣海，你盤膝閉關三日，自悟一門霸道內功！", noSkillText: "你在塞外孤峰頂上偶遇頭狼對月長嘯，其吞吐風雲之勢觸動你的氣海，你盤膝調息三日，體內罡氣更添幾分霸烈！", stats: { wu: 2, ming: 2 }, gainSkill: "嘯狼心訣" },
+      { minAge: 25, maxAge: 50, text: "你在洛陽古董鋪淘到一卷生鏽的鐵簡，用火烤去蠟封後竟顯出前朝劍客留下的星象劍圖，苦練之下劍術大成！", noSkillText: "你在洛陽古董鋪淘到一卷生鏽的鐵簡，用火烤去蠟封後竟顯出前朝劍客留下的星象殘圖，反覆推演後劍意更見流轉！", stats: { wu: 2, cai: -2 }, gainSkill: "星雲劍法" },
+      { minAge: 25, maxAge: 50, text: "行經天池雪山風口，你在漫天狂風暴雪中拔刃獨舞，以風勢淬煉身法，雙足輕靈如御清風！", noSkillText: "行經天池雪山風口，你在漫天狂風中拔刃演武，藉罡風磨礪下盤與身法，舉手投足更見輕靈！", stats: { wu: 2, qing: 2 }, gainSkill: "疾風步" },
+      { minAge: 25, maxAge: 50, text: "你在古戰場遺址掘出一柄斷折的百斤重槍與半部殘譜，日夜演練殺伐破陣之術，終將其融會貫通！", noSkillText: "你在古戰場遺址掘出一柄斷折的百斤重槍與半部殘譜，連日揣摩其中殺伐破陣之理，招式威勢愈發沉雄！", stats: { wu: 2, ming: 3 }, gainSkill: "碎岳槍法" },
+      { minAge: 25, maxAge: 50, text: "你在靈鷲山古林見蒼鷹搏兔、踏七星方位俯衝側擊，福至心靈間將鷹爪撲擊化入掌法，悟出上乘拳術！", noSkillText: "你在靈鷲山古林見蒼鷹搏兔、踏七星方位俯衝側擊，心中觸動頗深，對拳掌變招與身位借力大有所得！", stats: { wu: 2, de: 2 }, gainSkill: "偏花七星拳" },
+      { minAge: 25, maxAge: 50, text: "你在赤霞山萬仞古壁下靜觀殘月刀痕，體悟有進無退之霸烈刀意，刀道修為一朝破境！", noSkillText: "你在赤霞山萬仞古壁下靜觀殘月刀痕，感受前人有進無退的霸烈刀勢，武道眼界大有精進！", stats: { wu: 2, ming: 3 }, gainSkill: "霸刀殘月刀法" },
+      { minAge: 25, maxAge: 50, text: "你在雲澤湖孤島石洞中避風，見洞頂鐘乳石滴水穿石、劍氣暗藏，靜坐參悟十日，領悟凌厲劍氣法門！", noSkillText: "你在雲澤湖孤島石洞中避風，見洞頂鐘乳石滴水穿石、暗合剛柔之理，靜坐揣摩十日，出招勁道愈發凝練！", stats: { wu: 2, de: 2 }, gainSkill: "七絕劍氣" },
+      { minAge: 25, maxAge: 50, text: "深山採藥時失足跌入隱秘寒潭，冰刺骨髓，你咬牙運功抵禦三日，潭中地煞寒氣竟將你的凡胎肉身生生淬鍊了一番！", noUpgradeText: "深山採藥時失足跌入隱秘寒潭，冰刺骨髓，你咬牙運功抵禦三日方才脫困，筋骨經寒氣一激反倒更見強韌！", stats: { wu: 2 }, bodyUpgrade: true },
       { minAge: 25, maxAge: 50, text: "長安夜遊暗市裡魚龍混雜，你戴著斗笠向靈藥客買下一瓶九轉金瘡散，順手替一名誤入暗市的採藥少年解了圍。", stats: { de: 2, cai: -1 } },
       { minAge: 25, maxAge: 50, text: "你把攢下的一半盤纏分給了玄真山腳下逃荒的窮苦百姓，自己啃了三天冷硬的乾糧。", stats: { cai: -3, de: 3, ming: 2 } },
       { minAge: 25, maxAge: 50, text: "寒冬臘月，你在赤霞鎮外見一名凍僵的游方郎中倒在雪窩裡，連忙背進客棧灌下薑湯，救回一命。", stats: { de: 3 } },
@@ -17816,9 +17816,9 @@ addGameData({
           { text: "青年游歷南疆蒼洱城古道，漫山紅海棠隨風飄落，一陣清脆銀鈴與竹笛聲自竹林深處傳來，令人心曠神怡。", stats: { qing: 2, wu: 1 } },
           { text: "在洛陽茶攤歇腳，聽聞幾個鏢師吹噓當年一刀斷瀑布的豪勇，你低頭喝茶淡然一笑。", stats: { ming: 1 } },
           { text: "寒冬朔風起時，經脈深處早年與強敵對決殘留的真氣舊痕便隨之震顫，你不得不購置靈丹壓制翻湧氣血。", stats: { wu: -2, cai: -1 } },
-          { text: "雨夜投宿荒山破廟，見殘壁上留有前人刻下的槍法殘痕，你枯坐推演至天明，福至心靈習得一門槍術！", stats: { wu: 4 }, gainSkill: "破陣十三槍" },
+          { text: "雨夜投宿荒山破廟，見殘壁上留有前人刻下的槍法殘痕，你枯坐推演至天明，福至心靈習得一門槍術！", noSkillText: "雨夜投宿荒山破廟，見殘壁上留有前人刻下的槍法殘痕，你枯坐推演至天明，對槍勢變化大有所得！", stats: { wu: 4 }, gainSkill: "破陣十三槍" },
           { text: "你在赤霞鎮老鐵匠鋪淘到一柄百煉精鋼刃，隨身佩帶演練，外功殺傷大增！", stats: { wu: 4, cai: -2 }, gainBadge: "佩兵：百煉精鋼刃" },
-          { text: "深山採藥時失足跌入極寒靈潭，你咬牙運功抵禦寒毒三日，潭底地煞靈液竟將你的肉身生生淬鍊了一番！", stats: { wu: 5 }, bodyUpgrade: true }
+          { text: "深山採藥時失足跌入極寒靈潭，你咬牙運功抵禦寒毒三日，潭底地煞靈液竟將你的肉身生生淬鍊了一番！", noUpgradeText: "深山採藥時失足跌入極寒靈潭，你咬牙運功抵禦寒毒三日方才脫險，氣血經寒氣激盪更見凝實！", stats: { wu: 5 }, bodyUpgrade: true }
         ],
         major_events: [],
         dynamic_dilemmas: [
@@ -18223,7 +18223,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.28.0015";
+    const GAME_VERSION = "v2026.11.28.0055";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -18338,7 +18338,8 @@ addGameData({
         if (!Array.isArray(p[k])) p[k] = [];
       });
       const setFields = [
-        "usedEvents", "usedEpochEvents", "usedImmortalEvents", "triggeredBattles",
+        "usedEvents", "usedEpochEvents", "usedImmortalEvents", "usedMythicEncounters",
+        "usedSectEvents", "usedDiscipleEvents", "triggeredBattles",
         "triggeredAllianceLeaderEvents", "weaponHistoryFlags",
         "thisLifeBaixiao", "thisLifeAchievements"
       ];
@@ -19236,6 +19237,7 @@ addGameData({
         worldHistory: [],
         usedEvents: new Set(),
         usedEpochEvents: new Set(),
+        usedMythicEncounters: new Set(),
         triggeredBattles: new Set(),
         sectPromoStage: 0,
         childhoodTargetMonth: Math.floor(Math.random() * 10) + 2,
@@ -20439,9 +20441,9 @@ addGameData({
 
       let narrative = "";
       if (sk.weapon === "刀法") {
-        narrative = `夜半風雷激盪，你取出昔日收錄的《${sk.name}》刀譜反覆推演。隨著一聲春雷炸響，你過往積累的雄渾刀勁豁然貫通，拔刀連劈三十六式，刀氣如匹練撕裂夜空！`;
+        narrative = `夜半風雷激盪，你取出昔日收錄的《${sk.name}》刀譜反覆推演。隨著一聲驚雷炸響，你過往積累的雄渾刀勁豁然貫通，拔刀連劈三十六式，刀氣如匹練撕裂夜空！`;
       } else if (sk.weapon === "劍法") {
-        narrative = `秋夜月華如水，你靜立庭院中回想《${sk.name}》劍訣精要。一片落葉飄落劍鋒的剎那，你福至心靈、劍心通明，體內真氣如江河奔涌貫通周身劍穴！`;
+        narrative = `靜夜月華如水，你靜立庭院中回想《${sk.name}》劍訣精要。一片落葉飄落劍鋒的剎那，你福至心靈、劍心通明，體內真氣如江河奔涌貫通周身劍穴！`;
       } else if (sk.weapon === "槍棍") {
         narrative = `破曉時分，你於山林間演練昔年所得《${sk.name}》圖譜。如今你氣血充盈、臂力雄渾，長槍抖動間如怒龍出海，百般滯澀一朝盡去！`;
       } else if (sk.type === "內功") {
@@ -22773,10 +22775,13 @@ ${targetW.desc}
         : FRIEND_GIFT_EVENTS;
       const deckKey = isSpouse ? (senderIsMale ? "_usedSpouseWarmthMale" : "_usedSpouseWarmth") : "_usedFriendGift";
       player[deckKey] = player[deckKey] || [];
-      let avail = pool.map((_, i) => i).filter(i => !player[deckKey].includes(i));
+      const seasonValid = pool.map((_, i) => i).filter(i => isEventSeasonallyValid(pool[i], player?.month));
+      const baseIndices = seasonValid.length > 0 ? seasonValid : pool.map((_, i) => i);
+      let avail = baseIndices.filter(i => !player[deckKey].includes(i));
       if (avail.length === 0) {
-        player[deckKey] = [];
-        avail = pool.map((_, i) => i);
+        const baseSet = new Set(baseIndices);
+        player[deckKey] = player[deckKey].filter(i => !baseSet.has(i));
+        avail = [...baseIndices];
       }
       const idx = avail[Math.floor(Math.random() * avail.length)];
       player[deckKey].push(idx);
@@ -22814,11 +22819,14 @@ ${targetW.desc}
       } else {
         const unlocked = allHangouts.filter(s => curQing >= s.minQing);
         if (unlocked.length === 0) return false;
+        const seasonUnlocked = unlocked.filter(s => isEventSeasonallyValid(s, player?.month));
+        const baseHangouts = seasonUnlocked.length > 0 ? seasonUnlocked : unlocked;
         player.usedHighQingHangouts = Array.isArray(player.usedHighQingHangouts) ? player.usedHighQingHangouts : [];
-        let avail = unlocked.filter(s => !player.usedHighQingHangouts.includes(s.id));
+        let avail = baseHangouts.filter(s => !player.usedHighQingHangouts.includes(s.id));
         if (avail.length === 0) {
-          player.usedHighQingHangouts = [];
-          avail = unlocked;
+          const baseIds = new Set(baseHangouts.map(s => s.id));
+          player.usedHighQingHangouts = player.usedHighQingHangouts.filter(id => !baseIds.has(id));
+          avail = [...baseHangouts];
         }
         picked = avail[Math.floor(Math.random() * avail.length)];
         player.usedHighQingHangouts.push(picked.id);
@@ -23017,11 +23025,14 @@ ${targetW.desc}
       }
 
       let candidatePool = [...unusedBase, ...unusedHangouts];
-      if (candidatePool.length === 0) {
+      let seasonCandPool = candidatePool.filter(s => isEventSeasonallyValid(s, player?.month));
+      if (seasonCandPool.length === 0) {
         bond.usedReunionTitles = [];
         candidatePool = [...basePool];
+        seasonCandPool = candidatePool.filter(s => isEventSeasonallyValid(s, player?.month));
       }
-      const pickedScene = candidatePool[Math.floor(Math.random() * candidatePool.length)];
+      const finalCandPool = seasonCandPool.length > 0 ? seasonCandPool : candidatePool;
+      const pickedScene = finalCandPool[Math.floor(Math.random() * finalCandPool.length)];
       if (pickedScene.id && pickedScene.id.startsWith("hq_")) {
         if (!player.usedHighQingHangouts.includes(pickedScene.id)) {
           player.usedHighQingHangouts.push(pickedScene.id);
@@ -23779,11 +23790,22 @@ ${targetW.desc}
       );
     }
 
-    function triggerMythicEncounter() {
-      setPauseState(true);
+    function triggerMythicEncounter(allowRepeat = false) {
+      if (!player || player.isDead) return false;
       const pool = DB.MYTHIC_ENCOUNTERS;
-      if (!pool || pool.length === 0) { setPauseState(false); return; }
-      const ev = pool[Math.floor(Math.random() * pool.length)];
+      if (!pool || pool.length === 0) return false;
+      if (!(player.usedMythicEncounters instanceof Set)) {
+        player.usedMythicEncounters = new Set(Array.isArray(player.usedMythicEncounters) ? player.usedMythicEncounters : []);
+      }
+      const getMythicKey = (e) => e.charId || e.id || e.title;
+      let avail = pool.filter(e => e && !player.usedMythicEncounters.has(getMythicKey(e)));
+      if (avail.length === 0) {
+        if (!allowRepeat) return false;
+        avail = pool;
+      }
+      const ev = avail[Math.floor(Math.random() * avail.length)];
+      player.usedMythicEncounters.add(getMythicKey(ev));
+      setPauseState(true);
 
       const choices = (ev.choices || []).map(c => {
         let dynamicHint = "";
@@ -23861,6 +23883,7 @@ ${targetW.desc}
       });
 
       openEventModal(ev.title, "0.5% 傳奇人物", ev.desc, choices);
+      return true;
     }
 
     // 機率檢定與多樣化求醫劇本
@@ -24736,8 +24759,10 @@ ${targetW.desc}
       player.usedSectEvents = player.usedSectEvents || new Set();
       let avail = SECT_INTERNAL_EVENTS_POOL.filter(e => !player.usedSectEvents.has(e.id));
       if (avail.length === 0) return false;
+      const seasonAvail = avail.filter(e => isEventSeasonallyValid(e, player?.month));
+      if (seasonAvail.length === 0) return false;
 
-      const ev = avail[Math.floor(Math.random() * avail.length)];
+      const ev = seasonAvail[Math.floor(Math.random() * seasonAvail.length)];
       player.usedSectEvents.add(ev.id);
 
       const sectName = player.sect || "本門";
@@ -25150,7 +25175,9 @@ ${targetW.desc}
       let avail = pool.filter(e => !player.usedEvents.has(e.id));
       // 每個行當專屬劇本（如孤身獨闖黑水山寨救人質）一生僅觸發一次，絕不重複刷出！
       if (avail.length === 0) return false;
-      const ev = avail[Math.floor(Math.random() * avail.length)];
+      const seasonAvail = avail.filter(e => isEventSeasonallyValid(e, player?.month));
+      if (seasonAvail.length === 0) return false;
+      const ev = seasonAvail[Math.floor(Math.random() * seasonAvail.length)];
       player.usedEvents.add(ev.id);
       player.lastProfEventAge = player.age;
 
@@ -25560,7 +25587,9 @@ ${targetW.desc}
       player.usedDiscipleEvents = player.usedDiscipleEvents || new Set();
       const avail = DISCIPLE_EVENTS_POOL.filter(e => !player.usedDiscipleEvents.has(e.id));
       if (avail.length === 0) return false;
-      const ev = avail[Math.floor(Math.random() * avail.length)];
+      const seasonAvail = avail.filter(e => isEventSeasonallyValid(e, player?.month));
+      if (seasonAvail.length === 0) return false;
+      const ev = seasonAvail[Math.floor(Math.random() * seasonAvail.length)];
       player.usedDiscipleEvents.add(ev.id);
       setPauseState(true);
 
@@ -28008,8 +28037,16 @@ ${targetW.desc}
         pool.forEach(ev => player.usedEvents.delete(`dilemma_${ev.id || ev.title}`));
         available = [...pool];
       }
+      const seasonCheck = typeof isEventSeasonallyValid === "function" ? isEventSeasonallyValid : (() => true);
+      let seasonAvail = available.filter(ev => seasonCheck(ev, player?.month));
+      if (seasonAvail.length === 0) {
+        pool.forEach(ev => player.usedEvents.delete(`dilemma_${ev.id || ev.title}`));
+        available = [...pool];
+        seasonAvail = available.filter(ev => seasonCheck(ev, player?.month));
+      }
+      const pickPool = seasonAvail.length > 0 ? seasonAvail : available;
 
-      const ev = available[Math.floor(Math.random() * available.length)];
+      const ev = pickPool[Math.floor(Math.random() * pickPool.length)];
       player.usedEvents.add(`dilemma_${ev.id || ev.title}`);
       setPauseState(true);
 
@@ -30560,9 +30597,8 @@ ${targetW.desc}
         return;
       }
 
-      // 每月 0.5% 獨立傳奇奇遇
-      if (player.age >= 12 && Math.random() < (CFG.mythicEncounterRate * oldAgeCalmMult)) {
-        triggerMythicEncounter();
+      // 每月 0.5% 獨立傳奇奇遇（每位武林神話同局僅觸發一次）
+      if (player.age >= 12 && Math.random() < (CFG.mythicEncounterRate * oldAgeCalmMult) && triggerMythicEncounter()) {
         return;
       }
 
@@ -30771,7 +30807,6 @@ ${targetW.desc}
           triggerDynamicDilemma();
         } else {
           const ev = pickNonRepeatingEvent(DB.EVENTS.mortal_adventures, "mortal");
-          const isSpecialGain = !!(ev.gainSkill || ev.gainWeapon || ev.gainBadge || ev.bodyUpgrade);
           const cappedStats = Object.assign({}, ev.stats || {});
           // 一般事件：有條件但隨機決定武力增加數 (+0 ~ +1)
           if (cappedStats.wu && cappedStats.wu > 0) {
@@ -30785,13 +30820,43 @@ ${targetW.desc}
           const getHeavy = ev.heavyInjury && Math.random() < 0.40 ? ev.heavyInjury : 0;
           if (getLight) addLightInjury(getLight);
           if (getHeavy) addHeavyInjury(getHeavy);
+
+          let willGrantSkill = false;
+          if (ev.gainSkill) {
+            const alreadyHasSkill = (player.skills || []).some(s => s && s.name === ev.gainSkill) ||
+              (player.collectedManuals || []).some(m => (m && (m.name || m)) === ev.gainSkill);
+            if (!alreadyHasSkill) {
+              const curMasteredCount = getMasteredSkillsList().length;
+              willGrantSkill = curMasteredCount < 5 ? true : (curMasteredCount < 8 ? Math.random() < 0.25 : Math.random() < 0.08);
+            }
+          }
+          const willTriggerBodyUpgrade = !!(ev.bodyUpgrade && player.bodyTierIndex < BODY_TIERS.length - 1 && Math.random() < 0.50);
+
+          let logBody = ev.text || "";
+          if (ev.gainSkill && !willGrantSkill) {
+            if (ev.noSkillText) {
+              logBody = ev.noSkillText;
+            } else {
+              logBody = logBody
+                .replace(/(?:福至心靈|豁然)?(?:悟出|領悟|自悟|習得|修成)[^，。！]*(?:！|。)/g, "心中大有觸動，對武道根基頗有裨益！")
+                .replace(/終將其融會貫通！/g, "連日揣摩之下，招式眼界與底蘊大有精進！");
+            }
+          }
+          if (ev.bodyUpgrade && !willTriggerBodyUpgrade && ev.noUpgradeText) {
+            logBody = ev.noUpgradeText;
+          }
+          if (ev.lightInjury && !getLight) {
+            logBody = logBody.replace(/【留下輕傷】/g, "所幸護體真氣穩固，並未留下內傷。");
+          }
+          if (ev.heavyInjury && !getHeavy) {
+            logBody = logBody.replace(/【留下重傷】/g, "所幸你強提一口真氣護住心脈，險之又險未釀成重創。");
+          }
+
           const injTag = getHeavy ? `、重傷+${getHeavy}` : (getLight ? `、輕傷+${getLight}` : "");
           const statSummary = (chg.length || injTag) ? `(${chg.join("、")}${injTag.replace(/^、/, chg.length ? "、" : "")})` : "";
-          addLog(`${ev.text} ${statSummary}`, (getLight || getHeavy) ? "danger-log" : "");
-          if (ev.gainSkill) {
-            const curMasteredCount = getMasteredSkillsList().length;
-            const allowRoutineSkill = curMasteredCount < 5 ? true : (curMasteredCount < 8 ? Math.random() < 0.25 : Math.random() < 0.08);
-            if (allowRoutineSkill) gainMartialArt(ev.gainSkill);
+          addLog(`${logBody} ${statSummary}`, (getLight || getHeavy) ? "danger-log" : "");
+          if (willGrantSkill) {
+            gainMartialArt(ev.gainSkill);
           }
           if (ev.gainWeapon) {
             gainWeapon(ev.gainWeapon);
@@ -30803,7 +30868,7 @@ ${targetW.desc}
               player.badges.push(ev.gainBadge);
             }
           }
-          if (ev.bodyUpgrade && player.bodyTierIndex < BODY_TIERS.length - 1 && Math.random() < 0.50) {
+          if (willTriggerBodyUpgrade) {
             triggerBodyTemperEncounter(ev.text);
           }
         }
@@ -31391,6 +31456,37 @@ ${targetW.desc}
       addLog(`🧘 ${microPool[pickIdx]}`, "immortal-log");
     }
 
+    function isEventSeasonallyValid(evOrText, month) {
+      if (!month) return true;
+      if (typeof player !== "undefined" && player && player.inImmortalPhase) return true;
+      if (evOrText && typeof evOrText === "object" && Array.isArray(evOrText.allowedMonths)) {
+        return evOrText.allowedMonths.includes(month);
+      }
+      let str = "";
+      if (typeof evOrText === "string") {
+        str = evOrText;
+      } else if (evOrText && typeof evOrText === "object") {
+        const t = typeof evOrText.text === "function" ? evOrText.text("") : (evOrText.text || "");
+        str = [evOrText.title || "", t, evOrText.desc || ""].join(" ");
+      }
+      if (!str) return true;
+      if (/除夕|歲末守夜|歲末師門大考|抄寫春聯|壓歲銅錢/.test(str)) return month === 12;
+      if (/元宵/.test(str)) return month === 1 || month === 2;
+      if (/清明/.test(str)) return month === 3 || month === 4;
+      if (/端午/.test(str)) return month === 5 || month === 6;
+      if (/梅雨/.test(str)) return month === 5 || month === 6;
+      if (/中秋/.test(str)) return month === 8 || month === 9;
+      if (/重陽/.test(str)) return month === 9 || month === 10;
+      if (/冬至/.test(str)) return month === 11 || month === 12;
+      if (/寒冬|冬日|冬夜|臘月|大雪封山|大雪紛飛|大雪壓彎|歲末大雪|歲暮大雪|寒夜圍爐|下了好大的一場雪|雪窩|風雪交加|冒著風雪|踏雪尋梅|煮雪烹茶|天寒多添衣|凝結成百丈冰凌/.test(str)) {
+        return month === 11 || month === 12 || month === 1 || month === 2;
+      }
+      if (/盛夏|酷暑|夏日|夏夜|炎夏|避暑/.test(str)) return month === 6 || month === 7 || month === 8;
+      if (/秋日|秋夜|秋收|秋風|秋深|秋高氣爽|秋獵|桂花糕/.test(str)) return month === 8 || month === 9 || month === 10;
+      if (/春日|春雨|春夜|春獵|明前龍井|春潮/.test(str)) return month === 2 || month === 3 || month === 4 || month === 5;
+      return true;
+    }
+
     function pickNonRepeatingEvent(pool, prefix) {
       if (!pool || pool.length === 0) return { text: "歲月靜好，平淡度日。", stats: { qing: 1 } };
       const curWu = player ? (player.stats.wu || 0) : 0;
@@ -31426,7 +31522,9 @@ ${targetW.desc}
         return true;
       });
 
-      const targetPool = fitPool.length > 0 ? fitPool : basePool;
+      const curMonth = player ? (player.month || 0) : 0;
+      const seasonPool = fitPool.filter(ev => isEventSeasonallyValid(ev, curMonth));
+      const targetPool = seasonPool.length > 0 ? seasonPool : (fitPool.length > 0 ? fitPool : basePool);
       MetaState.usedRoutineDeck = MetaState.usedRoutineDeck || {};
       if (!(MetaState.usedRoutineDeck[prefix] instanceof Set)) {
         MetaState.usedRoutineDeck[prefix] = new Set();
@@ -35349,7 +35447,7 @@ ${targetW.desc}
       });
       document.getElementById("dbg-btn-mythic").addEventListener("click", () => {
         if (!player) startNewLife();
-        triggerMythicEncounter();
+        triggerMythicEncounter(true);
       });
       document.getElementById("dbg-btn-skill").addEventListener("click", () => {
         if (!player) startNewLife();
