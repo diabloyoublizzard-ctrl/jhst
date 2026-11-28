@@ -1112,7 +1112,7 @@
     <div class="debug-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;">
         <span style="font-size:0.8rem;color:var(--gold);font-weight:bold;">⚡ 邊測邊改快捷調試台</span>
-        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.28.0055</span>
+        <span id="dbg-version-badge" style="font-size:0.72rem;color:#d4af37;background:rgba(212,175,55,0.12);padding:2px 6px;border-radius:3px;border:1px solid rgba(212,175,55,0.3);font-family:ui-monospace,Menlo,monospace;letter-spacing:0.5px;">v2026.11.28.1145</span>
       </div>
 
       <div class="debug-row">
@@ -18223,7 +18223,7 @@ addGameData({
       return 10 + Math.round((5 * lv * (lv + 3)) / 2);
     }
 
-    const GAME_VERSION = "v2026.11.28.0055";
+    const GAME_VERSION = "v2026.11.28.1145";
     const MetaState = {
       daoSeeds: 20,
       talents: {
@@ -19502,12 +19502,16 @@ addGameData({
       return 1;
     }
 
-    // 從玩家已學會的武學中挑選（優先挑選高階武學與契合佩兵之招式，一旦學會進階以上武學便不再出現太祖長拳/羅漢拳等基礎拳腳）
-    function pickLearnedSkill(preferCategory = null, weaponHint = null, allowRandom = true) {
+    // 從玩家已學會的武學中挑選（一般事件從全部已參悟武學隨機輪替；對上 BOSS 時傳入 { preferHighest: true } 鎖定最高階絕學）
+    function pickLearnedSkill(preferCategory = null, weaponHint = null, allowRandom = true, options = {}) {
       if (typeof weaponHint === "boolean") {
+        options = (allowRandom && typeof allowRandom === "object") ? allowRandom : options;
         allowRandom = weaponHint;
         weaponHint = null;
       }
+      const opts = (options && typeof options === "object") ? options : {};
+      const preferHighest = !!opts.preferHighest;
+      const excludeNames = opts.excludeNames instanceof Set ? opts.excludeNames : null;
       const mastered = (typeof getMasteredSkillsList === "function" ? getMasteredSkillsList() : []).filter(s => s && !s.isScripture);
       if (mastered.length === 0) return null;
 
@@ -19528,16 +19532,23 @@ addGameData({
         if (wMatches.length > 0) pool = wMatches;
       }
 
-      // 只要有進階(2)以上武學，一律排除一般(1)基礎武學，並保留所有進階以上武學共同隨機輪替
-      const highPool = pool.filter(s => getTierPrio(s.tier) >= 2);
-      if (highPool.length > 0) pool = highPool;
+      if (preferHighest && pool.length > 1) {
+        const maxPrio = Math.max(...pool.map(s => getTierPrio(s.tier)));
+        const highestPool = pool.filter(s => getTierPrio(s.tier) === maxPrio);
+        if (highestPool.length > 0) pool = highestPool;
+      }
+
+      if (excludeNames && excludeNames.size > 0 && pool.length > 1) {
+        const notUsed = pool.filter(s => !excludeNames.has(s.name));
+        if (notUsed.length > 0) pool = notUsed;
+      }
 
       if (pool.length === 1) return pool[0];
 
-      // 強制啟用防連抽記憶輪替（即便舊程式碼傳入 allowRandom=false，只要池中有多門高階武學也進行輪替）
+      // 強制啟用防連抽記憶輪替（即便舊程式碼傳入 allowRandom=false，只要池中有多門武學也進行輪替）
       if (typeof player !== "undefined" && player) {
         player._lastPickedSkillMap = player._lastPickedSkillMap || {};
-        const key = `${preferCategory || "any"}_${weaponHint || "all"}`;
+        const key = `${preferCategory || "any"}_${weaponHint || "all"}_${preferHighest ? "top" : "any"}`;
         const last = player._lastPickedSkillMap[key];
         const diff = pool.filter(s => s.name !== last);
         const target = diff.length > 0 ? diff : pool;
@@ -19548,12 +19559,12 @@ addGameData({
       return pool[Math.floor(Math.random() * pool.length)];
     }
 
-    function getBestLearnedSkill(preferCategory) {
-      return pickLearnedSkill(preferCategory, "", true);
+    function getBestLearnedSkill(preferCategory, options = {}) {
+      return pickLearnedSkill(preferCategory, "", true, options);
     }
 
-    function getBestLearnedSkillName(preferCategory, fallbackName = "看家武學") {
-      const sk = pickLearnedSkill(preferCategory, "", true);
+    function getBestLearnedSkillName(preferCategory, fallbackName = "看家武學", options = {}) {
+      const sk = pickLearnedSkill(preferCategory, "", true, options);
       return sk ? `《${sk.name}》` : fallbackName;
     }
 
@@ -19582,18 +19593,31 @@ addGameData({
     }
 
     // 從符合品階與分類條件的已學武學中輪替挑選一門代表武學（未達門檻則回傳 null）
-    function pickMasteredSkillByMinTier(minTierPrio = 3, category = "", preferExactTier = false) {
+    function pickMasteredSkillByMinTier(minTierPrio = 3, category = "", preferExactTier = false, options = {}) {
       const pool = getMasteredSkillsByMinTier(minTierPrio, category);
       if (pool.length === 0) return null;
+      const opts = (options && typeof options === "object") ? options : {};
+      const excludeNames = opts.excludeNames instanceof Set ? opts.excludeNames : null;
       let chosenPool = pool;
-      if (preferExactTier) {
+      if (opts.preferHighest && chosenPool.length > 1) {
+        const maxPrio = Math.max(...chosenPool.map(s => getSkillTierPriority(s.tier)));
+        const topOnly = chosenPool.filter(s => getSkillTierPriority(s.tier) === maxPrio);
+        if (topOnly.length > 0) chosenPool = topOnly;
+      } else if (preferExactTier) {
         const exact = pool.filter(s => getSkillTierPriority(s.tier) === minTierPrio);
         if (exact.length > 0) chosenPool = exact;
+      }
+      if (excludeNames && excludeNames.size > 0 && chosenPool.length > 1) {
+        const nonDup = chosenPool.filter(s => !excludeNames.has(s.name));
+        if (nonDup.length > 0) chosenPool = nonDup;
+      } else if (excludeNames && excludeNames.size > 0 && chosenPool.length === 1 && excludeNames.has(chosenPool[0].name)) {
+        const fallbackFromPool = pool.filter(s => !excludeNames.has(s.name));
+        if (fallbackFromPool.length > 0) chosenPool = fallbackFromPool;
       }
       if (chosenPool.length === 1) return chosenPool[0];
       if (player) {
         player._lastPickedTierSkillMap = player._lastPickedTierSkillMap || {};
-        const key = `${minTierPrio}_${category || "all"}`;
+        const key = `${minTierPrio}_${category || "all"}_${opts.preferHighest ? "top" : "any"}`;
         const last = player._lastPickedTierSkillMap[key];
         const varied = chosenPool.filter(s => s.name !== last);
         const finalPool = varied.length > 0 ? varied : chosenPool;
@@ -19644,7 +19668,7 @@ addGameData({
     }
 
     // 將戰鬥/危機選項中寫死的未學招式（如萬仞斬雪、萬刃歸元、獅子吼等）與銅皮鐵骨動態替換為玩家目前已學會的武學與當前肉身境界
-    function personalizeSkillAndBodyText(rawText, modalTag = "", modalTitle = "") {
+    function personalizeSkillAndBodyText(rawText, modalTag = "", modalTitle = "", options = {}) {
       if (!rawText || typeof rawText !== "string" || !player) return rawText;
       // 若為武道機緣、秘笈尋獲、宗門傳功、武學參悟、神話傳奇或自創武學事件，絕不替換內文與選項中的武學名稱！
       if (/武道機緣|因緣際會|宗門傳功|已參悟|傳奇人物|開宗立派|仙道經典/.test(modalTag) ||
@@ -19653,23 +19677,24 @@ addGameData({
       }
 
       let text = rawText;
-      const atkSk = pickLearnedSkill("招式", "", true);
+      const pickOpts = { preferHighest: !!(options && options.preferHighest) };
+      const atkSk = pickLearnedSkill("招式", "", true, pickOpts);
       const atkName = atkSk ? `《${atkSk.name}》` : "《基礎招式》";
       const qiNoun = getSkillQiNoun(atkSk);
-      const intSk = pickLearnedSkill("內功", "", true);
+      const intSk = pickLearnedSkill("內功", "", true, pickOpts);
       const intName = intSk ? `《${intSk.name}》` : "《基礎吐納》";
-      const qgSk = pickLearnedSkill("輕功", "", true);
+      const qgSk = pickLearnedSkill("輕功", "", true, pickOpts);
       const qgName = qgSk ? `《${qgSk.name}》` : "《靈動身法》";
       const bodyName = (player.bodyTierIndex >= 1) ? getCurrentBodyTierName() : "銅皮鐵骨";
 
-      // 門派專屬對應武學（從已學會的對應兵器/功法中隨機挑選）
-      const bladeSk = pickLearnedSkill("招式", "刀", true) || atkSk;
+      // 門派專屬對應武學（從已學會的對應兵器/功法中隨機挑選；對上 BOSS 時鎖定最高階）
+      const bladeSk = pickLearnedSkill("招式", "刀", true, pickOpts) || atkSk;
       const bladeName = bladeSk ? `《${bladeSk.name}》` : atkName;
-      const swordSk = pickLearnedSkill("招式", "劍", true) || atkSk;
+      const swordSk = pickLearnedSkill("招式", "劍", true, pickOpts) || atkSk;
       const swordName = swordSk ? `《${swordSk.name}》` : atkName;
-      const spearSk = pickLearnedSkill("招式", "槍", true) || pickLearnedSkill("招式", "棍", true) || atkSk;
+      const spearSk = pickLearnedSkill("招式", "槍", true, pickOpts) || pickLearnedSkill("招式", "棍", true, pickOpts) || atkSk;
       const spearName = spearSk ? `《${spearSk.name}》` : atkName;
-      const shaolinSk = pickLearnedSkill("招式", "棍", true) || pickLearnedSkill("招式", "拳", true) || atkSk;
+      const shaolinSk = pickLearnedSkill("招式", "棍", true, pickOpts) || pickLearnedSkill("招式", "拳", true, pickOpts) || atkSk;
       const shaolinName = shaolinSk ? `《${shaolinSk.name}》` : atkName;
 
       // 替換各門派選項中寫死的未學招式（內文已含《武學名》，不重複在開頭塞入【催動/施展《...》】！）
@@ -27770,7 +27795,7 @@ ${targetW.desc}
         : "";
       const guideBlock = formattedGuide ? `${formattedGuide}\n` : "";
       const desc = `${stageNarrative}\n\n${guideBlock}${bossZhenpaiNote ? bossZhenpaiNote + "\n" : ""}📊 【當前狀態】：武力 ${player.stats.wu}${injPenaltyNote} ／ 德行 ${player.stats.de} ／ 名望 ${player.stats.ming}`;
-      openEventModal(`【${battle.title}】第 ${stageNum}/5 幕 · ${stage.subtitle}`, `⚔️ 武林浩劫（第 ${stageNum}/5 幕）`, desc, choices);
+      openEventModal(`【${battle.title}】第 ${stageNum}/5 幕 · ${stage.subtitle}`, `⚔️ 武林浩劫（第 ${stageNum}/5 幕）`, desc, choices, { isBossBattle: isBossStage });
     }
 
     // 依險境事件性質（人禍交鋒 vs 密室機關 vs 毒瘴天災 vs 嫁禍懸案），智慧適配【武林盟主】與【高階肉身】專屬選項，絕不塞入違背情境的罐頭選項！
@@ -27896,7 +27921,7 @@ ${targetW.desc}
         }
       }
 
-      // 2.5 上乘武學與鎮派以上武學專屬破局選項（未達品階時仍會顯示於介面但反灰鎖定，激勵玩家精進武學）
+      // 2.5 上乘武學與鎮派以上武學專屬破局選項（未達品階時仍會顯示於介面但反灰鎖定，激勵玩家精進武學；若同分類已學會鎮派以上且無第二門高階招式，僅留最高階格不重複出雙按鈕）
       if (!mappedChoices.some(c => c.reqSkillTier === "上乘" || c.reqSkillTier === 3)) {
         let tier3Cat = "招式";
         let tier3Text = "";
@@ -27918,17 +27943,24 @@ ${targetW.desc}
           tier3Text = `運起上乘武學修為施展《招式名》，凌厲劍氣搶先一步切入敵陣破綻，瞬間扭轉戰局！`;
           tier3Log = `✨【${ev.title}】你施展上乘殺伐招式切中要害，來犯敵勢一觸即潰！`;
         }
-        mappedChoices.push({
-          reqSkillTier: "上乘",
-          reqSkillCategory: tier3Cat,
-          text: tier3Text,
-          onSelect: () => {
-            const chg = modifyStats({ wu: 2, ming: 3, de: 1 });
-            addLog(`${tier3Log} (${chg.join("、")})`, "milestone");
-            updateAllUI();
-            setPauseState(false);
-          }
-        });
+        const tier4CatPre = isPoisonPlague ? "內功" : "招式";
+        const skipDupTier3 = !isIntrigueOrFraming && tier3Cat === tier4CatPre &&
+          typeof getMasteredSkillsByMinTier === "function" &&
+          getMasteredSkillsByMinTier(4, tier4CatPre).length > 0 &&
+          getMasteredSkillsByMinTier(3, tier3Cat).length <= 1;
+        if (!skipDupTier3) {
+          mappedChoices.push({
+            reqSkillTier: "上乘",
+            reqSkillCategory: tier3Cat,
+            text: tier3Text,
+            onSelect: () => {
+              const chg = modifyStats({ wu: 2, ming: 3, de: 1 });
+              addLog(`${tier3Log} (${chg.join("、")})`, "milestone");
+              updateAllUI();
+              setPauseState(false);
+            }
+          });
+        }
       }
 
       if (!isIntrigueOrFraming && !mappedChoices.some(c => c.reqSkillTier === "鎮派" || c.reqSkillTier === 4)) {
@@ -28022,6 +28054,112 @@ ${targetW.desc}
       return combined;
     }
 
+    function isHighMartialMasterForTwist() {
+      if (!player) return false;
+      const curWu = (player.stats && player.stats.wu) || 0;
+      const isLeader = !!(player.isAllianceLeader || player.title === "武林盟主" || (player.badges && player.badges.includes("武林盟主")));
+      const hasTopSkill = typeof getMasteredSkillsByMinTier === "function" && getMasteredSkillsByMinTier(4, "").length > 0;
+      return curWu >= 85 || isLeader || hasTopSkill || !!player.inImmortalPhase;
+    }
+
+    function getHighMartialSurpriseTwist(ev, c) {
+      if (!c || c.reqStat || c.reqBond || c.reqBondAny || c.reqProfession || c.reqSect || c.reqBodyOrImmortal || c.reqAllianceLeader || c.reqSkillTier) {
+        return null;
+      }
+      const txt = String(c.text || "");
+      // 嚴格排除捨己救人／護民／散財救災類英勇擔當選項，保留原義
+      if (/護民|救火|購藥|挑夫|撲救|刨雪|老窯工|疏散|買了|救出|抱經|敲鑼/.test(txt)) {
+        return null;
+      }
+      if (/鑽入石縫|乾涸水渠/.test(txt)) {
+        return {
+          title: "😎【扮豬吃老虎 · 渠底拾寶戲群盜】",
+          log: "你這位名震天下的大高手忽生玩心，刻意斂息貼入乾涸水渠！戰馬呼嘯掠過頭頂之際，你指尖無意間觸到渠壁一處暗格，摸出前朝鎮北軍遺留的古銀票與玄鐵令牌；末了你還隔空對準馬賊頭目馬蹄輕彈一記無形指風，只見連環鐵騎當場人仰馬翻、自亂陣腳狼狽潰逃，你則拍拍衣袖笑著揣寶離去！",
+          stats: { cai: 6, ming: 4, qing: 2 }
+        };
+      }
+      if (/狼狽避火|躍入冷水溝|冷水溝/.test(txt)) {
+        return {
+          title: "😎【將計就計 · 暗渠抄底擒伏兵】",
+          log: "你看似翻身滾入冷水溝，實則足尖一點水面寸衣未濕！沿著暗渠游走數步時，竟意外摸走死士預先藏在渠邊的火藥備囊與賞金腰牌，隨後你鬼魅般自屋脊伏兵身後現身拍肩問安，駭得整批殺手當場嚇破膽束手就擒！",
+          stats: { cai: 5, ming: 5, wu: 1 }
+        };
+      }
+      if (/硬抗毒霧|伏在地上閉氣/.test(txt)) {
+        return {
+          title: "😎【藏拙低俯 · 窺見先秦壁刻】",
+          log: "你一身先天護體真罡萬毒不侵，乾脆順勢伏低身形假作苦熬。沒承想貼近地面的視角竟讓你瞥見石磚陰影下常人絕難察覺的先秦破陣微雕與藏金暗匣！你順手收起遺寶並屈指震開生門，氣定神閒步出地宮。",
+          stats: { wu: 2, cai: 5, de: 3 }
+        };
+      }
+      if (/裝中毒倒|裝死/.test(txt)) {
+        return {
+          title: "😎【順水推舟 · 桌底聽秘順手牽羊】",
+          log: "區區軟筋毒酒豈能奈何百毒不侵之軀？你乾脆順勢倒在桌底看戲，反倒偷聽到權臣醉後吐露的貪墨密庫暗號，還順手撿起滾落桌腳的一塊上等羊脂玉佩，待眾人酒酣耳熱便留下一行諷刺字條飄然遠去！",
+          stats: { cai: 6, ming: 5, qing: 2 }
+        };
+      }
+      if (/割袍掩鼻|頂著沙暴狼狽逃命/.test(txt)) {
+        return {
+          title: "😎【順風藏鋒 · 沙暴遺塚逢古珍】",
+          log: "你佯作割袍躲避漫天黃沙，護體罡氣早已隔絕半粒塵埃。誰知順勢躲進一處背風沙丘後竟踏空跌入前朝樓蘭商隊掩埋百年的古窖，非但半點無損，還平白收獲西域金餅與一壺未曾開封的百年冰釀！",
+          stats: { cai: 7, qing: 3, ming: 2 }
+        };
+      }
+      if (/破財消災|碎銀買路/.test(txt)) {
+        return {
+          title: "😎【戲耍群盜 · 碎銀如山壓服綠林】",
+          log: "你不願多開殺戒，笑著將四兩碎銀往賊首掌心一放——暗中卻微吐三分千斤墜沉勁！盜首瞬間雙膝一軟險些跪碎青石，這才驚覺眼前竟是深藏不露的絕頂宗師，嚇得連忙雙手奉還銀兩並叩首獻上孝敬求饒，你則笑著取其不義之財濟助貧民。",
+          stats: { de: 6, ming: 5, cai: 2 }
+        };
+      }
+      if (/撞破船底|棄船潛渡|抱木漂流|斬索墜江/.test(txt)) {
+        return {
+          title: "😎【踏浪潛行 · 水底暗探反拾奇珍】",
+          log: "你身負絕頂修為如水中游龍，假作落水實則在水面之下游走自如！你順勢暗中在敵艦龍骨敲開三個暗洞令惡寇船隊不戰自沉，更從江海暗礁隙縫撈出前朝沉船遺留的銅匣官銀與古海圖滿載而歸！",
+          stats: { cai: 6, ming: 4, wu: 1 }
+        };
+      }
+      if (/跳崖棄戰|跳下積雪深谷/.test(txt)) {
+        return {
+          title: "😎【飛鴻墜谷 · 絕壁雪窟得奇緣】",
+          log: "群盜見你縱身躍下深谷正欲狂笑，豈料你在半空一個折身便輕飄飄落於絕壁隱秘雪窟，恰巧撞見一株吸納天地靈氣的陳年天山雪蓮與遺落石龕中的精鐵古匣，不費吹灰之力笑納造化！",
+          stats: { wu: 2, de: 3, cai: 5 }
+        };
+      }
+      if (/硬吃一掌|催吐自救|強行闖谷|揮火急奔/.test(txt)) {
+        return {
+          title: "😎【百毒不侵 · 反客為主戲群邪】",
+          log: "你內息渾厚早已不懼陰毒暗算，乾脆佯作藥發或倉皇閃避誘使幕後宵小得意忘形靠近！正當對手伸手欲補刀之際，你袖袍輕拂便點住幾名首惡麻穴，笑著收繳解藥秘方與銀票揚長而去。",
+          stats: { wu: 2, ming: 5, cai: 4 }
+        };
+      }
+      if (/掀翻麵攤|火燒驛站|棄車衝關|強行突圍|捲袍擋箭/.test(txt)) {
+        return {
+          title: "😎【大智若愚 · 混水摸魚反制強敵】",
+          log: "旁人以為你倉促應變、手忙腳亂，殊不知你每一腳踢翻雜物皆暗合奇門巧勁封死伏兵退路！混亂煙塵間你一指彈暈頭目、順手摸走懷中密函與懸賞金囊，在眾人還沒回過神前便已從容脫身。",
+          stats: { ming: 5, cai: 4, wu: 1 }
+        };
+      }
+      if (/審時度勢/.test(txt) && /亂石林|自保/.test(txt)) {
+        return {
+          title: "😎【暗度陳倉 · 亂石飛石救鏢頭】",
+          log: "你假作退入亂石林避禍，待殺手鬆懈舉刀補刀的剎那，指間扣住的三枚鵝卵石驟然破空擊出，準確震飛數名殺手腕骨與鋼刀！總鏢頭大難不死連聲拜謝，事後重金答謝你深藏不露的大俠高義。",
+          stats: { de: 6, ming: 4, qing: 3 }
+        };
+      }
+      const st = c.stats || {};
+      const hasNeg = (st.ming || 0) < 0 || (st.cai || 0) < 0 || (st.wu || 0) < 0 || (st.de || 0) < 0;
+      if (hasNeg || /狼狽|逃命|趴進|鑽入|棄下/.test(txt)) {
+        return {
+          title: "😎【大巧若拙 · 藏拙撞奇緣】",
+          log: "你身負蓋世修為卻偏不願張揚，刻意順著窘迫假動作暗中避實擊虛！豈料陰錯陽差之下反破了對手的算計，順道撿到意外遺落的好處與江湖笑談，可謂大巧若拙、不戰自勝！",
+          stats: { cai: 4, ming: 4, qing: 2 }
+        };
+      }
+      return null;
+    }
+
     function triggerDynamicDilemma(forceTrigger = false) {
       // 修仙之後關閉江湖風波
       if (!forceTrigger && player && (player.isImmortalUnlocked || player.inImmortalPhase || (player.immortalStage || 0) > 0)) {
@@ -28050,58 +28188,70 @@ ${targetW.desc}
       player.usedEvents.add(`dilemma_${ev.id || ev.title}`);
       setPauseState(true);
 
-      const choices = (ev.choices || []).map(c => ({
-        text: c.text,
-        reqStat: c.reqStat,
-        reqProfession: c.reqProfession,
-        reqSect: c.reqSect,
-        reqBond: c.reqBond,
-        reqBondAny: c.reqBondAny,
-        reqBodyOrImmortal: c.reqBodyOrImmortal,
-        reqAllianceLeader: c.reqAllianceLeader,
-        reqSkillTier: c.reqSkillTier,
-        reqSkillCategory: c.reqSkillCategory,
-        cost: c.cost,
-        onSelect: () => {
-          if (c.cost?.cai) modifyStats({ cai: -c.cost.cai });
-          const rawSt = Object.assign({}, c.stats || {});
-          // 江湖風波：有條件但隨機決定武力增加數 (+0 ~ +2)
-          if (typeof rawSt.wu === "number" && rawSt.wu > 0) {
-            rawSt.wu = Math.floor(Math.random() * 3);
-          }
-          if (c.reqBond && (c.intimacyDelta || c.tacitDelta)) {
-            const req = typeof c.reqBond === "string" ? { id: c.reqBond, name: c.reqBond } : c.reqBond;
-            const bond = player.bonds.find(b => !b.isDead && (!player.fakedDeath || b.isImmortal) && (b.id === req.id || b.name === req.name));
-            if (bond) {
-              const intimacyDelta = Math.sign(c.intimacyDelta || 0);
-              const tacitDelta = Math.sign(c.tacitDelta || 0);
-              bond.intimacyIndex = Math.min(INTIMACY_LEVELS.length - 1, Math.max(0, bond.intimacyIndex + intimacyDelta));
-              bond.tacit = Math.max(0, (bond.tacit || 0) + tacitDelta);
-              if (intimacyDelta > 0 && tacitDelta > 0) bond.resonance = (bond.resonance || 0) + 1;
+      const highMasterNow = isHighMartialMasterForTwist();
+      const choices = (ev.choices || []).map(c => {
+        const twist = highMasterNow ? getHighMartialSurpriseTwist(ev, c) : null;
+        return {
+          text: twist ? `${c.text} ✨` : c.text,
+          reqStat: c.reqStat,
+          reqProfession: c.reqProfession,
+          reqSect: c.reqSect,
+          reqBond: c.reqBond,
+          reqBondAny: c.reqBondAny,
+          reqBodyOrImmortal: c.reqBodyOrImmortal,
+          reqAllianceLeader: c.reqAllianceLeader,
+          reqSkillTier: c.reqSkillTier,
+          reqSkillCategory: c.reqSkillCategory,
+          cost: twist ? undefined : c.cost,
+          onSelect: () => {
+            if (twist) {
+              const twistStats = Object.assign({}, twist.stats || { ming: 4, cai: 4 });
+              const chg = modifyStats(twistStats);
+              addLog(`${twist.title}【${ev.title}】${twist.log} ${chg.length ? "(" + chg.join("、") + ")" : ""}`, "milestone");
+              updateAllUI();
+              setPauseState(false);
+              return;
             }
+            if (c.cost?.cai) modifyStats({ cai: -c.cost.cai });
+            const rawSt = Object.assign({}, c.stats || {});
+            // 江湖風波：有條件但隨機決定武力增加數 (+0 ~ +2)
+            if (typeof rawSt.wu === "number" && rawSt.wu > 0) {
+              rawSt.wu = Math.floor(Math.random() * 3);
+            }
+            if (c.reqBond && (c.intimacyDelta || c.tacitDelta)) {
+              const req = typeof c.reqBond === "string" ? { id: c.reqBond, name: c.reqBond } : c.reqBond;
+              const bond = player.bonds.find(b => !b.isDead && (!player.fakedDeath || b.isImmortal) && (b.id === req.id || b.name === req.name));
+              if (bond) {
+                const intimacyDelta = Math.sign(c.intimacyDelta || 0);
+                const tacitDelta = Math.sign(c.tacitDelta || 0);
+                bond.intimacyIndex = Math.min(INTIMACY_LEVELS.length - 1, Math.max(0, bond.intimacyIndex + intimacyDelta));
+                bond.tacit = Math.max(0, (bond.tacit || 0) + tacitDelta);
+                if (intimacyDelta > 0 && tacitDelta > 0) bond.resonance = (bond.resonance || 0) + 1;
+              }
+            }
+            if (c.plantKarmicSeed || ((rawSt.de || 0) >= 3 && /救|護|助|施藥|贈|孤兒|孩童|百姓|旅人|流民/.test(c.text || ""))) {
+              recordKarmicSeed(c.plantKarmicSeed || `早年你在【${ev.title}】中仗義援手救下的那名受困旅人`);
+            }
+            const chg = modifyStats(rawSt);
+            const resStr = String(c.result || c.reply || "");
+            let injNotice = "";
+            if (c.heavyInjury) {
+              addHeavyInjury(c.heavyInjury);
+              if (!/重傷\+/.test(resStr)) injNotice = `【受創留下重傷+${c.heavyInjury}】`;
+            } else if (c.lightInjury) {
+              addLightInjury(c.lightInjury);
+              if (!/輕傷\+/.test(resStr)) injNotice = `【擦傷留下輕傷+${c.lightInjury}】`;
+            } else if (c.riskInjury && Math.random() < c.riskInjury) {
+              addLightInjury(1);
+              if (!/輕傷\+/.test(resStr)) injNotice = `【激戰負傷，留下輕傷+1】`;
+            }
+            addLog(`⚖️【${ev.title}】${resStr} ${injNotice} ${chg.length ? "(" + chg.join("、") + ")" : ""}`, (c.heavyInjury || c.lightInjury || injNotice) ? "danger-log" : "milestone");
+            if (player && player.isDead) return;
+            updateAllUI();
+            setPauseState(false);
           }
-          if (c.plantKarmicSeed || ((rawSt.de || 0) >= 3 && /救|護|助|施藥|贈|孤兒|孩童|百姓|旅人|流民/.test(c.text || ""))) {
-            recordKarmicSeed(c.plantKarmicSeed || `早年你在【${ev.title}】中仗義援手救下的那名受困旅人`);
-          }
-          const chg = modifyStats(rawSt);
-          const resStr = String(c.result || c.reply || "");
-          let injNotice = "";
-          if (c.heavyInjury) {
-            addHeavyInjury(c.heavyInjury);
-            if (!/重傷\+/.test(resStr)) injNotice = `【受創留下重傷+${c.heavyInjury}】`;
-          } else if (c.lightInjury) {
-            addLightInjury(c.lightInjury);
-            if (!/輕傷\+/.test(resStr)) injNotice = `【擦傷留下輕傷+${c.lightInjury}】`;
-          } else if (c.riskInjury && Math.random() < c.riskInjury) {
-            addLightInjury(1);
-            if (!/輕傷\+/.test(resStr)) injNotice = `【激戰負傷，留下輕傷+1】`;
-          }
-          addLog(`⚖️【${ev.title}】${resStr} ${injNotice} ${chg.length ? "(" + chg.join("、") + ")" : ""}`, (c.heavyInjury || c.lightInjury || injNotice) ? "danger-log" : "milestone");
-          if (player && player.isDead) return;
-          updateAllUI();
-          setPauseState(false);
-        }
-      }));
+        };
+      });
 
       openEventModal(ev.title, "江湖風波", ev.desc, enrichCrisisChoices(ev, choices));
       return true;
@@ -28893,8 +29043,8 @@ ${targetW.desc}
       if (!player || !player.isAllianceLeader || player.inImmortalPhase) return false;
       if (!player.triggeredAllianceLeaderEvents) player.triggeredAllianceLeaderEvents = new Set();
 
-      const bestAtk = getBestLearnedSkillName("招式", "盟主絕學");
-      const bestInt = getBestLearnedSkillName("內功", "宗師罡氣");
+      const bestAtk = getBestLearnedSkillName("招式", "盟主絕學", { preferHighest: true });
+      const bestInt = getBestLearnedSkillName("內功", "宗師罡氣", { preferHighest: true });
       const stories = [
         {
           id: "al_dongying_sword_saint",
@@ -34606,6 +34756,9 @@ ${targetW.desc}
     // 動態前置條件過濾、標籤去重與渲染
     function openEventModal(title, tag, desc, rawChoices) {
       if (!player || player.isDead) return;
+      const modalOpts = (arguments.length >= 5 && arguments[4] && typeof arguments[4] === "object") ? arguments[4] : {};
+      const isBossModal = !!modalOpts.isBossBattle || (Boolean(/武林浩劫/.test(tag || "")) && /最終決戰|最終強敵|終戰|魔主|司馬玄冥|最終/.test(title || ""));
+      const skillPickOpts = { preferHighest: isBossModal };
       if (player.inMajorBattle && !/武林浩劫|浩劫風雲|重大戰役/.test(tag || "")) {
         player.inMajorBattle = false;
       }
@@ -34614,7 +34767,7 @@ ${targetW.desc}
       document.getElementById("ev-modal-title").textContent = title;
       document.getElementById("ev-modal-tag").textContent = tag;
       const descEl = document.getElementById("ev-modal-desc");
-      const personalizedDesc = personalizeSkillAndBodyText(desc, tag, title);
+      const personalizedDesc = personalizeSkillAndBodyText(desc, tag, title, skillPickOpts);
       if (typeof personalizedDesc === "string" && personalizedDesc.includes("<div")) {
         descEl.innerHTML = personalizedDesc;
       } else {
@@ -34623,8 +34776,42 @@ ${targetW.desc}
       const box = document.getElementById("ev-modal-choices");
       box.innerHTML = "";
 
+      // 同彈窗品階武學選項先依高階優先配發（4→3→2），避免出現兩格顯示同一門招式
+      const usedTierSkillNamesInModal = new Set();
+      const preAssignedTierSkills = new Map();
+      if (player && typeof pickMasteredSkillByMinTier === "function") {
+        const tierRequests = [];
+        (rawChoices || []).forEach((rc, idx) => {
+          if (!rc) return;
+          let effTier = rc.reqSkillTier || "";
+          let effCat = rc.reqSkillCategory || "";
+          const rcText = rc.text || "";
+          if (!effTier && !/無武力門檻|需習得進階以上/.test(rcText) && /以絕世武功|展露絕頂武學|以蓋世武威/.test(rcText)) {
+            effTier = "上乘";
+            if (!effCat && /劈|劍|刀|殺|斬|打|開道/.test(rcText)) effCat = "招式";
+          }
+          if (effTier) {
+            const minPrio = (effTier === "鎮派" || effTier === 4 || effTier === "鎮派以上")
+              ? 4
+              : ((effTier === "進階" || effTier === 2 || effTier === "進階以上") ? 2 : 3);
+            tierRequests.push({ idx, minPrio, cat: effCat });
+          }
+        });
+        tierRequests.sort((a, b) => b.minPrio - a.minPrio);
+        tierRequests.forEach(item => {
+          const sk = pickMasteredSkillByMinTier(item.minPrio, item.cat, false, {
+            preferHighest: isBossModal,
+            excludeNames: usedTierSkillNamesInModal
+          });
+          if (sk) {
+            preAssignedTierSkills.set(item.idx, sk);
+            if (sk.name) usedTierSkillNamesInModal.add(sk.name);
+          }
+        });
+      }
+
       const filtered = [];
-      (rawChoices || []).forEach(c => {
+      (rawChoices || []).forEach((c, rawIdx) => {
         if (!c) return;
         let prefixBadges = "";
         let effectiveSkillTier = c.reqSkillTier || "";
@@ -34638,7 +34825,7 @@ ${targetW.desc}
           const slotTag = effectiveSkillCategory === "招式" ? "招式名" : "武學名";
           rawChoiceText = rawChoiceText.replace(/(以|展露)(絕世武功|絕頂武學|蓋世武威)/g, `$1《${slotTag}》$2`);
         }
-        let displayText = effectiveSkillTier ? rawChoiceText : personalizeSkillAndBodyText(rawChoiceText, tag, title);
+        let displayText = effectiveSkillTier ? rawChoiceText : personalizeSkillAndBodyText(rawChoiceText, tag, title, skillPickOpts);
 
         // 1. 檢定行當（例如：因為你是郎中 / 商賈 / 獵戶）
         const isBattleModal = /武林浩劫/.test(tag || "") || !!c.lockIfUnmet;
@@ -34785,7 +34972,7 @@ ${targetW.desc}
 
                 if (isQinggongContext) {
                   requiresQinggong = true;
-                  const qgSk = pickLearnedSkill("輕功", "", true);
+                  const qgSk = pickLearnedSkill("輕功", "", true, skillPickOpts);
                   const qgLabel = qgSk ? `《${qgSk.name}》` : "《未習輕功》";
                   if (/^【[^】]+】/.test(displayText)) {
                     displayText = displayText.replace(/^【([^】]+)】/, `【施展${qgLabel}】`);
@@ -34794,7 +34981,7 @@ ${targetW.desc}
                   }
                 } else if (isNeigongContext) {
                   requiresNeigong = true;
-                  const intSk = pickLearnedSkill("內功", "", true);
+                  const intSk = pickLearnedSkill("內功", "", true, skillPickOpts);
                   const intLabel = intSk ? `《${intSk.name}》` : "《未習內功》";
                   if (/^【[^】]+】/.test(displayText)) {
                     displayText = displayText.replace(/^【([^】]+)】/, `【催動${intLabel}】`);
@@ -34803,7 +34990,7 @@ ${targetW.desc}
                   }
                 } else {
                   requiresZhaoshi = true;
-                  const atkSk = pickLearnedSkill("招式", "", true);
+                  const atkSk = pickLearnedSkill("招式", "", true, skillPickOpts);
                   const atkLabel = atkSk ? `《${atkSk.name}》` : "《未習招式》";
                   const qiNoun = getSkillQiNoun(atkSk);
                   displayText = displayText
@@ -34873,7 +35060,10 @@ ${targetW.desc}
           const tierLabel = minTierPrio >= 4 ? "鎮派以上" : (minTierPrio <= 2 ? "進階以上" : "上乘以上");
           const catLabel = catFilter === "輕功" ? "輕功/身法" : (catFilter === "內功" ? "內功/心法" : (catFilter === "招式" ? "武學招式" : "武學"));
           const catShort = catFilter || "武學";
-          const matchedTierSk = player ? pickMasteredSkillByMinTier(minTierPrio, catFilter, false) : null;
+          const matchedTierSk = preAssignedTierSkills.has(rawIdx)
+            ? preAssignedTierSkills.get(rawIdx)
+            : (player ? pickMasteredSkillByMinTier(minTierPrio, catFilter, false, { preferHighest: isBossModal, excludeNames: usedTierSkillNamesInModal }) : null);
+          if (matchedTierSk && matchedTierSk.name) usedTierSkillNamesInModal.add(matchedTierSk.name);
 
           if (matchedTierSk) {
             const skLabel = `《${matchedTierSk.name}》`;
